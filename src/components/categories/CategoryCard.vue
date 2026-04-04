@@ -24,7 +24,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, filter: FilterState }]
+  save: [value: { name: string, description: string, filter: FilterState }]
   delete: [categoryId: string]
   selectAnime: [selection: AnimeSelection]
   clearSelection: [categoryId: string]
@@ -49,6 +49,12 @@ const selectionTitle = computed(() =>
         <h3 class="mt-2 break-words text-xl font-semibold tracking-tight text-app-text">
           {{ category.name }}
         </h3>
+        <p
+          v-if="category.description"
+          class="mt-2 max-w-2xl break-words text-sm leading-6 text-app-muted line-clamp-3"
+        >
+          {{ category.description }}
+        </p>
       </div>
 
       <button

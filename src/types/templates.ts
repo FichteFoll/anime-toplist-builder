@@ -20,6 +20,7 @@ export type TemplateOrigin = (typeof templateOrigins)[number]
 export interface Category {
   id: CategoryId
   name: string
+  description: string
   filter: FilterState
 }
 
@@ -35,6 +36,7 @@ export interface Template {
 export interface TemplateImportCategoryPayloadV1 {
   id?: CategoryId
   name: string
+  description?: string
   filter?: Partial<FilterState>
 }
 
@@ -49,6 +51,7 @@ export interface TemplateImportPayloadV1 {
 export interface TemplateExportCategoryPayloadV1 {
   id: CategoryId
   name: string
+  description: string
   filter: FilterState
 }
 

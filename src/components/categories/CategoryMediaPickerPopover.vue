@@ -213,10 +213,11 @@ watch(pickerSort, (value, previousValue) => {
             <DialogTitle class="mt-3 text-xl font-semibold tracking-tight text-app-text">
               {{ category.name }}
             </DialogTitle>
-            <DialogDescription class="mt-2 max-w-2xl text-sm leading-6 text-app-muted">
-              Results load immediately,
-              search input is debounced by 250ms,
-              and requests keep the merged template and category filters applied.
+            <DialogDescription
+              v-if="category.description"
+              class="mt-2 max-w-2xl text-sm leading-6 text-app-muted"
+            >
+              {{ category.description }}
             </DialogDescription>
           </div>
 

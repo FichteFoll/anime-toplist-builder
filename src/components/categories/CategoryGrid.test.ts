@@ -81,6 +81,7 @@ const categoryCardStub = defineComponent({
       emitSave: () =>
         emit('save', {
           name: `${(props.category as Category).name} Updated`,
+          description: (props.category as Category).description,
           filter: createEmptyFilterState(),
         }),
       emitDelete: () => emit('delete', (props.category as Category).id),
@@ -102,6 +103,7 @@ const categories: Category[] = [
   {
     id: 'cat_gridopening01',
     name: 'Best Opening',
+    description: '',
     filter: createEmptyFilterState(),
   },
 ]
@@ -149,6 +151,7 @@ describe('CategoryGrid', () => {
         'cat_gridopening01',
         {
           name: 'Best Opening Updated',
+          description: '',
           filter: createEmptyFilterState(),
         },
       ],

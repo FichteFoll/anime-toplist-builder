@@ -212,6 +212,7 @@ const updateCategory = (
   categoryId: string,
   value: {
     name: string
+    description: string
     filter: FilterState
   },
 ) => {
@@ -223,6 +224,7 @@ const updateCategory = (
     }
 
     category.name = value.name
+    category.description = value.description
     category.filter = value.filter
   })
 }

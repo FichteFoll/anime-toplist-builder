@@ -63,7 +63,7 @@ describe('persistence helpers', () => {
         version: templateSchemaVersion,
         id: 'tpl_userlocal01',
         name: 'Local Template',
-        categories: [{ id: 'cat_localpick01', name: 'Local Pick' }],
+        categories: [{ id: 'cat_localpick01', name: 'Local Pick', description: '' }],
       },
       'user',
     )
@@ -72,7 +72,7 @@ describe('persistence helpers', () => {
         version: templateSchemaVersion,
         id: 'tpl_remotelocal01',
         name: 'Remote Template',
-        categories: [{ id: 'cat_remotepick01', name: 'Remote Pick' }],
+        categories: [{ id: 'cat_remotepick01', name: 'Remote Pick', description: '' }],
       },
       'imported-url',
     )
@@ -81,7 +81,7 @@ describe('persistence helpers', () => {
         version: templateSchemaVersion,
         id: 'tpl_predefinedlocal01',
         name: 'Predefined Template',
-        categories: [{ id: 'cat_predefinedpick01', name: 'Predefined Pick' }],
+        categories: [{ id: 'cat_predefinedpick01', name: 'Predefined Pick', description: '' }],
       },
       'predefined',
     )

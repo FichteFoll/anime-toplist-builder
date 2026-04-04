@@ -22,13 +22,14 @@ describe('template validation', () => {
         tags: ['Cyberpunk', 'Cyberpunk'],
         minimumTagRank: 70,
       },
-      categories: [
-        {
-          id: 'cat_bestpick01',
-          name: '  Best Pick  ',
-          filter: {
-            seasons: ['SPRING', 'WINTER', 'SPRING'],
-          },
+        categories: [
+          {
+            id: 'cat_bestpick01',
+            name: '  Best Pick  ',
+            description: '  A focused choice  ',
+            filter: {
+              seasons: ['SPRING', 'WINTER', 'SPRING'],
+            },
         },
       ],
     })
@@ -54,6 +55,7 @@ describe('template validation', () => {
         {
           id: 'cat_bestpick01',
           name: 'Best Pick',
+          description: 'A focused choice',
           filter: {
             search: '',
             yearRange: undefined,
@@ -89,10 +91,12 @@ describe('template validation', () => {
           {
             id: 'cat_duplicate01',
             name: 'First',
+            description: '',
           },
           {
             id: 'cat_duplicate01',
             name: 'Second',
+            description: '',
           },
         ],
       }),
@@ -110,6 +114,7 @@ describe('template validation', () => {
         categories: [
           {
             name: 'Opener',
+            description: '  Short context  ',
           },
         ],
       },
@@ -121,6 +126,7 @@ describe('template validation', () => {
     expect(template.globalFilter.search).toBe('thriller')
     expect(template.categories).toHaveLength(1)
     expect(isCategoryId(template.categories[0]?.id)).toBe(true)
+    expect(template.categories[0]?.description).toBe('Short context')
   })
 
   it('creates an export payload with stable ids and validated filters', () => {
@@ -137,6 +143,7 @@ describe('template validation', () => {
           {
             id: 'cat_exportpick01',
             name: 'Pick',
+            description: 'Nice pacing',
             filter: {
               genres: ['Mystery'],
             },
@@ -167,6 +174,7 @@ describe('template validation', () => {
         {
           id: 'cat_exportpick01',
           name: 'Pick',
+          description: 'Nice pacing',
           filter: {
             search: '',
             yearRange: undefined,
@@ -198,6 +206,7 @@ describe('template validation', () => {
         {
           id: 'cat_documentedshape01',
           name: 'Documented Category',
+          description: 'Context',
         },
       ],
     }

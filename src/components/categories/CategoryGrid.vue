@@ -34,7 +34,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   addCategory: [name: string]
-  updateCategory: [categoryId: string, value: { name: string, filter: FilterState }]
+  updateCategory: [categoryId: string, value: { name: string, description: string, filter: FilterState }]
   deleteCategory: [categoryId: string]
   reorderCategories: [value: { fromIndex: number, toIndex: number }]
   selectAnime: [categoryId: string, selection: AnimeSelection]
@@ -48,6 +48,7 @@ const newCategoryName = ref('')
 let sortable: Sortable | null = null
 
 const canReorder = computed(() => props.categories.length > 1)
+
 const selectedCategoryCount = computed(
   () => props.categories.filter((category) => props.selectionByCategory[category.id]).length,
 )
@@ -57,7 +58,10 @@ const resetAddDraft = () => {
   newCategoryName.value = `Category ${props.categories.length + 1}`
 }
 
-const forwardCategoryUpdate = (categoryId: string, value: { name: string, filter: FilterState }) => {
+const forwardCategoryUpdate = (
+  categoryId: string,
+  value: { name: string, description: string, filter: FilterState },
+) => {
   emit('updateCategory', categoryId, value)
 }
 
@@ -273,7 +277,7 @@ onBeforeUnmount(() => {
     <div
       v-else
       ref="gridRef"
-      class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+      class="mt-6 flex flex-wrap gap-4"
     >
       <CategoryCard
         v-for="category in categories"
@@ -285,6 +289,7 @@ onBeforeUnmount(() => {
         :metadata-status="metadataStatus"
         :metadata-error="metadataError"
         :can-reorder="canReorder"
+        class="w-full md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.889rem)]"
         :title-language="titleLanguage"
         @save="forwardCategoryUpdate(category.id, $event)"
         @delete="emit('deleteCategory', $event)"

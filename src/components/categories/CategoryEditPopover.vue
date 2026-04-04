@@ -28,11 +28,12 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, filter: FilterState }]
+  save: [value: { name: string, description: string, filter: FilterState }]
 }>()
 
 const open = ref(false)
 const draftName = ref(props.category.name)
+const draftDescription = ref(props.category.description)
 const draftFilter = ref<FilterState>(cloneFilter(props.category.filter))
 
 function cloneFilter(filter: FilterState): FilterState {
@@ -54,6 +55,7 @@ const hasValidName = computed(() => isNonBlankName(draftName.value))
 
 const resetDraft = () => {
   draftName.value = props.category.name
+  draftDescription.value = props.category.description
   draftFilter.value = cloneFilter(props.category.filter)
 }
 
@@ -75,6 +77,7 @@ watch(
 
 const save = () => {
   const nextName = draftName.value.trim()
+  const nextDescription = draftDescription.value.trim()
 
   if (!isNonBlankName(nextName)) {
     return
@@ -82,6 +85,7 @@ const save = () => {
 
   emit('save', {
     name: nextName,
+    description: nextDescription,
     filter: cloneFilter(draftFilter.value),
   })
   open.value = false
@@ -98,9 +102,9 @@ const save = () => {
       >
         Edit
         <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
-        {{ filterRuleCount }} rule{{ filterRuleCount === 1 ? '' : 's' }}
-      </span>
-    </button>
+          {{ filterRuleCount }} rule{{ filterRuleCount === 1 ? '' : 's' }}
+        </span>
+      </button>
     </DialogTrigger>
 
     <DialogPortal>
@@ -143,6 +147,21 @@ const save = () => {
             >
             <span class="text-xs leading-5 text-app-muted">
               Category names must stay non-blank.
+            </span>
+          </label>
+
+          <label class="mb-5 block space-y-2">
+            <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+              Description
+            </span>
+            <textarea
+              v-model="draftDescription"
+              rows="2"
+              class="shell-input min-h-0 resize-none"
+              placeholder="Short context for this category"
+            />
+            <span class="text-xs leading-5 text-app-muted">
+              Optional. Keep it short so it fits beside the category title.
             </span>
           </label>
 

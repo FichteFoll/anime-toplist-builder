@@ -245,6 +245,7 @@ const parseCategoryPayload = (
   return {
     id: categoryId,
     name: asTrimmedString(value.name, `${path}.name`),
+    description: hasOwn(value, 'description') ? asTrimmedSearchString(value.description, `${path}.description`) : '',
     filter: parseFilterState(value.filter, `${path}.filter`),
   }
 }
@@ -335,6 +336,10 @@ export const normalizeImportedTemplate = (
   categories: payload.categories.map((category) => ({
     id: category.id ?? createCategoryId(),
     name: category.name,
+    description:
+      category.description === undefined
+        ? ''
+        : asTrimmedSearchString(category.description, `categories.${category.name}.description`),
     filter: parseFilterState(category.filter, `categories.${category.name}.filter`),
   })),
   globalFilter: parseFilterState(payload.globalFilter, 'globalFilter'),
@@ -355,6 +360,7 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
     return {
       id: category.id,
       name: asTrimmedString(category.name, `categories[${index}].name`),
+      description: asTrimmedSearchString(category.description, `categories[${index}].description`),
       filter: parseFilterState(category.filter, `categories[${index}].filter`),
     }
   })

@@ -31,6 +31,7 @@ export const createBlankTemplate = (
 export const createBlankCategory = (name: string) => ({
   id: createCategoryId(),
   name,
+  description: '',
   filter: createEmptyFilterState(),
 })
 
