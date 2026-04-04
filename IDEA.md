@@ -10,14 +10,11 @@ or imported from a template.
 
 - Statically compiled website hosted via GitHub Pages
 - Vue.js as frontend framework
+- Tailwind CSS + Radix Vue as UI/style frontends
 - TypeScript
 - ESlint configuration with default rules
 - Github Actions to build and deploy the site via GitHub Pages
 - No i18n. Everything will be English only.
-
-### Undecided Technology
-
-- UI framework (Tailwind CSS?)
 
 ### Vue.js guidelines
 
@@ -125,12 +122,12 @@ but a manga/light novel toplist could be interesting as well.
     - an image for the anime's image (key visual) or a placeholder if none has been selected yet,
     - the name of the selected anime, if any,
     - a few action buttons in the top right corner.
-  - Each category has an "edit" icon/button that can be clicked to open a popup.
-    - In the popup, there will be an input to set the category name.
-    - In the popup, the category filters can be configured.
+  - Each category has an "edit" icon/button that can be clicked to open a popover.
+    - In the popover, there will be an input to set the category name.
+    - In the popover, the category filters can be configured.
   - Each category has a trash icon/button to delete the category
     with a confirmation prompt if its configuration is not empty.
-  - When clicking on a category's image, a popup will open to search for and select an anime.
+  - When clicking on a category's image, a popover will open to search for and select an anime.
     - Includes a text input at the top to search for an anime title matching the given criteria.
     - Includes a result grid with one entry for each matching Anime, including the anime's:
       - image (key visual)
