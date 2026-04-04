@@ -5,7 +5,7 @@ import {
   PopoverPortal,
   PopoverRoot,
   PopoverTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
 import { normalizeAniListError, searchAnimeMedia } from '@/api'

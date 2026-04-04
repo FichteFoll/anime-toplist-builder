@@ -8,7 +8,7 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 
 import { animeTitleLanguages, type AnimeTitleLanguage } from '@/types'
 

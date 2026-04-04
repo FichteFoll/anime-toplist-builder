@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ConfigProvider, TooltipProvider } from 'radix-vue'
+import { ConfigProvider, TooltipProvider } from 'reka-ui'
 
 import { fetchAniListMetadata } from '@/api'
 import AppFooter from '@/components/AppFooter.vue'

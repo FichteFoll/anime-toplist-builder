@@ -21,7 +21,7 @@ vi.mock('sortablejs', () => ({
   },
 }))
 
-vi.mock('radix-vue', () => ({
+vi.mock('reka-ui', () => ({
   PopoverArrow: {
     template: '<div><slot /></div>',
   },

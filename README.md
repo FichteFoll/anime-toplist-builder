@@ -27,7 +27,7 @@ and exporting the current list as a themed PNG image.
 - Vue 3 with the Composition API and TypeScript.
 - Vite for development and production builds.
 - Pinia for shared state and local persistence.
-- Tailwind CSS and Radix Vue for UI.
+- Tailwind CSS and Reka UI for UI.
 - Vitest and Vue Test Utils for unit and component testing.
 
 ## Setup
@@ -98,8 +98,6 @@ including GitHub Pages.
 
 ## Known Constraints
 
-- `tsconfig.json` keeps `skipLibCheck` enabled because of current third-party `radix-vue` type issues,
-  as documented in `plans/2026-04-04-initial-implementation/step-1-deviations.md`.
 - AniList currently exposes a single `tagRank` argument for tag queries,
   so the app collapses merged tag thresholds to the strictest rank.
   See `plans/2026-04-04-initial-implementation/step-4-deviations.md`.

@@ -5,7 +5,7 @@
 - Vite with Vue 3 Composition API and TypeScript.
 - Pinia for shared state and local persistence integration.
 - Tailwind CSS for styling.
-- Radix Vue for headless UI primitives.
+- Reka UI for headless UI primitives.
 - Vitest and Vue Test Utils for tests.
 - ESLint for linting.
 - `pnpm` for dependency and script management.
@@ -106,7 +106,6 @@
 
 ## Current Notes
 
-- `tsconfig.json` currently uses `skipLibCheck` because of third-party `radix-vue` type issues documented in `plans/2026-04-04-initial-implementation/step-1-deviations.md`.
 - Remote template startup hydration is triggered from the app after store initialization,
   using `pendingStartupTemplateUrl` captured by the template store.
 - PNG export can fall back to placeholders when remote covers fail to load,

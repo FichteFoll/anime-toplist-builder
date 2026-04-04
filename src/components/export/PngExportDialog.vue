@@ -8,7 +8,7 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { appConfig } from '@/config/app'

@@ -5,7 +5,7 @@ import {
   PopoverPortal,
   PopoverRoot,
   PopoverTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'

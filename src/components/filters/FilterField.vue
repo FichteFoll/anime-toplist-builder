@@ -5,7 +5,7 @@ import {
   TooltipPortal,
   TooltipRoot,
   TooltipTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 
 defineProps<{
   label: string

@@ -7,7 +7,7 @@ import {
   ToastRoot,
   ToastTitle,
   ToastViewport,
-} from 'radix-vue'
+} from 'reka-ui'
 
 import { useToastStore } from '@/stores/toasts'
 

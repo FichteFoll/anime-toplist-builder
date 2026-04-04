@@ -5,7 +5,7 @@ import {
   PopoverPortal,
   PopoverRoot,
   PopoverTrigger,
-} from 'radix-vue'
+} from 'reka-ui'
 import Sortable from 'sortablejs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
