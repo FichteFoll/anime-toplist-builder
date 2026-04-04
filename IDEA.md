@@ -43,6 +43,8 @@ or imported from a template.
 - Anime title can be configured to use the English, Romaji or Native name.
 - Selections per template are persisted in local storage
   so that the user can reload the page and continue where they left off.
+  - Category selections are stored by the category name.
+  - When a category is renamed, the selection remains.
 - Supports mobile layouts.
 
 ### Filters
@@ -81,6 +83,7 @@ or imported from a template.
 - Includes a code-configurable watermark string
   references the site itself.
   Cannot be disabled.
+- Includes the author below the template name.
 - Matches Dark or light theme from the current UI settings.
 - Image format is png.
 - Resolution is 1400px in width and height as much as needed to fit all categories.
@@ -112,11 +115,12 @@ or imported from a template.
 - Templates can be uploaded and will create a new user-local template with a generated ID.
 - Template JSON can also be uploaded to a different site and loaded via an input field or query parameter.
   In that case, the URL fragment will look like `#template=<escaped-url>`
-  using percent escaping (as is usual for URLs).
+  using percent-encoding for the escaped URL.
+  The URL is properly unescaped when loading the page.
 - When a template cannot be imported (by file or remote URL),
   display a validation error and abort the import.
-- When the user makes any change
-  to an imported or default template categories or the template name,
+- When the user makes a change
+  to an imported or default template (category order, category name, category filters, template name),
   a new template is automatically forked from it
   and the name gets suffixed with " (modified)".
 - Selections per template are persisted in local storage (by template id)
@@ -126,9 +130,9 @@ or imported from a template.
 
 In a later iteration of this tool,
 there may be some enhancements.
-These extra features should be loosely considered
+These extra features may be loosely considered
 when drafting out the architecture of the software
-but they should not be implemented yet.
+but they should **not** be implemented yet!
 
 ### Characters
 
@@ -151,12 +155,6 @@ but they should not be implemented yet.
 For now, only Anime will be supported
 but a manga/light novel toplist could be interesting as well.
 
-### Share selection via URL fragment
-
-The currently selected anime IDs for a given template via fragment
-can be shared via a URL fragment in the form `#template=<template>&selected=<ids>`
-where the ids is a comma-separated list of anime ids.
-
 ## UI
 
 - Dark and light theme.
@@ -174,7 +172,7 @@ where the ids is a comma-separated list of anime ids.
     - "Export to file" to export the current template as JSON.
     - "Import from file" to import a template file as JSON via file upload.
     - "Import from URL" to load a JSON template file from a remote URL.
-    - "Reset" to reset all selections for the current template with a confirmation prompt.
+    - "Clear selections" to reset all selections for the current template with a confirmation prompt.
   - The menu items are accompanied by fitting icons.
   - When importing a template (file or URL) fails,
     an error toast is displayed
@@ -218,7 +216,8 @@ where the ids is a comma-separated list of anime ids.
   - While the image is generated, a loading spinner is shown.
   - The default image name is `Anime Toplist <template name>.png`
     with characters that are invalid on NTFS/Windows replaced with `_`.
-  - The copy behavior is defined by the browser.
+  - For the copy feature, a text is displayed
+    that mentions to use the browser's context menu "Copy image" item.
 - Footer
   - Mentions that it is powered by AniList with a link to it.
   - Mentions that it is open source with a link to a github repository.
