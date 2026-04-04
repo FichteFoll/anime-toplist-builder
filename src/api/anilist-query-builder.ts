@@ -59,13 +59,6 @@ export const buildAniListMediaSearchVariables = ({
   perPage,
 }: BuildAniListMediaSearchVariablesOptions): BuildAniListMediaSearchVariablesResult => {
   const mergedFilter = mergeFilterStates(globalFilter, categoryFilter, search)
-  const highestTagRank = mergedFilter.filter.tags.reduce<number | undefined>((currentRank, tag) => {
-    if (tag.minimumRank === undefined) {
-      return currentRank
-    }
-
-    return Math.max(currentRank ?? 0, tag.minimumRank)
-  }, undefined)
 
   return {
     variables: {
@@ -75,7 +68,7 @@ export const buildAniListMediaSearchVariables = ({
       season: pickSingleValue(mergedFilter.filter.seasons),
       countryOfOrigin: pickSingleValue(mergedFilter.filter.countryOfOrigin),
       tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags.map((tag) => tag.name) : undefined,
-      minimumTagRank: highestTagRank,
+      minimumTagRank: mergedFilter.filter.minimumTagRank,
       genreIn: mergedFilter.filter.genres.length > 0 ? mergedFilter.filter.genres : undefined,
       formatIn: mergedFilter.filter.formats.length > 0 ? mergedFilter.filter.formats : undefined,
       source: pickSingleValue(mergedFilter.filter.source),

@@ -39,10 +39,9 @@ const normalizeTags = (tags: TagFilter[]): TagFilter[] => {
 
     const existingTag = dedupedTags.get(normalizedName)
 
-    if (!existingTag || (tag.minimumRank ?? -1) > (existingTag.minimumRank ?? -1)) {
+    if (!existingTag) {
       dedupedTags.set(normalizedName, {
         name: normalizedName,
-        minimumRank: tag.minimumRank,
       })
     }
   }
@@ -157,7 +156,6 @@ const mergeTags = (
     return [
       {
         name: tag.name,
-        minimumRank: Math.max(tag.minimumRank ?? 0, categoryTag.minimumRank ?? 0) || undefined,
       },
     ]
   })
@@ -193,6 +191,7 @@ export const mergeFilterStates = (
       formats: formats.values,
       popularity: popularity.range,
       source: source.values,
+      minimumTagRank: Math.max(globalFilter.minimumTagRank ?? 0, categoryFilter.minimumTagRank ?? 0) || undefined,
       sort: categoryFilter.sort ?? globalFilter.sort,
     },
     hasConflicts:

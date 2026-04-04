@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import {
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxPortal,
+  ComboboxRoot,
+  ComboboxViewport,
+} from 'reka-ui'
 
 import FilterField from '@/components/filters/FilterField.vue'
-import FilterMultiSelectField, {
-  type FilterOption,
-} from '@/components/filters/FilterMultiSelectField.vue'
+import FilterMultiComboboxField from '@/components/filters/FilterMultiComboboxField.vue'
+import FilterMultiSelectField from '@/components/filters/FilterMultiSelectField.vue'
 import FilterSortEditor from '@/components/filters/FilterSortEditor.vue'
 import FilterTagEditor from '@/components/filters/FilterTagEditor.vue'
 import type { FilterDisabledReasons } from '@/lib/filter-editor'
@@ -13,13 +20,16 @@ import {
   animeSeasons,
   animeSources,
   type AnimeFormat,
-  type AnimeSeason,
-  type AnimeSource,
   type AniListMetadata,
   type FilterSort,
   type FilterState,
   type NumericRange,
 } from '@/types'
+
+export interface FilterOption {
+  value: string
+  label: string
+}
 
 const props = defineProps<{
   modelValue: FilterState
@@ -35,6 +45,7 @@ const emit = defineEmits<{
 }>()
 
 const staticCountryOptions = ['CN', 'JP', 'KR', 'TW']
+const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' })
 
 const toTitleLabel = (value: string) =>
   value
@@ -63,13 +74,22 @@ const sourceOptions = createEnumOptions(animeSources)
 const countryOptions = computed(() =>
   mergedOptions(staticCountryOptions, props.modelValue.countryOfOrigin).map((option) => ({
     ...option,
-    label: option.value,
+    label: countryDisplayNames.of(option.value) ?? option.value,
   })),
 )
 
-const genreOptions = computed(() =>
-  mergedOptions(props.metadata?.genres ?? [], props.modelValue.genres),
-)
+const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], props.modelValue.genres))
+
+const seasonValue = computed(() => props.modelValue.seasons[0] ?? '')
+const sourceValue = computed(() => props.modelValue.source[0] ?? '')
+
+const seasonLabelByValue = new Map(seasonOptions.map((option) => [option.value, option.label]))
+const sourceLabelByValue = new Map(sourceOptions.map((option) => [option.value, option.label]))
+
+const normalizeStringValues = (values: string[]) =>
+  [...new Set(values.map((value) => value.trim()).filter((value) => value.length > 0))].sort((left, right) =>
+    left.localeCompare(right),
+  )
 
 const updateFilter = (patch: Partial<FilterState>) => {
   emit('update:modelValue', {
@@ -92,45 +112,31 @@ const updateRange = (
   }
 
   if (nextRange.minimum === undefined && nextRange.maximum === undefined) {
-    updateFilter({
-      [field]: undefined,
-    })
+    updateFilter({ [field]: undefined })
     return
   }
 
-  updateFilter({
-    [field]: nextRange,
-  })
+  updateFilter({ [field]: nextRange })
 }
 
 const setSearch = (value: string) => {
-  updateFilter({
-    search: value.trim(),
-  })
+  updateFilter({ search: value.trim() })
 }
 
 const setSort = (value: FilterSort | undefined) => {
-  updateFilter({
-    sort: value,
-  })
-}
-
-const setSeasons = (value: string[]) => {
-  updateFilter({
-    seasons: value as AnimeSeason[],
-  })
+  updateFilter({ sort: value })
 }
 
 const setFormats = (value: string[]) => {
-  updateFilter({
-    formats: value as AnimeFormat[],
-  })
+  updateFilter({ formats: value as AnimeFormat[] })
 }
 
-const setSource = (value: string[]) => {
-  updateFilter({
-    source: value as AnimeSource[],
-  })
+const updateSingleSelect = (field: 'seasons' | 'source', value: string | undefined) => {
+  updateFilter({ [field]: value ? [value] : [] } as Pick<FilterState, 'seasons' | 'source'>)
+}
+
+const setMinimumTagRank = (value: number | undefined) => {
+  updateFilter({ minimumTagRank: value })
 }
 
 const genreEmptyMessage = computed(() => {
@@ -144,11 +150,13 @@ const genreEmptyMessage = computed(() => {
 
   return 'No genres available.'
 })
+
 </script>
 
 <template>
   <div class="grid gap-5 lg:grid-cols-2">
     <FilterField
+      v-if="mode === 'category'"
       label="Search"
       description="Search text is trimmed before it is applied."
       :disabled-reason="disabledFields?.search"
@@ -221,30 +229,58 @@ const genreEmptyMessage = computed(() => {
       </div>
     </FilterField>
 
-    <FilterMultiSelectField
+    <FilterField
       label="Seasons"
-      description="Choose one or more airing seasons."
-      :model-value="modelValue.seasons"
-      :options="seasonOptions"
+      description="Choose a single airing season."
       :disabled-reason="disabledFields?.seasons"
-      @update:model-value="setSeasons"
-    />
+    >
+      <ComboboxRoot
+        :model-value="seasonValue"
+        :disabled="Boolean(disabledFields?.seasons)"
+        open-on-focus
+        @update:model-value="updateSingleSelect('seasons', $event as string | undefined)"
+      >
+        <ComboboxInput
+          class="shell-input"
+          :display-value="(value) => seasonLabelByValue.get(value as string) ?? ''"
+          placeholder="Choose a season"
+        />
 
-    <FilterMultiSelectField
+        <ComboboxPortal>
+          <ComboboxContent class="z-50 mt-2 rounded-[1.25rem] border border-app-border/80 bg-app-surface p-2 shadow-shell">
+            <ComboboxViewport class="max-h-64 overflow-y-auto">
+              <ComboboxItem
+                v-for="option in seasonOptions"
+                :key="option.value"
+                :value="option.value"
+                :text-value="option.label"
+                class="flex cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
+              >
+                {{ option.label }}
+              </ComboboxItem>
+            </ComboboxViewport>
+          </ComboboxContent>
+        </ComboboxPortal>
+      </ComboboxRoot>
+    </FilterField>
+
+    <FilterMultiComboboxField
       label="Country of origin"
       description="Common anime-producing regions are always available."
       :model-value="modelValue.countryOfOrigin"
       :options="countryOptions"
+      placeholder="Search or select countries"
       :disabled-reason="disabledFields?.countryOfOrigin"
       @update:model-value="updateFilter({ countryOfOrigin: $event })"
     />
 
-    <FilterMultiSelectField
+    <FilterMultiComboboxField
       label="Genres"
       description="Genre choices update automatically as more data becomes available."
       :model-value="modelValue.genres"
       :options="genreOptions"
       :empty-message="genreEmptyMessage"
+      placeholder="Search or select genres"
       :disabled-reason="disabledFields?.genres"
       @update:model-value="updateFilter({ genres: $event })"
     />
@@ -258,23 +294,49 @@ const genreEmptyMessage = computed(() => {
       @update:model-value="setFormats"
     />
 
-    <FilterMultiSelectField
+    <FilterField
       label="Source material"
-      description="Filter by the origin of the anime adaptation."
-      :model-value="modelValue.source"
-      :options="sourceOptions"
+      description="Choose a single source material type."
       :disabled-reason="disabledFields?.source"
-      @update:model-value="setSource"
-    />
+    >
+      <ComboboxRoot
+        :model-value="sourceValue"
+        :disabled="Boolean(disabledFields?.source)"
+        open-on-focus
+        @update:model-value="updateSingleSelect('source', $event as string | undefined)"
+      >
+        <ComboboxInput
+          class="shell-input"
+          :display-value="(value) => sourceLabelByValue.get(value as string) ?? ''"
+          placeholder="Choose a source type"
+        />
+
+        <ComboboxPortal>
+          <ComboboxContent class="z-50 mt-2 rounded-[1.25rem] border border-app-border/80 bg-app-surface p-2 shadow-shell">
+            <ComboboxViewport class="max-h-64 overflow-y-auto">
+              <ComboboxItem
+                v-for="option in sourceOptions"
+                :key="option.value"
+                :value="option.value"
+                :text-value="option.label"
+                class="flex cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
+              >
+                {{ option.label }}
+              </ComboboxItem>
+            </ComboboxViewport>
+          </ComboboxContent>
+        </ComboboxPortal>
+      </ComboboxRoot>
+    </FilterField>
 
     <div class="lg:col-span-2">
       <FilterTagEditor
-        :model-value="modelValue.tags"
+        :model-value="modelValue.tags.map((tag) => tag.name)"
         :metadata-tags="metadata?.tags ?? []"
         :metadata-status="metadataStatus"
         :metadata-error="metadataError"
         :disabled-reason="disabledFields?.tags"
-        @update:model-value="updateFilter({ tags: $event })"
+        @update:model-value="updateFilter({ tags: $event.map((name: string) => ({ name })) })"
       />
     </div>
   </div>

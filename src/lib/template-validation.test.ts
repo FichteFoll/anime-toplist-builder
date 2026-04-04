@@ -22,13 +22,12 @@ describe('template validation', () => {
         tags: [
           {
             name: 'Cyberpunk',
-            minimumRank: 25,
           },
           {
             name: 'Cyberpunk',
-            minimumRank: 70,
           },
         ],
+        minimumTagRank: 70,
       },
       categories: [
         {
@@ -53,9 +52,9 @@ describe('template validation', () => {
         tags: [
           {
             name: 'Cyberpunk',
-            minimumRank: 70,
           },
         ],
+        minimumTagRank: 70,
         genres: ['Action', 'Drama'],
         formats: [],
         popularity: undefined,
@@ -72,6 +71,7 @@ describe('template validation', () => {
             seasons: ['SPRING', 'WINTER'],
             countryOfOrigin: [],
             tags: [],
+            minimumTagRank: undefined,
             genres: [],
             formats: [],
             popularity: undefined,
@@ -142,6 +142,7 @@ describe('template validation', () => {
         name: 'Export me',
         globalFilter: {
           formats: ['TV', 'MOVIE'],
+          minimumTagRank: 40,
         },
         categories: [
           {
@@ -160,12 +161,13 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_exportcase01',
       name: 'Export me',
-      globalFilter: {
+        globalFilter: {
         search: '',
         yearRange: undefined,
         seasons: [],
         countryOfOrigin: [],
         tags: [],
+        minimumTagRank: 40,
         genres: [],
         formats: ['MOVIE', 'TV'],
         popularity: undefined,
@@ -182,6 +184,7 @@ describe('template validation', () => {
             seasons: [],
             countryOfOrigin: [],
             tags: [],
+            minimumTagRank: undefined,
             genres: ['Mystery'],
             formats: [],
             popularity: undefined,

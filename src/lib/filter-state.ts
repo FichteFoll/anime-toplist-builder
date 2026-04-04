@@ -8,4 +8,5 @@ export const createEmptyFilterState = (): FilterState => ({
   genres: [],
   formats: [],
   source: [],
+  minimumTagRank: undefined,
 })

@@ -38,12 +38,8 @@ describe('mergeFilterStates', () => {
       popularity: {
         minimum: 100,
       },
-      tags: [
-        {
-          name: 'Cyberpunk',
-          minimumRank: 20,
-        },
-      ],
+      tags: [{ name: 'Cyberpunk' }],
+      minimumTagRank: 20,
     }
 
     const categoryFilter: FilterState = {
@@ -56,12 +52,8 @@ describe('mergeFilterStates', () => {
       popularity: {
         maximum: 500,
       },
-      tags: [
-        {
-          name: 'Cyberpunk',
-          minimumRank: 50,
-        },
-      ],
+      tags: [{ name: 'Cyberpunk' }],
+      minimumTagRank: 50,
     }
 
     const result = mergeFilterStates(globalFilter, categoryFilter)
@@ -80,9 +72,9 @@ describe('mergeFilterStates', () => {
     expect(result.filter.tags).toEqual([
       {
         name: 'Cyberpunk',
-        minimumRank: 50,
       },
     ])
+    expect(result.filter.minimumTagRank).toBe(50)
   })
 
   it('prefers an explicit search override and category sort', () => {
@@ -147,13 +139,12 @@ describe('mergeFilterStates', () => {
       tags: [
         {
           name: ' Time Travel ',
-          minimumRank: 20,
         },
         {
           name: 'Time Travel',
-          minimumRank: 35,
         },
       ],
+      minimumTagRank: 35,
     }
 
     const categoryFilter: FilterState = {
@@ -162,12 +153,12 @@ describe('mergeFilterStates', () => {
       tags: [
         {
           name: 'Time Travel',
-          minimumRank: 10,
         },
         {
           name: 'Iyashikei',
         },
       ],
+      minimumTagRank: 10,
     }
 
     const result = mergeFilterStates(globalFilter, categoryFilter, '   ')
@@ -177,8 +168,8 @@ describe('mergeFilterStates', () => {
     expect(result.filter.tags).toEqual([
       {
         name: 'Time Travel',
-        minimumRank: 35,
       },
     ])
+    expect(result.filter.minimumTagRank).toBe(35)
   })
 })

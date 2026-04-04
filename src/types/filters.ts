@@ -52,12 +52,6 @@ export interface NumericRange {
 
 export interface TagFilter {
   name: string
-  minimumRank?: number
-}
-
-export interface FilterSort {
-  field: FilterSortField
-  direction: FilterSortDirection
 }
 
 export interface FilterState {
@@ -70,5 +64,11 @@ export interface FilterState {
   formats: AnimeFormat[]
   popularity?: NumericRange
   source: AnimeSource[]
+  minimumTagRank?: number
   sort?: FilterSort
+}
+
+export interface FilterSort {
+  field: FilterSortField
+  direction: FilterSortDirection
 }

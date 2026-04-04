@@ -162,10 +162,6 @@ const asTagFilters = (value: unknown, path: string): TagFilter[] => {
 
     return {
       name: asTrimmedString(entry.name, `${path}[${index}].name`),
-      minimumRank: asOptionalInteger(entry.minimumRank, `${path}[${index}].minimumRank`, {
-        minimum: 0,
-        maximum: 100,
-      }),
     }
   })
 
@@ -174,7 +170,7 @@ const asTagFilters = (value: unknown, path: string): TagFilter[] => {
   for (const tag of tags) {
     const existingTag = dedupedTags.get(tag.name)
 
-    if (!existingTag || (tag.minimumRank ?? -1) > (existingTag.minimumRank ?? -1)) {
+    if (!existingTag) {
       dedupedTags.set(tag.name, tag)
     }
   }
@@ -237,6 +233,10 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
     formats: asEnumArray<AnimeFormat>(value.formats, `${path}.formats`, animeFormats),
     popularity: asOptionalRange(value.popularity, `${path}.popularity`),
     source: asEnumArray<AnimeSource>(value.source, `${path}.source`, animeSources),
+    minimumTagRank: asOptionalInteger(value.minimumTagRank, `${path}.minimumTagRank`, {
+      minimum: 0,
+      maximum: 100,
+    }),
     sort: asOptionalSort(value.sort, `${path}.sort`),
   }
 
