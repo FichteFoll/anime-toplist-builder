@@ -13,13 +13,10 @@ import {
 const props = defineProps<{
   label: string
   description?: string
-  modelValue?: FilterSort
   inheritLabel?: string
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: FilterSort | undefined]
-}>()
+const model = defineModel<FilterSort | undefined>()
 
 const sortFieldOptions = computed(() =>
   filterSortFields.map((field) => ({
@@ -30,25 +27,25 @@ const sortFieldOptions = computed(() =>
 
 const setField = (field: FilterSortField | '') => {
   if (!field) {
-    emit('update:modelValue', undefined)
+    model.value = undefined
     return
   }
 
-  emit('update:modelValue', {
+  model.value = {
     field,
-    direction: props.modelValue?.direction ?? 'desc',
-  })
+    direction: model.value?.direction ?? 'desc',
+  }
 }
 
 const setDirection = (direction: FilterSortDirection) => {
-  if (!props.modelValue) {
+  if (!model.value) {
     return
   }
 
-  emit('update:modelValue', {
-    ...props.modelValue,
+  model.value = {
+    ...model.value,
     direction,
-  })
+  }
 }
 </script>
 
@@ -62,7 +59,7 @@ const setDirection = (direction: FilterSortDirection) => {
         <span class="sr-only">Sort field</span>
         <select
           class="shell-input"
-          :value="modelValue?.field ?? ''"
+          :value="model?.field ?? ''"
           @change="setField(($event.target as HTMLSelectElement).value as FilterSortField | '')"
         >
           <option value="">
@@ -84,9 +81,9 @@ const setDirection = (direction: FilterSortDirection) => {
           :key="direction"
           type="button"
           class="shell-button"
-          :class="modelValue?.direction === direction ? 'shell-button-active' : ''"
-          :disabled="!modelValue"
-          :aria-pressed="modelValue?.direction === direction"
+          :class="model?.direction === direction ? 'shell-button-active' : ''"
+          :disabled="!model"
+          :aria-pressed="model?.direction === direction"
           :aria-label="direction === 'asc' ? 'Use ascending sort order' : 'Use descending sort order'"
           @click="setDirection(direction)"
         >

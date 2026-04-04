@@ -29,6 +29,8 @@
 
 - Use TypeScript throughout.
 - In Vue SFCs, keep the `<script>` block before `<template>`.
+- Make components re-usable and encapsulate functionality to keep per-component context minimal and isolated.
+- Prefer bi-directional data transfer using the `defineModel` directive.
 - Prefer small pure helpers in `src/lib` for normalization, validation, and merge logic.
 - Do not introduce character, staff, or manga support.
   The current product scope is anime only.

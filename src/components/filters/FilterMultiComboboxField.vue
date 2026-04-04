@@ -21,7 +21,6 @@ export interface FilterOption {
 const props = defineProps<{
   label: string
   description?: string
-  modelValue: string[]
   options: FilterOption[]
   emptyMessage?: string
   placeholder?: string
@@ -29,9 +28,7 @@ const props = defineProps<{
   virtualized?: boolean
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string[]]
-}>()
+const model = defineModel<string[]>({ required: true })
 
 const normalizeValues = (values: string[]) =>
   [...new Set(values.map((value) => value.trim()).filter((value) => value.length > 0))].sort((left, right) =>
@@ -45,7 +42,7 @@ const normalizedSearchTerm = computed(() => searchTerm.value.trim().toLocaleLowe
 const normalizedOptions = computed(() => {
   const optionMap = new Map(props.options.map((option) => [option.value, option]))
 
-  for (const selectedValue of props.modelValue) {
+  for (const selectedValue of model.value) {
     if (!optionMap.has(selectedValue)) {
       optionMap.set(selectedValue, {
         value: selectedValue,
@@ -60,7 +57,7 @@ const normalizedOptions = computed(() => {
 const selectedOptions = computed(() => {
   const optionMap = new Map(normalizedOptions.value.map((option) => [option.value, option]))
 
-  return normalizeValues(props.modelValue)
+  return normalizeValues(model.value)
     .map((value) => optionMap.get(value))
     .filter((option): option is FilterOption => option !== undefined)
 })
@@ -89,7 +86,7 @@ const emptyStateMessage = computed(() => {
 })
 
 const emitValues = (values: string[] | undefined) => {
-  emit('update:modelValue', normalizeValues(values ?? []))
+  model.value = normalizeValues(values ?? [])
 }
 
 const updateValuesFromCombobox = (values: string[] | undefined) => {
@@ -98,7 +95,7 @@ const updateValuesFromCombobox = (values: string[] | undefined) => {
 }
 
 const removeValue = (value: string) => {
-  emitValues(props.modelValue.filter((entry) => entry !== value))
+  emitValues(model.value.filter((entry) => entry !== value))
 }
 </script>
 
@@ -110,7 +107,7 @@ const removeValue = (value: string) => {
   >
     <ComboboxRoot
       :multiple="true"
-      :model-value="normalizeValues(modelValue)"
+      :model-value="normalizeValues(model)"
       :disabled="Boolean(disabledReason)"
       open-on-focus
       :ignore-filter="true"

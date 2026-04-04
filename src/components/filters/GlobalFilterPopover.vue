@@ -14,15 +14,12 @@ import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import type { AniListMetadata, FilterState } from '@/types'
 
 const props = defineProps<{
-  modelValue: FilterState
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: FilterState]
-}>()
+const model = defineModel<FilterState>({ required: true })
 </script>
 
 <template>
@@ -35,7 +32,7 @@ const emit = defineEmits<{
       >
         Template filter
         <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
-        {{ countConfiguredFilterFields(props.modelValue) }} rule{{ countConfiguredFilterFields(props.modelValue) === 1 ? '' : 's' }}
+        {{ countConfiguredFilterFields(model) }} rule{{ countConfiguredFilterFields(model) === 1 ? '' : 's' }}
       </span>
     </button>
     </DialogTrigger>
@@ -58,11 +55,10 @@ const emit = defineEmits<{
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
           <FilterEditor
             mode="global"
-            :model-value="modelValue"
+            v-model="model"
             :metadata="metadata"
             :metadata-status="metadataStatus"
             :metadata-error="metadataError"
-            @update:model-value="emit('update:modelValue', $event)"
           />
         </div>
       </DialogContent>

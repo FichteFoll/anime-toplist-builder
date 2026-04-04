@@ -11,20 +11,17 @@ export interface FilterOption {
 const props = defineProps<{
   label: string
   description?: string
-  modelValue: string[]
   options: FilterOption[]
   emptyMessage?: string
   disabledReason?: string
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string[]]
-}>()
+const model = defineModel<string[]>({ required: true })
 
 const normalizedOptions = computed(() => {
   const optionMap = new Map(props.options.map((option) => [option.value, option]))
 
-  for (const selectedValue of props.modelValue) {
+  for (const selectedValue of model.value) {
     if (!optionMap.has(selectedValue)) {
       optionMap.set(selectedValue, {
         value: selectedValue,
@@ -36,17 +33,12 @@ const normalizedOptions = computed(() => {
   return [...optionMap.values()].sort((left, right) => left.label.localeCompare(right.label))
 })
 
-const isSelected = (value: string) => props.modelValue.includes(value)
+const isSelected = (value: string) => model.value.includes(value)
 
 const toggleValue = (value: string) => {
-  const nextValues = isSelected(value)
-    ? props.modelValue.filter((entry) => entry !== value)
-    : [...props.modelValue, value]
+  const nextValues = isSelected(value) ? model.value.filter((entry) => entry !== value) : [...model.value, value]
 
-  emit(
-    'update:modelValue',
-    [...new Set(nextValues)].sort((left, right) => left.localeCompare(right)),
-  )
+  model.value = [...new Set(nextValues)].sort((left, right) => left.localeCompare(right))
 }
 </script>
 

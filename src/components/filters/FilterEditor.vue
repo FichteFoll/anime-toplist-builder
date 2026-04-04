@@ -33,7 +33,6 @@ export interface FilterOption {
 }
 
 const props = defineProps<{
-  modelValue: FilterState
   mode: 'global' | 'category'
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
@@ -41,9 +40,7 @@ const props = defineProps<{
   disabledFields?: FilterDisabledReasons
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: FilterState]
-}>()
+const model = defineModel<FilterState>({ required: true })
 
 const staticCountryOptions = ['CN', 'JP', 'KR', 'TW']
 const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' })
@@ -73,25 +70,45 @@ const formatOptions = createEnumOptions(animeFormats)
 const sourceOptions = createEnumOptions(animeSources)
 
 const countryOptions = computed(() =>
-  mergedOptions(staticCountryOptions, props.modelValue.countryOfOrigin).map((option) => ({
+  mergedOptions(staticCountryOptions, model.value.countryOfOrigin).map((option) => ({
     ...option,
     label: countryDisplayNames.of(option.value) ?? option.value,
   })),
 )
 
-const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], props.modelValue.genres))
+const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], model.value.genres))
 
-const seasonValue = computed(() => props.modelValue.seasons[0] ?? '')
-const sourceValue = computed(() => props.modelValue.source[0] ?? '')
+const seasonValue = computed(() => model.value.seasons[0] ?? '')
+const sourceValue = computed(() => model.value.source[0] ?? '')
+const countryOfOriginModel = computed({
+  get: () => model.value.countryOfOrigin,
+  set: (value: string[]) => updateFilter({ countryOfOrigin: value }),
+})
+const genresModel = computed({
+  get: () => model.value.genres,
+  set: (value: string[]) => updateFilter({ genres: value }),
+})
+const formatsModel = computed({
+  get: () => model.value.formats,
+  set: (value: string[]) => updateFilter({ formats: value as AnimeFormat[] }),
+})
+const tagNamesModel = computed({
+  get: () => model.value.tags.map((tag) => tag.name),
+  set: (value: string[]) => updateFilter({ tags: value.map((name) => ({ name })) }),
+})
+const sortModel = computed<FilterSort | undefined>({
+  get: () => model.value.sort,
+  set: (value) => setSort(value),
+})
 
 const seasonLabelByValue = new Map(seasonOptions.map((option) => [option.value, option.label]))
 const sourceLabelByValue = new Map(sourceOptions.map((option) => [option.value, option.label]))
 
 const updateFilter = (patch: Partial<FilterState>) => {
-  emit('update:modelValue', {
-    ...props.modelValue,
+  model.value = {
+    ...model.value,
     ...patch,
-  })
+  }
 }
 
 const updateRange = (
@@ -99,12 +116,12 @@ const updateRange = (
   bound: keyof NumericRange,
   rawValue: string,
 ) => {
-  const trimmedValue = rawValue.trim()
-  const parsedValue = trimmedValue.length === 0 ? undefined : Number.parseInt(trimmedValue, 10)
-  const currentRange = props.modelValue[field]
-  const nextRange: NumericRange = {
-    ...(currentRange ?? {}),
-    [bound]: Number.isFinite(parsedValue) ? parsedValue : undefined,
+    const trimmedValue = rawValue.trim()
+    const parsedValue = trimmedValue.length === 0 ? undefined : Number.parseInt(trimmedValue, 10)
+    const currentRange = model.value[field]
+    const nextRange: NumericRange = {
+      ...(currentRange ?? {}),
+      [bound]: Number.isFinite(parsedValue) ? parsedValue : undefined,
   }
 
   if (nextRange.minimum === undefined && nextRange.maximum === undefined) {
@@ -121,10 +138,6 @@ const setSearch = (value: string) => {
 
 const setSort = (value: FilterSort | undefined) => {
   updateFilter({ sort: value })
-}
-
-const setFormats = (value: string[]) => {
-  updateFilter({ formats: value as AnimeFormat[] })
 }
 
 const updateSingleSelect = (field: 'seasons' | 'source', value: string | undefined) => {
@@ -157,18 +170,17 @@ const genreEmptyMessage = computed(() => {
         type="text"
         class="shell-input"
         :disabled="Boolean(disabledFields?.search)"
-        :value="modelValue.search"
+        :value="model.search"
         placeholder="Search AniList titles"
         @input="setSearch(($event.target as HTMLInputElement).value)"
       >
     </FilterField>
 
     <FilterSortEditor
+      v-model="sortModel"
       label="Sort"
       :description="mode === 'global' ? 'Default result ordering for the template.' : 'Adjust ordering for this category.'"
-      :model-value="modelValue.sort"
       :inherit-label="mode === 'category' ? 'Use template sort' : 'No explicit sort'"
-      @update:model-value="setSort"
     />
 
     <FilterField
@@ -181,7 +193,7 @@ const genreEmptyMessage = computed(() => {
           type="number"
           class="shell-input"
           :disabled="Boolean(disabledFields?.yearRange)"
-          :value="modelValue.yearRange?.minimum ?? ''"
+          :value="model.yearRange?.minimum ?? ''"
           placeholder="Minimum year"
           @input="updateRange('yearRange', 'minimum', ($event.target as HTMLInputElement).value)"
         >
@@ -189,7 +201,7 @@ const genreEmptyMessage = computed(() => {
           type="number"
           class="shell-input"
           :disabled="Boolean(disabledFields?.yearRange)"
-          :value="modelValue.yearRange?.maximum ?? ''"
+          :value="model.yearRange?.maximum ?? ''"
           placeholder="Maximum year"
           @input="updateRange('yearRange', 'maximum', ($event.target as HTMLInputElement).value)"
         >
@@ -206,7 +218,7 @@ const genreEmptyMessage = computed(() => {
           type="number"
           class="shell-input"
           :disabled="Boolean(disabledFields?.popularity)"
-          :value="modelValue.popularity?.minimum ?? ''"
+          :value="model.popularity?.minimum ?? ''"
           placeholder="Minimum popularity"
           @input="updateRange('popularity', 'minimum', ($event.target as HTMLInputElement).value)"
         >
@@ -214,7 +226,7 @@ const genreEmptyMessage = computed(() => {
           type="number"
           class="shell-input"
           :disabled="Boolean(disabledFields?.popularity)"
-          :value="modelValue.popularity?.maximum ?? ''"
+          :value="model.popularity?.maximum ?? ''"
           placeholder="Maximum popularity"
           @input="updateRange('popularity', 'maximum', ($event.target as HTMLInputElement).value)"
         >
@@ -262,33 +274,30 @@ const genreEmptyMessage = computed(() => {
     </FilterField>
 
     <FilterMultiComboboxField
+      v-model="countryOfOriginModel"
       label="Country of origin"
       description="Common anime-producing regions are always available."
-      :model-value="modelValue.countryOfOrigin"
       :options="countryOptions"
       placeholder="Search or select countries"
       :disabled-reason="disabledFields?.countryOfOrigin"
-      @update:model-value="updateFilter({ countryOfOrigin: $event })"
     />
 
     <FilterMultiComboboxField
+      v-model="genresModel"
       label="Genres"
       description="Genre choices update automatically as more data becomes available."
-      :model-value="modelValue.genres"
       :options="genreOptions"
       :empty-message="genreEmptyMessage"
       placeholder="Search or select genres"
       :disabled-reason="disabledFields?.genres"
-      @update:model-value="updateFilter({ genres: $event })"
     />
 
     <FilterMultiSelectField
+      v-model="formatsModel"
       label="Formats"
       description="Filter by anime release format."
-      :model-value="modelValue.formats"
       :options="formatOptions"
       :disabled-reason="disabledFields?.formats"
-      @update:model-value="setFormats"
     />
 
     <FilterField
@@ -305,7 +314,7 @@ const genreEmptyMessage = computed(() => {
         <ComboboxAnchor>
           <ComboboxInput
             class="shell-input"
-            :display-value="(value) => sourceLabelByValue.get(value as string) ?? ''"
+            :display-value="(value: string) => sourceLabelByValue.get(value) ?? ''"
             placeholder="Choose a source type"
           />
         </ComboboxAnchor>
@@ -333,12 +342,11 @@ const genreEmptyMessage = computed(() => {
 
     <div class="lg:col-span-2">
       <FilterTagEditor
-        :model-value="modelValue.tags.map((tag) => tag.name)"
+        v-model="tagNamesModel"
         :metadata-tags="metadata?.tags ?? []"
         :metadata-status="metadataStatus"
         :metadata-error="metadataError"
         :disabled-reason="disabledFields?.tags"
-        @update:model-value="updateFilter({ tags: $event.map((name: string) => ({ name })) })"
       />
     </div>
   </div>

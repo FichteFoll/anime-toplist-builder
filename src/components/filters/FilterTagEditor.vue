@@ -5,21 +5,18 @@ import FilterMultiComboboxField, { type FilterOption } from '@/components/filter
 import type { AniListTag } from '@/types'
 
 const props = defineProps<{
-  modelValue: string[]
   metadataTags: AniListTag[]
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
   disabledReason?: string
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string[]]
-}>()
+const model = defineModel<string[]>({ required: true })
 
 const options = computed<FilterOption[]>(() => {
   const optionMap = new Map(props.metadataTags.map((tag) => [tag.name, tag]))
 
-  for (const value of props.modelValue) {
+  for (const value of model.value) {
     if (!optionMap.has(value)) {
       optionMap.set(value, {
         id: -1,
@@ -53,12 +50,11 @@ const emptyMessage = computed(() => {
   <FilterMultiComboboxField
     label="Tags"
     description="AniList applies a single minimum rank threshold across all selected tags."
-    :model-value="modelValue"
+    v-model="model"
     :options="options"
     :empty-message="emptyMessage"
     virtualized
     placeholder="Search or select tags"
     :disabled-reason="disabledReason"
-    @update:model-value="(value) => emit('update:modelValue', value)"
   />
 </template>
