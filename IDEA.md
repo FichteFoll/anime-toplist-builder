@@ -23,6 +23,13 @@ or imported from a template.
 
 - Use composition API and always define the script block first.
 - Make components re-usable and encapsulate functionality to keep per-component context minimal and isolated.
+- Prefer bi-directonal data transfer using the `defineModel` directive.
+- Use a `types` folder for types shared by multiple components.
+- Use a `composables` folder to collect various utility composables.
+- Use pinia to share and inject application data across several components.
+  - Also use pinia to persist user data in local storage,
+    specifically the user's selections per template
+    and their own (or imported) templates.
 
 ## Features
 
@@ -110,9 +117,11 @@ but a manga/light novel toplist could be interesting as well.
 ## UI
 
 - Dark and light theme.
+- Settings menu (in a popup) with configuration options for:
+  - anime title language (English, Romaji, Native)
 - Categories should be rendered in a grid
   - The category is rendered with
-    - its name,
+    - its name
     - an image for the anime's image (key visual) or a placeholder if none has been selected yet,
     - the name of the selected anime, if any,
     - a few action buttons in the top right corner.
@@ -121,6 +130,18 @@ but a manga/light novel toplist could be interesting as well.
     - In the popup, the category filters can be configured.
   - Each category has a trash icon/button to delete the category
     with a confirmation prompt if its configuration is not empty.
+  - When clicking on a category's image, a popup will open to search for and select an anime.
+    - Includes a text input at the top to search for an anime title matching the given criteria.
+    - Includes a result grid with one entry for each matching Anime, including the anime's:
+      - image (key visual)
+      - title
+      - release year
+      - format
+    - Clicking on one anime in the result grid will select this anime for the category.
+    - A dropdown to select the sort field and order.
+    - Use a page size of 15.
+    - Results should already be displayed without having inserted text according to the filter criteria and default sort order.
+    - Show loading spinner while search results are being requested.
 - There is a button to generate an image.
   The image will then be displayed in a popup for the user to download or copy.
 - There is a "Template" section/menu.
