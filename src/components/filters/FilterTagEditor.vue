@@ -12,6 +12,10 @@ const props = defineProps<{
   disabledReason?: string
 }>()
 
+const emit = defineEmits<{
+  'update:modelValue': [value: string[]]
+}>()
+
 const options = computed<FilterOption[]>(() => {
   const optionMap = new Map(props.metadataTags.map((tag) => [tag.name, tag]))
 
@@ -52,8 +56,9 @@ const emptyMessage = computed(() => {
     :model-value="modelValue"
     :options="options"
     :empty-message="emptyMessage"
+    virtualized
     placeholder="Search or select tags"
     :disabled-reason="disabledReason"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="(value) => emit('update:modelValue', value)"
   />
 </template>

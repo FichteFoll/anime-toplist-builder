@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
+  ComboboxAnchor,
   ComboboxContent,
   ComboboxInput,
   ComboboxItem,
@@ -86,11 +87,6 @@ const sourceValue = computed(() => props.modelValue.source[0] ?? '')
 const seasonLabelByValue = new Map(seasonOptions.map((option) => [option.value, option.label]))
 const sourceLabelByValue = new Map(sourceOptions.map((option) => [option.value, option.label]))
 
-const normalizeStringValues = (values: string[]) =>
-  [...new Set(values.map((value) => value.trim()).filter((value) => value.length > 0))].sort((left, right) =>
-    left.localeCompare(right),
-  )
-
 const updateFilter = (patch: Partial<FilterState>) => {
   emit('update:modelValue', {
     ...props.modelValue,
@@ -133,10 +129,6 @@ const setFormats = (value: string[]) => {
 
 const updateSingleSelect = (field: 'seasons' | 'source', value: string | undefined) => {
   updateFilter({ [field]: value ? [value] : [] } as Pick<FilterState, 'seasons' | 'source'>)
-}
-
-const setMinimumTagRank = (value: number | undefined) => {
-  updateFilter({ minimumTagRank: value })
 }
 
 const genreEmptyMessage = computed(() => {
@@ -230,7 +222,7 @@ const genreEmptyMessage = computed(() => {
     </FilterField>
 
     <FilterField
-      label="Seasons"
+      label="Season"
       description="Choose a single airing season."
       :disabled-reason="disabledFields?.seasons"
     >
@@ -240,21 +232,26 @@ const genreEmptyMessage = computed(() => {
         open-on-focus
         @update:model-value="updateSingleSelect('seasons', $event as string | undefined)"
       >
-        <ComboboxInput
-          class="shell-input"
-          :display-value="(value) => seasonLabelByValue.get(value as string) ?? ''"
-          placeholder="Choose a season"
-        />
+        <ComboboxAnchor>
+          <ComboboxInput
+            class="shell-input"
+            :display-value="(value) => seasonLabelByValue.get(value as string) ?? ''"
+            placeholder="Choose a season"
+          />
+        </ComboboxAnchor>
 
         <ComboboxPortal>
-          <ComboboxContent class="z-50 mt-2 rounded-[1.25rem] border border-app-border/80 bg-app-surface p-2 shadow-shell">
-            <ComboboxViewport class="max-h-64 overflow-y-auto">
+          <ComboboxContent
+            position="popper"
+            class="z-[60] w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
+          >
+            <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
               <ComboboxItem
                 v-for="option in seasonOptions"
                 :key="option.value"
                 :value="option.value"
                 :text-value="option.label"
-                class="flex cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
+                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
               >
                 {{ option.label }}
               </ComboboxItem>
@@ -305,21 +302,26 @@ const genreEmptyMessage = computed(() => {
         open-on-focus
         @update:model-value="updateSingleSelect('source', $event as string | undefined)"
       >
-        <ComboboxInput
-          class="shell-input"
-          :display-value="(value) => sourceLabelByValue.get(value as string) ?? ''"
-          placeholder="Choose a source type"
-        />
+        <ComboboxAnchor>
+          <ComboboxInput
+            class="shell-input"
+            :display-value="(value) => sourceLabelByValue.get(value as string) ?? ''"
+            placeholder="Choose a source type"
+          />
+        </ComboboxAnchor>
 
         <ComboboxPortal>
-          <ComboboxContent class="z-50 mt-2 rounded-[1.25rem] border border-app-border/80 bg-app-surface p-2 shadow-shell">
-            <ComboboxViewport class="max-h-64 overflow-y-auto">
+          <ComboboxContent
+            position="popper"
+            class="z-[60] w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
+          >
+            <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
               <ComboboxItem
                 v-for="option in sourceOptions"
                 :key="option.value"
                 :value="option.value"
                 :text-value="option.label"
-                class="flex cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
+                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
               >
                 {{ option.label }}
               </ComboboxItem>
