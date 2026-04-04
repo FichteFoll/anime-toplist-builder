@@ -12,6 +12,7 @@ or imported from a template.
 - Vue.js as frontend framework
 - Tailwind CSS + Radix Vue as UI/style frontends
 - TypeScript
+- pnpm as package manager
 - ESlint configuration with default rules
 - Github Actions to build and deploy the site via GitHub Pages
 - No i18n. Everything will be English only.
