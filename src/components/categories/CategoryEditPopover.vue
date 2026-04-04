@@ -110,7 +110,6 @@ const save = () => {
           </h2>
           <p class="text-sm leading-6 text-app-muted">
             Update the category name and refine its filters.
-            Fields already fixed by the template stay inherited here.
           </p>
         </div>
 

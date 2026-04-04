@@ -29,9 +29,6 @@ const titleLanguage = defineModel<AnimeTitleLanguage>('titleLanguage', { require
       </div>
 
       <div class="flex flex-col gap-3 sm:items-end">
-        <span class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-          Active theme: {{ resolvedTheme }}
-        </span>
         <div class="flex flex-wrap gap-2 sm:justify-end">
           <SettingsDialog v-model="titleLanguage" />
         </div>

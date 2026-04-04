@@ -45,17 +45,17 @@ const activeSelectionCount = computed(() =>
 const groupedTemplates = computed(() => [
   {
     title: 'Predefined',
-    description: 'Built-in starter templates registered from src/templates.',
+    description: 'Built-in starter templates.',
     templates: templateStore.predefinedTemplates,
   },
   {
     title: 'My Templates',
-    description: 'User-created templates and file imports stored locally.',
+    description: 'Your templates and file imports.',
     templates: templateStore.userTemplates,
   },
   {
     title: 'Remote Imports',
-    description: 'Templates loaded from remote JSON URLs and reopened via #template=<url>.',
+    description: 'Templates loaded from remote JSON URLs.',
     templates: templateStore.remoteTemplates,
   },
 ])
@@ -373,13 +373,13 @@ onMounted(async () => {
                   Filter workspace
                 </p>
                 <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Active Template
+                  Current template
                 </h2>
                 <p class="mt-3 text-3xl font-semibold tracking-tight">
                   {{ activeTemplate?.name ?? 'None' }}
                 </p>
                 <p class="mt-3 text-sm leading-6 text-app-muted">
-                  Shared filters edit the active template directly through store updates.
+                  Shared filters apply to the selected template.
                 </p>
               </article>
 
@@ -403,28 +403,13 @@ onMounted(async () => {
                   Filter workspace
                 </p>
                 <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Metadata
-                </h2>
-                <p class="mt-3 text-3xl font-semibold tracking-tight">
-                  {{ metadataStatus }}
-                </p>
-                <p class="mt-3 text-sm leading-6 text-app-muted">
-                  {{ metadataError ?? 'Genre and tag option loading is resilient to failures.' }}
-                </p>
-              </article>
-
-              <article class="rounded-3xl border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur">
-                <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                  Filter workspace
-                </p>
-                <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Selections
+                  Selected slots
                 </h2>
                 <p class="mt-3 text-3xl font-semibold tracking-tight">
                   {{ activeSelectionCount }}
                 </p>
                 <p class="mt-3 text-sm leading-6 text-app-muted">
-                  Selections remain persisted separately from template structure and filters.
+                  Fill categories with one anime each.
                 </p>
               </article>
             </section>
@@ -503,22 +488,6 @@ onMounted(async () => {
                 <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-2 xl:grid-cols-4">
                   <div>
                     <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Origin
-                    </dt>
-                    <dd class="mt-2 text-sm text-app-text">
-                      {{ activeTemplate?.origin ?? 'Unavailable' }}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Template id
-                    </dt>
-                    <dd class="mt-2 break-all text-sm text-app-text">
-                      {{ activeTemplate?.id ?? 'Unavailable' }}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
                       Categories
                     </dt>
                     <dd class="mt-2 text-sm text-app-text">
@@ -527,10 +496,18 @@ onMounted(async () => {
                   </div>
                   <div>
                     <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Selections
+                      Filled slots
                     </dt>
                     <dd class="mt-2 text-sm text-app-text">
                       {{ activeSelectionCount }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
+                      Status
+                    </dt>
+                    <dd class="mt-2 text-sm text-app-text">
+                      {{ activeTemplate ? 'Open for editing' : 'Choose a template to begin' }}
                     </dd>
                   </div>
                 </div>
@@ -583,9 +560,6 @@ onMounted(async () => {
                             <p class="text-base font-semibold text-app-text">
                               {{ template.name }}
                             </p>
-                            <p class="mt-1 break-all text-xs uppercase tracking-[0.2em] text-app-muted">
-                              {{ template.id }}
-                            </p>
                           </div>
                           <div class="text-right text-sm text-app-muted">
                             <p>{{ template.categories.length }} categories</p>
@@ -614,8 +588,7 @@ onMounted(async () => {
                     Load a template from a URL
                   </h2>
                   <p class="mt-3 text-sm leading-6 text-app-muted">
-                    Supports explicit imports and startup hydration from a URL fragment like
-                    <code>#template=https%3A%2F%2Fexample.com%2Ftemplate.json</code>.
+                    Paste a remote template URL to load it.
                   </p>
 
                   <label class="mt-5 block text-sm font-medium text-app-text">
@@ -639,54 +612,6 @@ onMounted(async () => {
                       {{ isImportingRemote ? 'Loading...' : 'Import remote template' }}
                     </button>
                   </div>
-                </article>
-
-                <article class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur">
-                  <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                    Startup State
-                  </p>
-                  <dl class="mt-4 space-y-4 text-sm text-app-muted">
-                    <div>
-                      <dt class="font-medium text-app-text">
-                        AniList metadata status
-                      </dt>
-                      <dd class="mt-1">
-                        {{ metadataStatus }}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt class="font-medium text-app-text">
-                        Last opened template
-                      </dt>
-                      <dd class="mt-1 break-all">
-                        {{ settingsStore.lastOpenedTemplateId ?? 'None stored yet' }}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt class="font-medium text-app-text">
-                        Pending URL template
-                      </dt>
-                      <dd class="mt-1 break-all">
-                        {{ templateStore.pendingStartupTemplateUrl ?? 'No URL template in hash' }}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt class="font-medium text-app-text">
-                        Resolved theme
-                      </dt>
-                      <dd class="mt-1">
-                        {{ resolvedTheme }}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt class="font-medium text-app-text">
-                        Title language
-                      </dt>
-                      <dd class="mt-1">
-                        {{ settingsStore.titleLanguage }}
-                      </dd>
-                    </div>
-                  </dl>
                 </article>
               </div>
             </section>

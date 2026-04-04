@@ -249,8 +249,7 @@ onBeforeUnmount(() => {
           </p>
           <p class="mt-3 max-w-xl text-sm leading-6 text-app-muted">
             Add the first card to define the toplist structure.
-            New categories receive stable ids immediately,
-            so later reordering and selection persistence stay intact.
+            You can reorder and edit cards after that.
           </p>
         </div>
 

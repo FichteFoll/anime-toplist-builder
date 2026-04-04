@@ -135,7 +135,7 @@ const setSource = (value: string[]) => {
 
 const genreEmptyMessage = computed(() => {
   if (props.metadataStatus === 'loading' || props.metadataStatus === 'idle') {
-    return 'Genre metadata is loading. Existing selections remain visible.'
+    return 'Additional genres will appear automatically when available.'
   }
 
   if (props.metadataStatus === 'error') {
@@ -150,7 +150,7 @@ const genreEmptyMessage = computed(() => {
   <div class="grid gap-5 lg:grid-cols-2">
     <FilterField
       label="Search"
-      description="Search text is trimmed before it becomes part of the shared filter model."
+      description="Search text is trimmed before it is applied."
       :disabled-reason="disabledFields?.search"
     >
       <input
@@ -165,7 +165,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterSortEditor
       label="Sort"
-      :description="mode === 'global' ? 'Default result ordering for the template.' : 'Override the template sort for this category only.'"
+      :description="mode === 'global' ? 'Default result ordering for the template.' : 'Adjust ordering for this category.'"
       :model-value="modelValue.sort"
       :inherit-label="mode === 'category' ? 'Use template sort' : 'No explicit sort'"
       @update:model-value="setSort"
@@ -173,7 +173,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterField
       label="Release year"
-      description="Minimum and maximum years map to AniList start-date bounds."
+      description="Set a year range to narrow results."
       :disabled-reason="disabledFields?.yearRange"
     >
       <div class="grid gap-3 sm:grid-cols-2">
@@ -198,7 +198,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterField
       label="Popularity"
-      description="Use AniList popularity thresholds to narrow broad searches."
+      description="Use popularity thresholds to narrow broad searches."
       :disabled-reason="disabledFields?.popularity"
     >
       <div class="grid gap-3 sm:grid-cols-2">
@@ -232,7 +232,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterMultiSelectField
       label="Country of origin"
-      description="Common anime-producing regions are available even before metadata loads."
+      description="Common anime-producing regions are always available."
       :model-value="modelValue.countryOfOrigin"
       :options="countryOptions"
       :disabled-reason="disabledFields?.countryOfOrigin"
@@ -241,7 +241,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterMultiSelectField
       label="Genres"
-      description="Genre choices come from AniList metadata when available."
+      description="Genre choices update automatically as more data becomes available."
       :model-value="modelValue.genres"
       :options="genreOptions"
       :empty-message="genreEmptyMessage"

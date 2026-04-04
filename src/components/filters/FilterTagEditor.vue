@@ -85,7 +85,7 @@ const updateRank = (tagName: string, rawValue: string) => {
 
 const metadataMessage = computed(() => {
   if (props.metadataStatus === 'loading' || props.metadataStatus === 'idle') {
-    return 'AniList metadata is loading. Existing tag selections remain editable.'
+    return 'Additional tag options will appear automatically when available.'
   }
 
   if (props.metadataStatus === 'error') {
@@ -99,7 +99,7 @@ const metadataMessage = computed(() => {
 <template>
   <FilterField
     label="Tags"
-    description="AniList applies the strictest selected minimum rank across all chosen tags during search."
+    description="AniList applies the strictest selected minimum rank across chosen tags."
     :disabled-reason="disabledReason"
   >
     <p

@@ -104,7 +104,7 @@ const selectionTitle = computed(() =>
         {{ categoryFilterCount }} custom rule{{ categoryFilterCount === 1 ? '' : 's' }}
       </span>
       <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
-        {{ selection ? 'Selection saved' : 'No selection yet' }}
+        {{ selection ? 'Selected' : 'No selection yet' }}
       </span>
     </div>
 
@@ -130,7 +130,7 @@ const selectionTitle = computed(() =>
             <span v-if="selection.format"> · {{ selection.format }}</span>
           </p>
           <p class="text-sm leading-6 text-app-muted">
-            This selection stays keyed to the stable category id when you rename or reorder the card.
+            You can rename or reorder this card without losing the selection.
           </p>
         </div>
       </div>

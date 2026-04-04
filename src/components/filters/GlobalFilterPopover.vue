@@ -52,7 +52,7 @@ const emit = defineEmits<{
             Shared constraints for every category
           </h2>
           <p class="text-sm leading-6 text-app-muted">
-            Category editors inherit these constraints and disable matching fields when they are already fixed here.
+            Category editors inherit these constraints automatically.
           </p>
         </div>
 

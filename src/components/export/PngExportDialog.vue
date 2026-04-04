@@ -303,7 +303,7 @@ onBeforeUnmount(() => {
                 v-else
                 class="flex min-h-72 items-center justify-center rounded-[1rem] border border-dashed border-app-border/70 bg-app-bg/40 px-6 py-12 text-center text-sm leading-6 text-app-muted"
               >
-                {{ isRendering ? 'Rendering the PNG preview...' : 'Open the export dialog with an active template to generate a preview.' }}
+                {{ isRendering ? 'Rendering the PNG preview...' : 'Open the export dialog to generate a preview.' }}
               </div>
             </div>
           </article>
