@@ -101,7 +101,6 @@ const sortModel = computed<FilterSort | undefined>({
   set: (value) => setSort(value),
 })
 
-const seasonLabelByValue = new Map(seasonOptions.map((option) => [option.value, option.label]))
 const sourceLabelByValue = new Map(sourceOptions.map((option) => [option.value, option.label]))
 
 const updateFilter = (patch: Partial<FilterState>) => {
@@ -142,6 +141,12 @@ const setSort = (value: FilterSort | undefined) => {
 
 const updateSingleSelect = (field: 'seasons' | 'source', value: string | undefined) => {
   updateFilter({ [field]: value ? [value] : [] } as Pick<FilterState, 'seasons' | 'source'>)
+}
+
+const isSeasonSelected = (value: string) => seasonValue.value === value
+
+const setSeason = (value: string) => {
+  updateSingleSelect('seasons', isSeasonSelected(value) ? undefined : value)
 }
 
 const genreEmptyMessage = computed(() => {
@@ -238,39 +243,21 @@ const genreEmptyMessage = computed(() => {
       description="Choose a single airing season."
       :disabled-reason="disabledFields?.seasons"
     >
-      <ComboboxRoot
-        :model-value="seasonValue"
-        :disabled="Boolean(disabledFields?.seasons)"
-        open-on-focus
-        @update:model-value="updateSingleSelect('seasons', $event as string | undefined)"
-      >
-        <ComboboxAnchor>
-          <ComboboxInput
-            class="shell-input"
-            :display-value="(value) => seasonLabelByValue.get(value as string) ?? ''"
-            placeholder="Choose a season"
-          />
-        </ComboboxAnchor>
-
-        <ComboboxPortal>
-          <ComboboxContent
-            position="popper"
-            class="z-[60] w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
-          >
-            <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
-              <ComboboxItem
-                v-for="option in seasonOptions"
-                :key="option.value"
-                :value="option.value"
-                :text-value="option.label"
-                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
-              >
-                {{ option.label }}
-              </ComboboxItem>
-            </ComboboxViewport>
-          </ComboboxContent>
-        </ComboboxPortal>
-      </ComboboxRoot>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="option in seasonOptions"
+          :key="option.value"
+          type="button"
+          class="shell-button"
+          :class="isSeasonSelected(option.value) ? 'shell-button-active' : ''"
+          :disabled="Boolean(disabledFields?.seasons)"
+          :aria-pressed="isSeasonSelected(option.value)"
+          :aria-label="`Use ${option.label} season`"
+          @click="setSeason(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      </div>
     </FilterField>
 
     <FilterMultiComboboxField
