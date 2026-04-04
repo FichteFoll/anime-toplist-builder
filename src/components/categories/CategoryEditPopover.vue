@@ -34,7 +34,12 @@ const draftFilter = ref<FilterState>(cloneFilter(props.category.filter))
 
 function cloneFilter(filter: FilterState): FilterState {
   if (typeof structuredClone === 'function') {
-    return structuredClone(filter)
+    try {
+      return structuredClone(filter)
+    } catch {
+      // Vue props can be proxies, which structuredClone rejects.
+      // Fall back to JSON cloning for this plain filter state.
+    }
   }
 
   return JSON.parse(JSON.stringify(filter)) as FilterState
