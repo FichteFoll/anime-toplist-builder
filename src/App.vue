@@ -414,7 +414,7 @@ onMounted(async () => {
               </article>
             </section>
 
-            <section class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <section class="mt-6 grid gap-4">
               <article class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
                 <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -523,6 +523,40 @@ onMounted(async () => {
                   </button>
                 </div>
 
+                <div class="mt-6 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4 sm:p-5">
+                  <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+                    Remote import
+                  </p>
+                  <h3 class="mt-3 text-lg font-semibold tracking-tight text-app-text">
+                    Load a template from a URL
+                  </h3>
+                  <p class="mt-2 text-sm leading-6 text-app-muted">
+                    Paste a remote template URL to load it.
+                  </p>
+
+                  <label class="mt-5 block text-sm font-medium text-app-text">
+                    Remote template URL
+                    <input
+                      v-model="remoteUrlInput"
+                      type="url"
+                      inputmode="url"
+                      placeholder="https://example.com/template.json"
+                      class="mt-2 w-full rounded-2xl border border-app-border/80 bg-app-bg/70 px-4 py-3 text-sm text-app-text outline-none transition focus:border-app-accent/60 focus:ring-2 focus:ring-app-accent/20"
+                    >
+                  </label>
+
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="shell-button"
+                      :disabled="isImportingRemote"
+                      @click="importFromRemoteUrl()"
+                    >
+                      {{ isImportingRemote ? 'Loading...' : 'Import remote template' }}
+                    </button>
+                  </div>
+                </div>
+
                 <div class="mt-6 space-y-4">
                   <article
                     v-for="group in groupedTemplates"
@@ -578,42 +612,6 @@ onMounted(async () => {
                   </article>
                 </div>
               </article>
-
-              <div class="space-y-4">
-                <article class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur">
-                  <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                    Remote Import
-                  </p>
-                  <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                    Load a template from a URL
-                  </h2>
-                  <p class="mt-3 text-sm leading-6 text-app-muted">
-                    Paste a remote template URL to load it.
-                  </p>
-
-                  <label class="mt-5 block text-sm font-medium text-app-text">
-                    Remote template URL
-                    <input
-                      v-model="remoteUrlInput"
-                      type="url"
-                      inputmode="url"
-                      placeholder="https://example.com/template.json"
-                      class="mt-2 w-full rounded-2xl border border-app-border/80 bg-app-bg/70 px-4 py-3 text-sm text-app-text outline-none transition focus:border-app-accent/60 focus:ring-2 focus:ring-app-accent/20"
-                    >
-                  </label>
-
-                  <div class="mt-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="shell-button"
-                      :disabled="isImportingRemote"
-                      @click="importFromRemoteUrl()"
-                    >
-                      {{ isImportingRemote ? 'Loading...' : 'Import remote template' }}
-                    </button>
-                  </div>
-                </article>
-              </div>
             </section>
 
             <section class="mt-6">
