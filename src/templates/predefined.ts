@@ -59,7 +59,7 @@ const predefinedTemplatePayloads = [
       { id: 'cat_comedyspot01', name: 'Comedy', filter: { genres: ['Comedy'] } },
       { id: 'cat_scifispot01', name: 'Sci-Fi', filter: { genres: ['Sci-Fi'] } },
       { id: 'cat_romancespot01', name: 'Romance', filter: { genres: ['Romance'] } },
-      { id: 'cat_experimentaltag01', name: 'Experimental', filter: { tags: [{ name: 'Experimental' }] } },
+      { id: 'cat_experimentaltag01', name: 'Experimental', filter: { tags: ['Experimental'] } },
     ],
   },
 ]

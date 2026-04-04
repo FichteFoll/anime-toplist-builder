@@ -4,7 +4,6 @@ import type {
   AnimeSource,
   FilterState,
   NumericRange,
-  TagFilter,
 } from '@/types'
 
 export interface MergeFilterStateResult {
@@ -26,28 +25,6 @@ const sortStrings = <T extends string>(values: T[]) =>
   [...values].sort((left, right) => left.localeCompare(right))
 
 const normalizeStringArray = <T extends string>(values: T[]) => sortStrings(Array.from(new Set(values)))
-
-const normalizeTags = (tags: TagFilter[]): TagFilter[] => {
-  const dedupedTags = new Map<string, TagFilter>()
-
-  for (const tag of tags) {
-    const normalizedName = tag.name.trim()
-
-    if (normalizedName.length === 0) {
-      continue
-    }
-
-    const existingTag = dedupedTags.get(normalizedName)
-
-    if (!existingTag) {
-      dedupedTags.set(normalizedName, {
-        name: normalizedName,
-      })
-    }
-  }
-
-  return [...dedupedTags.values()].sort((left, right) => left.name.localeCompare(right.name))
-}
 
 const resolveSearchTerm = (searchOverride: string | undefined, categorySearch: string, globalSearch: string) => {
   const candidates = [searchOverride, categorySearch, globalSearch]
@@ -125,11 +102,13 @@ const mergeStringArray = <T extends string>(
 }
 
 const mergeTags = (
-  globalTags: TagFilter[],
-  categoryTags: TagFilter[],
-): { tags: TagFilter[]; hasConflict: boolean } => {
-  const normalizedGlobalTags = normalizeTags(globalTags)
-  const normalizedCategoryTags = normalizeTags(categoryTags)
+  globalTags: string[],
+  categoryTags: string[],
+): { tags: string[]; hasConflict: boolean } => {
+  const normalizedGlobalTags = normalizeStringArray(globalTags.map((tag) => tag.trim()).filter((tag) => tag.length > 0))
+  const normalizedCategoryTags = normalizeStringArray(
+    categoryTags.map((tag) => tag.trim()).filter((tag) => tag.length > 0),
+  )
 
   if (normalizedGlobalTags.length === 0) {
     return {
@@ -145,20 +124,8 @@ const mergeTags = (
     }
   }
 
-  const categoryTagsByName = new Map(normalizedCategoryTags.map((tag) => [tag.name, tag]))
-  const intersection = normalizedGlobalTags.flatMap((tag) => {
-    const categoryTag = categoryTagsByName.get(tag.name)
-
-    if (!categoryTag) {
-      return []
-    }
-
-    return [
-      {
-        name: tag.name,
-      },
-    ]
-  })
+  const categoryTagSet = new Set(normalizedCategoryTags)
+  const intersection = normalizedGlobalTags.filter((tag) => categoryTagSet.has(tag))
 
   return {
     tags: intersection,

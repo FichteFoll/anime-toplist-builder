@@ -50,16 +50,12 @@ export interface NumericRange {
   maximum?: number
 }
 
-export interface TagFilter {
-  name: string
-}
-
 export interface FilterState {
   search: string
   yearRange?: NumericRange
   seasons: AnimeSeason[]
   countryOfOrigin: string[]
-  tags: TagFilter[]
+  tags: string[]
   genres: string[]
   formats: AnimeFormat[]
   popularity?: NumericRange

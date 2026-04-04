@@ -67,7 +67,7 @@ export const buildAniListMediaSearchVariables = ({
       search: mergedFilter.filter.search || undefined,
       season: pickSingleValue(mergedFilter.filter.seasons),
       countryOfOrigin: pickSingleValue(mergedFilter.filter.countryOfOrigin),
-      tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags.map((tag) => tag.name) : undefined,
+      tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags : undefined,
       minimumTagRank: mergedFilter.filter.minimumTagRank,
       genreIn: mergedFilter.filter.genres.length > 0 ? mergedFilter.filter.genres : undefined,
       formatIn: mergedFilter.filter.formats.length > 0 ? mergedFilter.filter.formats : undefined,

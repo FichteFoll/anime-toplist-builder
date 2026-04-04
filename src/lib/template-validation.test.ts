@@ -19,14 +19,7 @@ describe('template validation', () => {
       globalFilter: {
         search: '  mecha  ',
         genres: ['Drama', 'Action', 'Drama'],
-        tags: [
-          {
-            name: 'Cyberpunk',
-          },
-          {
-            name: 'Cyberpunk',
-          },
-        ],
+        tags: ['Cyberpunk', 'Cyberpunk'],
         minimumTagRank: 70,
       },
       categories: [
@@ -49,11 +42,7 @@ describe('template validation', () => {
         yearRange: undefined,
         seasons: [],
         countryOfOrigin: [],
-        tags: [
-          {
-            name: 'Cyberpunk',
-          },
-        ],
+        tags: ['Cyberpunk'],
         minimumTagRank: 70,
         genres: ['Action', 'Drama'],
         formats: [],
@@ -161,7 +150,7 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_exportcase01',
       name: 'Export me',
-        globalFilter: {
+      globalFilter: {
         search: '',
         yearRange: undefined,
         seasons: [],

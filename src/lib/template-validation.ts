@@ -12,7 +12,6 @@ import {
   type FilterSortField,
   type FilterState,
   type NumericRange,
-  type TagFilter,
   type Template,
   type TemplateExportPayloadV1,
   type TemplateImportCategoryPayloadV1,
@@ -146,7 +145,7 @@ const asOptionalRange = (value: unknown, path: string): NumericRange | undefined
   return { minimum, maximum }
 }
 
-const asTagFilters = (value: unknown, path: string): TagFilter[] => {
+const asTagFilters = (value: unknown, path: string): string[] => {
   if (value === undefined) {
     return []
   }
@@ -155,27 +154,9 @@ const asTagFilters = (value: unknown, path: string): TagFilter[] => {
     throw new TemplateValidationError(`Expected ${path} to be an array.`)
   }
 
-  const tags = value.map((entry, index) => {
-    if (!isRecord(entry)) {
-      throw new TemplateValidationError(`Expected ${path}[${index}] to be an object.`)
-    }
+  const tags = value.map((entry, index) => asTrimmedString(entry, `${path}[${index}]`))
 
-    return {
-      name: asTrimmedString(entry.name, `${path}[${index}].name`),
-    }
-  })
-
-  const dedupedTags = new Map<string, TagFilter>()
-
-  for (const tag of tags) {
-    const existingTag = dedupedTags.get(tag.name)
-
-    if (!existingTag) {
-      dedupedTags.set(tag.name, tag)
-    }
-  }
-
-  return [...dedupedTags.values()].sort((left, right) => left.name.localeCompare(right.name))
+  return sortStrings(uniqueStrings(tags))
 }
 
 const asOptionalSort = (

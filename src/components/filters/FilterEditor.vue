@@ -93,8 +93,8 @@ const formatsModel = computed({
   set: (value: string[]) => updateFilter({ formats: value as AnimeFormat[] }),
 })
 const tagNamesModel = computed({
-  get: () => model.value.tags.map((tag) => tag.name),
-  set: (value: string[]) => updateFilter({ tags: value.map((name) => ({ name })) }),
+  get: () => model.value.tags,
+  set: (value: string[]) => updateFilter({ tags: value }),
 })
 const sortModel = computed<FilterSort | undefined>({
   get: () => model.value.sort,

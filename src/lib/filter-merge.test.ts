@@ -38,7 +38,7 @@ describe('mergeFilterStates', () => {
       popularity: {
         minimum: 100,
       },
-      tags: [{ name: 'Cyberpunk' }],
+      tags: ['Cyberpunk'],
       minimumTagRank: 20,
     }
 
@@ -52,7 +52,7 @@ describe('mergeFilterStates', () => {
       popularity: {
         maximum: 500,
       },
-      tags: [{ name: 'Cyberpunk' }],
+      tags: ['Cyberpunk'],
       minimumTagRank: 50,
     }
 
@@ -69,11 +69,7 @@ describe('mergeFilterStates', () => {
       minimum: 100,
       maximum: 500,
     })
-    expect(result.filter.tags).toEqual([
-      {
-        name: 'Cyberpunk',
-      },
-    ])
+    expect(result.filter.tags).toEqual(['Cyberpunk'])
     expect(result.filter.minimumTagRank).toBe(50)
   })
 
@@ -136,28 +132,14 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       search: '  global  ',
-      tags: [
-        {
-          name: ' Time Travel ',
-        },
-        {
-          name: 'Time Travel',
-        },
-      ],
+      tags: [' Time Travel ', 'Time Travel'],
       minimumTagRank: 35,
     }
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
       search: '  ',
-      tags: [
-        {
-          name: 'Time Travel',
-        },
-        {
-          name: 'Iyashikei',
-        },
-      ],
+      tags: ['Time Travel', 'Iyashikei'],
       minimumTagRank: 10,
     }
 
@@ -165,11 +147,7 @@ describe('mergeFilterStates', () => {
 
     expect(result.hasConflicts).toBe(false)
     expect(result.filter.search).toBe('global')
-    expect(result.filter.tags).toEqual([
-      {
-        name: 'Time Travel',
-      },
-    ])
+    expect(result.filter.tags).toEqual(['Time Travel'])
     expect(result.filter.minimumTagRank).toBe(35)
   })
 })
