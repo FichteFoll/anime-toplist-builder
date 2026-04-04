@@ -1,0 +1,192 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+import CategoryEditPopover from '@/components/categories/CategoryEditPopover.vue'
+import CategoryMediaPickerPopover from '@/components/categories/CategoryMediaPickerPopover.vue'
+import { countConfiguredFilterFields } from '@/lib/filter-editor'
+import { resolveAnimeTitle } from '@/lib/anime-title'
+import type {
+  AniListMetadata,
+  AnimeSelection,
+  AnimeTitleLanguage,
+  Category,
+  FilterState,
+} from '@/types'
+
+const props = defineProps<{
+  category: Category
+  selection: AnimeSelection | null
+  globalFilter: FilterState
+  metadata: AniListMetadata | null
+  metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
+  metadataError?: string | null
+  canReorder: boolean
+  titleLanguage: AnimeTitleLanguage
+}>()
+
+const emit = defineEmits<{
+  save: [value: { name: string, filter: FilterState }]
+  delete: [categoryId: string]
+  selectAnime: [selection: AnimeSelection]
+  clearSelection: [categoryId: string]
+}>()
+
+const categoryFilterCount = computed(() => countConfiguredFilterFields(props.category.filter))
+const selectionTitle = computed(() =>
+  props.selection ? resolveAnimeTitle(props.selection.title, props.titleLanguage) : null,
+)
+</script>
+
+<template>
+  <article
+    class="group flex h-full flex-col rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
+    :data-category-id="category.id"
+  >
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+          Category
+        </p>
+        <h3 class="mt-2 break-words text-xl font-semibold tracking-tight text-app-text">
+          {{ category.name }}
+        </h3>
+      </div>
+
+      <button
+        type="button"
+        class="category-drag-handle inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-border/80 bg-app-bg/70 text-app-muted transition hover:border-app-accent/50 hover:text-app-text disabled:cursor-default disabled:opacity-50"
+        :disabled="!canReorder"
+        :title="canReorder ? 'Drag to reorder categories' : 'Add more categories to enable reordering'"
+        :aria-label="canReorder ? 'Drag to reorder categories' : 'Reordering unavailable'"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-4 w-4"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <circle
+            cx="8"
+            cy="6.5"
+            r="1.5"
+          />
+          <circle
+            cx="16"
+            cy="6.5"
+            r="1.5"
+          />
+          <circle
+            cx="8"
+            cy="12"
+            r="1.5"
+          />
+          <circle
+            cx="16"
+            cy="12"
+            r="1.5"
+          />
+          <circle
+            cx="8"
+            cy="17.5"
+            r="1.5"
+          />
+          <circle
+            cx="16"
+            cy="17.5"
+            r="1.5"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+      <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
+        {{ categoryFilterCount }} custom rule{{ categoryFilterCount === 1 ? '' : 's' }}
+      </span>
+      <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
+        {{ selection ? 'Selection saved' : 'No selection yet' }}
+      </span>
+    </div>
+
+    <div class="mt-5 flex-1 rounded-[1.5rem] border border-dashed border-app-border/70 bg-app-bg/50 p-4">
+      <div
+        v-if="selection"
+        class="flex gap-4"
+      >
+        <img
+          :src="selection.coverImage.large"
+          :alt="selectionTitle ?? 'Selected anime cover'"
+          class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
+        >
+        <div class="min-w-0 space-y-2">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
+            Current selection
+          </p>
+          <p class="break-words text-base font-semibold text-app-text">
+            {{ selectionTitle }}
+          </p>
+          <p class="text-sm text-app-muted">
+            {{ selection.seasonYear ?? 'Unknown year' }}
+            <span v-if="selection.format"> · {{ selection.format }}</span>
+          </p>
+          <p class="text-sm leading-6 text-app-muted">
+            This selection stays keyed to the stable category id when you rename or reorder the card.
+          </p>
+        </div>
+      </div>
+
+      <div
+        v-else
+        class="space-y-4"
+      >
+        <div class="grid grid-cols-[4rem_1fr] gap-4">
+          <div class="h-24 rounded-xl bg-app-elevated/70" />
+          <div class="space-y-3 pt-1">
+            <div class="h-4 w-3/4 rounded-full bg-app-elevated/70" />
+            <div class="h-4 w-1/2 rounded-full bg-app-elevated/50" />
+            <div class="h-4 w-5/6 rounded-full bg-app-elevated/50" />
+          </div>
+        </div>
+        <p class="text-sm leading-6 text-app-muted">
+          Search AniList with the merged template and category filters,
+          then save one anime to this stable category slot.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+      <CategoryMediaPickerPopover
+        :category="category"
+        :global-filter="globalFilter"
+        :selected-media-id="selection?.mediaId ?? null"
+        :title-language="titleLanguage"
+        @select="emit('selectAnime', $event)"
+      />
+      <button
+        type="button"
+        class="shell-button"
+        :disabled="!selection"
+        :aria-label="`Clear selected anime for ${category.name}`"
+        @click="emit('clearSelection', category.id)"
+      >
+        Clear anime
+      </button>
+      <CategoryEditPopover
+        :category="category"
+        :global-filter="globalFilter"
+        :metadata="metadata"
+        :metadata-status="metadataStatus"
+        :metadata-error="metadataError"
+        @save="emit('save', $event)"
+      />
+      <button
+        type="button"
+        class="shell-button"
+        :aria-label="`Delete category ${category.name}`"
+        @click="emit('delete', category.id)"
+      >
+        Delete
+      </button>
+    </div>
+  </article>
+</template>

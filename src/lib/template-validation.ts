@@ -1,0 +1,391 @@
+import {
+  animeFormats,
+  animeSeasons,
+  animeSources,
+  filterSortDirections,
+  filterSortFields,
+  templateSchemaVersion,
+  type AnimeFormat,
+  type AnimeSeason,
+  type AnimeSource,
+  type FilterSortDirection,
+  type FilterSortField,
+  type FilterState,
+  type NumericRange,
+  type TagFilter,
+  type Template,
+  type TemplateExportPayloadV1,
+  type TemplateImportCategoryPayloadV1,
+  type TemplateImportPayloadV1,
+  type TemplateOrigin,
+  type TemplateVersion,
+} from '@/types'
+import {
+  createCategoryId,
+  createTemplateId,
+  isCategoryId,
+  isTemplateId,
+} from '@/lib/ids'
+import { createEmptyFilterState } from '@/lib/filter-state'
+
+type JsonRecord = Record<string, unknown>
+
+const hasOwn = (value: JsonRecord, key: string) => Object.hasOwn(value, key)
+
+const isRecord = (value: unknown): value is JsonRecord =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const sortStrings = (values: string[]) => [...values].sort((left, right) => left.localeCompare(right))
+
+const uniqueStrings = (values: string[]) => Array.from(new Set(values))
+
+const asTrimmedString = (value: unknown, path: string) => {
+  if (typeof value !== 'string') {
+    throw new TemplateValidationError(`Expected ${path} to be a string.`)
+  }
+
+  const normalizedValue = value.trim()
+
+  if (normalizedValue.length === 0) {
+    throw new TemplateValidationError(`Expected ${path} to be a non-empty string.`)
+  }
+
+  return normalizedValue
+}
+
+const asTrimmedSearchString = (value: unknown, path: string) => {
+  if (typeof value !== 'string') {
+    throw new TemplateValidationError(`Expected ${path} to be a string.`)
+  }
+
+  return value.trim()
+}
+
+const asOptionalStringArray = (value: unknown, path: string) => {
+  if (value === undefined) {
+    return []
+  }
+
+  if (!Array.isArray(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an array.`)
+  }
+
+  const items = value.map((item, index) => asTrimmedString(item, `${path}[${index}]`))
+
+  return sortStrings(uniqueStrings(items))
+}
+
+const asEnumArray = <T extends string>(
+  value: unknown,
+  path: string,
+  allowedValues: readonly T[],
+) => {
+  const items = asOptionalStringArray(value, path)
+
+  for (const item of items) {
+    if (!allowedValues.includes(item as T)) {
+      throw new TemplateValidationError(
+        `Expected ${path} to contain only supported values. Invalid value: ${item}.`,
+      )
+    }
+  }
+
+  return items as T[]
+}
+
+const asOptionalInteger = (
+  value: unknown,
+  path: string,
+  {
+    minimum,
+    maximum,
+  }: {
+    minimum?: number
+    maximum?: number
+  } = {},
+): number | undefined => {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (typeof value !== 'number' || !Number.isInteger(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an integer.`)
+  }
+
+  if (minimum !== undefined && value < minimum) {
+    throw new TemplateValidationError(`Expected ${path} to be at least ${minimum}.`)
+  }
+
+  if (maximum !== undefined && value > maximum) {
+    throw new TemplateValidationError(`Expected ${path} to be at most ${maximum}.`)
+  }
+
+  return value
+}
+
+const asOptionalRange = (value: unknown, path: string): NumericRange | undefined => {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  const minimum = asOptionalInteger(value.minimum, `${path}.minimum`, { minimum: 0 })
+  const maximum = asOptionalInteger(value.maximum, `${path}.maximum`, { minimum: 0 })
+
+  if (minimum === undefined && maximum === undefined) {
+    return undefined
+  }
+
+  if (minimum !== undefined && maximum !== undefined && minimum > maximum) {
+    throw new TemplateValidationError(`Expected ${path}.minimum to be less than or equal to ${path}.maximum.`)
+  }
+
+  return { minimum, maximum }
+}
+
+const asTagFilters = (value: unknown, path: string): TagFilter[] => {
+  if (value === undefined) {
+    return []
+  }
+
+  if (!Array.isArray(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an array.`)
+  }
+
+  const tags = value.map((entry, index) => {
+    if (!isRecord(entry)) {
+      throw new TemplateValidationError(`Expected ${path}[${index}] to be an object.`)
+    }
+
+    return {
+      name: asTrimmedString(entry.name, `${path}[${index}].name`),
+      minimumRank: asOptionalInteger(entry.minimumRank, `${path}[${index}].minimumRank`, {
+        minimum: 0,
+        maximum: 100,
+      }),
+    }
+  })
+
+  const dedupedTags = new Map<string, TagFilter>()
+
+  for (const tag of tags) {
+    const existingTag = dedupedTags.get(tag.name)
+
+    if (!existingTag || (tag.minimumRank ?? -1) > (existingTag.minimumRank ?? -1)) {
+      dedupedTags.set(tag.name, tag)
+    }
+  }
+
+  return [...dedupedTags.values()].sort((left, right) => left.name.localeCompare(right.name))
+}
+
+const asOptionalSort = (
+  value: unknown,
+  path: string,
+):
+  | {
+      field: FilterSortField
+      direction: FilterSortDirection
+    }
+  | undefined => {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  const field = asTrimmedString(value.field, `${path}.field`)
+  const direction = asTrimmedString(value.direction, `${path}.direction`)
+
+  if (!filterSortFields.includes(field as FilterSortField)) {
+    throw new TemplateValidationError(`Unsupported sort field at ${path}.field: ${field}.`)
+  }
+
+  if (!filterSortDirections.includes(direction as FilterSortDirection)) {
+    throw new TemplateValidationError(
+      `Unsupported sort direction at ${path}.direction: ${direction}.`,
+    )
+  }
+
+  return {
+    field: field as FilterSortField,
+    direction: direction as FilterSortDirection,
+  }
+}
+
+const parseFilterState = (value: unknown, path: string): FilterState => {
+  if (value === undefined) {
+    return createEmptyFilterState()
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  const filterState: FilterState = {
+    search: hasOwn(value, 'search') ? asTrimmedSearchString(value.search, `${path}.search`) : '',
+    yearRange: asOptionalRange(value.yearRange, `${path}.yearRange`),
+    seasons: asEnumArray<AnimeSeason>(value.seasons, `${path}.seasons`, animeSeasons),
+    countryOfOrigin: asOptionalStringArray(value.countryOfOrigin, `${path}.countryOfOrigin`),
+    tags: asTagFilters(value.tags, `${path}.tags`),
+    genres: asOptionalStringArray(value.genres, `${path}.genres`),
+    formats: asEnumArray<AnimeFormat>(value.formats, `${path}.formats`, animeFormats),
+    popularity: asOptionalRange(value.popularity, `${path}.popularity`),
+    source: asEnumArray<AnimeSource>(value.source, `${path}.source`, animeSources),
+    sort: asOptionalSort(value.sort, `${path}.sort`),
+  }
+
+  if (filterState.search.length === 0) {
+    filterState.search = ''
+  }
+
+  return filterState
+}
+
+const parseCategoryPayload = (
+  value: unknown,
+  path: string,
+): TemplateImportCategoryPayloadV1 => {
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  const categoryId = value.id === undefined ? undefined : asTrimmedString(value.id, `${path}.id`)
+
+  if (categoryId !== undefined && !isCategoryId(categoryId)) {
+    throw new TemplateValidationError(`Unsupported category id at ${path}.id: ${categoryId}.`)
+  }
+
+  return {
+    id: categoryId,
+    name: asTrimmedString(value.name, `${path}.name`),
+    filter: parseFilterState(value.filter, `${path}.filter`),
+  }
+}
+
+export class TemplateValidationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'TemplateValidationError'
+  }
+}
+
+export const isSupportedTemplateVersion = (value: unknown): value is TemplateVersion =>
+  value === templateSchemaVersion
+
+export function assertSupportedTemplateVersion(
+  value: unknown,
+  path = 'version',
+): asserts value is TemplateVersion {
+  if (!isSupportedTemplateVersion(value)) {
+    throw new TemplateValidationError(
+      `Unsupported template ${path}: ${String(value)}. Supported version: ${templateSchemaVersion}.`,
+    )
+  }
+}
+
+export const parseTemplateImportPayload = (value: unknown): TemplateImportPayloadV1 => {
+  if (!isRecord(value)) {
+    throw new TemplateValidationError('Expected template payload to be an object.')
+  }
+
+  assertSupportedTemplateVersion(value.version)
+
+  const templateId = value.id === undefined ? undefined : asTrimmedString(value.id, 'id')
+
+  if (templateId !== undefined && !isTemplateId(templateId)) {
+    throw new TemplateValidationError(`Unsupported template id: ${templateId}.`)
+  }
+
+  if (!Array.isArray(value.categories)) {
+    throw new TemplateValidationError('Expected categories to be an array.')
+  }
+
+  const categories = value.categories.map((category, index) =>
+    parseCategoryPayload(category, `categories[${index}]`),
+  )
+
+  const seenCategoryIds = new Set<string>()
+
+  for (const category of categories) {
+    if (!category.id) {
+      continue
+    }
+
+    if (seenCategoryIds.has(category.id)) {
+      throw new TemplateValidationError(`Duplicate category id detected: ${category.id}.`)
+    }
+
+    seenCategoryIds.add(category.id)
+  }
+
+  return {
+    version: value.version,
+    id: templateId,
+    name: asTrimmedString(value.name, 'name'),
+    categories,
+    globalFilter: parseFilterState(value.globalFilter, 'globalFilter'),
+  }
+}
+
+export const parseTemplateImportJson = (json: string): TemplateImportPayloadV1 => {
+  let parsedJson: unknown
+
+  try {
+    parsedJson = JSON.parse(json) as unknown
+  } catch {
+    throw new TemplateValidationError('Template import is not valid JSON.')
+  }
+
+  return parseTemplateImportPayload(parsedJson)
+}
+
+export const normalizeImportedTemplate = (
+  payload: TemplateImportPayloadV1,
+  origin: TemplateOrigin,
+): Template => ({
+  id: payload.id ?? createTemplateId(),
+  name: payload.name,
+  categories: payload.categories.map((category) => ({
+    id: category.id ?? createCategoryId(),
+    name: category.name,
+    filter: parseFilterState(category.filter, `categories.${category.name}.filter`),
+  })),
+  globalFilter: parseFilterState(payload.globalFilter, 'globalFilter'),
+  origin,
+  version: templateSchemaVersion,
+})
+
+export const createTemplateExportPayload = (template: Template): TemplateExportPayloadV1 => {
+  if (!isTemplateId(template.id)) {
+    throw new TemplateValidationError(`Unsupported template id: ${template.id}.`)
+  }
+
+  const categories = template.categories.map((category, index) => {
+    if (!isCategoryId(category.id)) {
+      throw new TemplateValidationError(`Unsupported category id at categories[${index}].id: ${category.id}.`)
+    }
+
+    return {
+      id: category.id,
+      name: asTrimmedString(category.name, `categories[${index}].name`),
+      filter: parseFilterState(category.filter, `categories[${index}].filter`),
+    }
+  })
+
+  return {
+    version: templateSchemaVersion,
+    id: template.id,
+    name: asTrimmedString(template.name, 'name'),
+    categories,
+    globalFilter: parseFilterState(template.globalFilter, 'globalFilter'),
+  }
+}
+
+export const stringifyTemplateExportPayload = (template: Template) =>
+  JSON.stringify(createTemplateExportPayload(template), null, 2)

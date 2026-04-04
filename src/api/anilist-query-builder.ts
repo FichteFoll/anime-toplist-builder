@@ -1,0 +1,107 @@
+import { mergeFilterStates } from '@/lib/filter-merge'
+import type { FilterSort, FilterState } from '@/types'
+
+import type { AniListMediaSearchVariables, AniListMediaSort } from './anilist-types'
+
+export interface BuildAniListMediaSearchVariablesOptions {
+  globalFilter: FilterState
+  categoryFilter: FilterState
+  search?: string
+  page: number
+  perPage: number
+}
+
+export interface BuildAniListMediaSearchVariablesResult {
+  variables: AniListMediaSearchVariables
+  hasConflicts: boolean
+}
+
+const toInclusiveLowerBound = (value: number) => value - 1
+
+const toExclusiveUpperBound = (value: number) => value + 1
+
+const toAniListYearFloor = (year: number) => year * 10000
+
+const toAniListYearCeiling = (year: number) => (year + 1) * 10000
+
+const withValue = <T>(value: T | undefined) => (value === undefined ? undefined : value)
+
+export const buildAniListMediaSort = (sort: FilterSort | undefined): AniListMediaSort[] | undefined => {
+  if (!sort) {
+    return undefined
+  }
+
+  const directionSuffix = sort.direction === 'desc' ? '_DESC' : ''
+
+  switch (sort.field) {
+    case 'POPULARITY':
+      return [`POPULARITY${directionSuffix}` as AniListMediaSort]
+    case 'SCORE':
+      return [`SCORE${directionSuffix}` as AniListMediaSort]
+    case 'TRENDING':
+      return [`TRENDING${directionSuffix}` as AniListMediaSort]
+    case 'START_DATE':
+      return [`START_DATE${directionSuffix}` as AniListMediaSort]
+    case 'UPDATED_AT':
+      return [`UPDATED_AT${directionSuffix}` as AniListMediaSort]
+    case 'TITLE':
+      return [sort.direction === 'desc' ? 'TITLE_ROMAJI_DESC' : 'TITLE_ROMAJI']
+  }
+}
+
+export const buildAniListMediaSearchVariables = ({
+  globalFilter,
+  categoryFilter,
+  search,
+  page,
+  perPage,
+}: BuildAniListMediaSearchVariablesOptions): BuildAniListMediaSearchVariablesResult => {
+  const mergedFilter = mergeFilterStates(globalFilter, categoryFilter, search)
+  const highestTagRank = mergedFilter.filter.tags.reduce<number | undefined>((currentRank, tag) => {
+    if (tag.minimumRank === undefined) {
+      return currentRank
+    }
+
+    return Math.max(currentRank ?? 0, tag.minimumRank)
+  }, undefined)
+
+  return {
+    variables: {
+      page,
+      perPage,
+      search: mergedFilter.filter.search || undefined,
+      seasonIn: mergedFilter.filter.seasons.length > 0 ? mergedFilter.filter.seasons : undefined,
+      countryOfOriginIn:
+        mergedFilter.filter.countryOfOrigin.length > 0
+          ? mergedFilter.filter.countryOfOrigin
+          : undefined,
+      tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags.map((tag) => tag.name) : undefined,
+      tagRank: highestTagRank,
+      genreIn: mergedFilter.filter.genres.length > 0 ? mergedFilter.filter.genres : undefined,
+      formatIn: mergedFilter.filter.formats.length > 0 ? mergedFilter.filter.formats : undefined,
+      sourceIn: mergedFilter.filter.source.length > 0 ? mergedFilter.filter.source : undefined,
+      startDateGreater: withValue(
+        mergedFilter.filter.yearRange?.minimum === undefined
+          ? undefined
+          : toAniListYearFloor(mergedFilter.filter.yearRange.minimum),
+      ),
+      startDateLesser: withValue(
+        mergedFilter.filter.yearRange?.maximum === undefined
+          ? undefined
+          : toAniListYearCeiling(mergedFilter.filter.yearRange.maximum),
+      ),
+      popularityGreater: withValue(
+        mergedFilter.filter.popularity?.minimum === undefined
+          ? undefined
+          : toInclusiveLowerBound(mergedFilter.filter.popularity.minimum),
+      ),
+      popularityLesser: withValue(
+        mergedFilter.filter.popularity?.maximum === undefined
+          ? undefined
+          : toExclusiveUpperBound(mergedFilter.filter.popularity.maximum),
+      ),
+      sort: buildAniListMediaSort(mergedFilter.filter.sort),
+    },
+    hasConflicts: mergedFilter.hasConflicts,
+  }
+}

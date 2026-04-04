@@ -1,0 +1,100 @@
+import type { AnimeFormat, AnimeSeason, AnimeSource } from '@/types'
+
+export interface GraphQlErrorResponse {
+  message: string
+}
+
+export interface GraphQlResponse<TData> {
+  data?: TData
+  errors?: GraphQlErrorResponse[]
+}
+
+export type AniListMediaSort =
+  | 'POPULARITY'
+  | 'POPULARITY_DESC'
+  | 'SCORE'
+  | 'SCORE_DESC'
+  | 'TRENDING'
+  | 'TRENDING_DESC'
+  | 'START_DATE'
+  | 'START_DATE_DESC'
+  | 'UPDATED_AT'
+  | 'UPDATED_AT_DESC'
+  | 'TITLE_ROMAJI'
+  | 'TITLE_ROMAJI_DESC'
+
+export interface AniListMediaSearchVariables {
+  page: number
+  perPage: number
+  search?: string
+  seasonIn?: AnimeSeason[]
+  countryOfOriginIn?: string[]
+  tagIn?: string[]
+  tagRank?: number
+  genreIn?: string[]
+  formatIn?: AnimeFormat[]
+  sourceIn?: AnimeSource[]
+  startDateGreater?: number
+  startDateLesser?: number
+  popularityGreater?: number
+  popularityLesser?: number
+  sort?: AniListMediaSort[]
+}
+
+interface AniListPageInfoResponse {
+  currentPage: number
+  hasNextPage: boolean
+  lastPage?: number | null
+  perPage: number
+  total?: number | null
+}
+
+interface AniListTitleResponse {
+  userPreferred: string
+  romaji?: string | null
+  english?: string | null
+  native?: string | null
+}
+
+interface AniListCoverImageResponse {
+  large?: string | null
+  medium?: string | null
+  extraLarge?: string | null
+  color?: string | null
+}
+
+interface AniListTagResponse {
+  id: number
+  name: string
+  description?: string | null
+  rank?: number | null
+  isAdult?: boolean | null
+}
+
+export interface AniListMediaResponse {
+  id: number
+  title: AniListTitleResponse
+  coverImage: AniListCoverImageResponse
+  description?: string | null
+  season?: AnimeSeason | null
+  seasonYear?: number | null
+  format?: AnimeFormat | null
+  source?: AnimeSource | null
+  genres?: string[] | null
+  tags?: AniListTagResponse[] | null
+  popularity?: number | null
+  averageScore?: number | null
+  countryOfOrigin?: string | null
+}
+
+export interface AniListMediaSearchData {
+  Page: {
+    pageInfo: AniListPageInfoResponse
+    media: AniListMediaResponse[]
+  }
+}
+
+export interface AniListMetadataData {
+  GenreCollection?: string[] | null
+  MediaTagCollection?: AniListTagResponse[] | null
+}

@@ -1,0 +1,90 @@
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it } from 'vitest'
+
+import { useSelectionsStore } from '@/stores/selections'
+import { useSettingsStore } from '@/stores/settings'
+import { useTemplateStore } from '@/stores/templates'
+import { predefinedTemplates } from '@/templates/predefined'
+import { templateSchemaVersion, type AnimeSelection } from '@/types'
+
+const createSelection = (): AnimeSelection => ({
+  mediaId: 5114,
+  title: {
+    userPreferred: 'Fullmetal Alchemist: Brotherhood',
+    romaji: 'Fullmetal Alchemist: Brotherhood',
+    english: 'Fullmetal Alchemist: Brotherhood',
+    native: null,
+  },
+  coverImage: {
+    large: 'https://img.example/fmab-large.jpg',
+    medium: null,
+    extraLarge: null,
+    color: '#1f2937',
+  },
+  season: 'SPRING',
+  seasonYear: 2009,
+  format: 'TV',
+})
+
+describe('template store fork-on-edit behavior', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('forks protected templates before updating them and duplicates selections', () => {
+    const settingsStore = useSettingsStore()
+    const selectionsStore = useSelectionsStore()
+    const templateStore = useTemplateStore()
+
+    settingsStore.initialize()
+    selectionsStore.initialize()
+    templateStore.initialize()
+    templateStore.registerTemplates(predefinedTemplates)
+
+    const sourceTemplate = templateStore.predefinedTemplates[0]
+
+    expect(sourceTemplate).toBeDefined()
+    expect(templateStore.setActiveTemplate(sourceTemplate.id)).toBe(true)
+
+    const sourceCategoryId = sourceTemplate.categories[0]?.id
+    const selection = createSelection()
+
+    expect(sourceCategoryId).toBeDefined()
+    selectionsStore.setCategorySelection(sourceTemplate.id, sourceCategoryId!, selection)
+
+    const updatedTemplate = templateStore.updateActiveTemplate((template) => {
+      template.name = 'Forked Predefined Copy'
+      template.categories[0]!.name = 'Updated Category'
+    })
+
+    expect(updatedTemplate).not.toBeNull()
+    expect(updatedTemplate?.id).not.toBe(sourceTemplate.id)
+    expect(updatedTemplate?.origin).toBe('user')
+    expect(updatedTemplate?.version).toBe(templateSchemaVersion)
+    expect(updatedTemplate?.name).toBe('Forked Predefined Copy')
+    expect(templateStore.activeTemplateId).toBe(updatedTemplate?.id)
+    expect(selectionsStore.getCategorySelection(updatedTemplate!.id, sourceCategoryId!)).toEqual(selection)
+    expect(selectionsStore.getCategorySelection(sourceTemplate.id, sourceCategoryId!)).toEqual(selection)
+    expect(templateStore.templates.find((template) => template.id === sourceTemplate.id)?.name).toBe(
+      sourceTemplate.name,
+    )
+  })
+
+  it('updates user-owned templates in place', () => {
+    const templateStore = useTemplateStore()
+    const settingsStore = useSettingsStore()
+
+    settingsStore.initialize()
+    templateStore.initialize()
+
+    const createdTemplate = templateStore.createTemplate('Editable Template')
+    const updatedTemplate = templateStore.updateActiveTemplate((template) => {
+      template.name = 'Edited In Place'
+    })
+
+    expect(updatedTemplate?.id).toBe(createdTemplate.id)
+    expect(updatedTemplate?.origin).toBe('user')
+    expect(templateStore.activeTemplate?.id).toBe(createdTemplate.id)
+    expect(templateStore.activeTemplate?.name).toBe('Edited In Place')
+  })
+})
