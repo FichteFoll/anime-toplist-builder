@@ -13,6 +13,7 @@ import { computed, ref, watch } from 'vue'
 
 import { normalizeAniListError, searchAnimeMedia } from '@/api'
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
+import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import {
   filterSortFields,
@@ -379,7 +380,11 @@ watch(pickerSort, (value, previousValue) => {
                         </p>
 
                         <p class="line-clamp-3 text-sm leading-6 text-app-muted">
-                          {{ result.description || 'No synopsis available from AniList.' }}
+                          <span
+                            v-if="result.description"
+                            v-html="sanitizeAnimeDescriptionHtml(result.description)"
+                          />
+                          <span v-else>No synopsis available from AniList.</span>
                         </p>
                       </div>
                     </div>
