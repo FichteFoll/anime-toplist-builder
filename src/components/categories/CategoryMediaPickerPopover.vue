@@ -59,6 +59,17 @@ const sortFieldOptions = filterSortFields.map((field) => ({
 }))
 
 const currentCategorySort = computed(() => props.category.filter.sort)
+const templateSortFieldLabel = computed(() => {
+  const templateSort = props.globalFilter.sort
+
+  if (!templateSort) {
+    return 'AniList default order'
+  }
+
+  return templateSort.field.toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+})
+
+const sortFieldPlaceholderLabel = computed(() => `Template: ${templateSortFieldLabel.value}`)
 const pickerSort = computed<FilterSort | undefined>(() => {
   if (!localSortField.value) {
     return undefined
@@ -68,18 +79,6 @@ const pickerSort = computed<FilterSort | undefined>(() => {
     field: localSortField.value,
     direction: localSortDirection.value,
   }
-})
-
-const effectiveSortLabel = computed(() => {
-  const effectiveSort = pickerSort.value ?? props.category.filter.sort ?? props.globalFilter.sort
-
-  if (!effectiveSort) {
-    return 'AniList default order'
-  }
-
-  const fieldLabel = effectiveSort.field.toLowerCase().replaceAll('_', ' ')
-
-  return `${fieldLabel} ${effectiveSort.direction === 'asc' ? 'ascending' : 'descending'}`
 })
 
 const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
@@ -220,10 +219,6 @@ watch(pickerSort, (value, previousValue) => {
             </DialogDescription>
           </div>
 
-          <div class="rounded-[1.25rem] bg-app-bg/60 px-4 py-3 text-sm text-app-muted">
-            Effective sort: {{ effectiveSortLabel }}
-          </div>
-
           <DialogClose as-child>
             <button
               type="button"
@@ -260,7 +255,7 @@ watch(pickerSort, (value, previousValue) => {
                 :aria-label="`Sort search results for ${category.name}`"
               >
                 <option value="">
-                  Use current filter sort
+                  {{ sortFieldPlaceholderLabel }}
                 </option>
                 <option
                   v-for="option in sortFieldOptions"
@@ -360,43 +355,54 @@ watch(pickerSort, (value, previousValue) => {
                 <article
                   v-for="result in searchResponse?.results ?? []"
                   :key="result.id"
-                  class="flex h-full flex-col rounded-[1.25rem] border border-app-border/70 bg-app-surface/85 p-3"
+                  class="flex h-full flex-col rounded-[1.25rem] border bg-app-surface/85 p-3"
+                  :class="result.id === selectedMediaId ? 'border-app-accent/80' : 'border-app-border/70'"
                 >
-                  <div class="grid grid-cols-[5rem_1fr] gap-4">
-                    <img
-                      :src="result.coverImage.large"
-                      :alt="resolveAnimeTitle(result.title, titleLanguage)"
-                      class="h-28 w-20 rounded-xl border border-app-border/70 object-cover"
-                    >
+                  <div class="flex flex-1 flex-col gap-4">
+                    <div class="grid grid-cols-[5rem_1fr] gap-4">
+                      <img
+                        :src="result.coverImage.large"
+                        :alt="resolveAnimeTitle(result.title, titleLanguage)"
+                        class="h-28 w-20 rounded-xl border border-app-border/70 object-cover"
+                      >
 
-                    <div class="min-w-0 space-y-2">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <p class="min-w-0 flex-1 break-words text-base font-semibold text-app-text">
-                          {{ resolveAnimeTitle(result.title, titleLanguage) }}
+                      <div class="min-w-0 space-y-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <p class="min-w-0 flex-1 break-words text-base font-semibold text-app-text">
+                            {{ resolveAnimeTitle(result.title, titleLanguage) }}
+                          </p>
+                        </div>
+
+                        <p class="text-sm text-app-muted">
+                          {{ result.seasonYear ?? 'Unknown year' }}
+                          <span v-if="result.format"> · {{ result.format }}</span>
                         </p>
-                        <span
-                          v-if="result.id === selectedMediaId"
-                          class="rounded-full bg-app-accentSoft px-2 py-1 text-xs font-medium text-app-text"
-                        >
-                          Selected
-                        </span>
+
+                        <p class="line-clamp-3 text-sm leading-6 text-app-muted">
+                          {{ result.description || 'No synopsis available from AniList.' }}
+                        </p>
                       </div>
-
-                      <p class="text-sm text-app-muted">
-                        {{ result.seasonYear ?? 'Unknown year' }}
-                        <span v-if="result.format"> · {{ result.format }}</span>
-                      </p>
-
-                      <p class="line-clamp-3 text-sm leading-6 text-app-muted">
-                        {{ result.description || 'No synopsis available from AniList.' }}
-                      </p>
                     </div>
                   </div>
 
-                  <div class="mt-4 flex items-center justify-between gap-3">
-                    <div class="text-xs uppercase tracking-[0.2em] text-app-muted">
-                      #{{ result.id }}
-                    </div>
+                  <div class="mt-auto flex items-center justify-between gap-3 pt-4">
+                    <a
+                      :href="result.siteUrl"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      class="inline-flex items-center gap-1 text-xs font-medium text-app-muted transition hover:text-app-text"
+                    >
+                      AniList
+                      <svg
+                        viewBox="0 0 24 24"
+                        class="h-3.5 w-3.5"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M14 3h7v7h-2V6.41l-8.29 8.3-1.42-1.42 8.3-8.29H14V3Z" />
+                        <path d="M5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+                      </svg>
+                    </a>
                     <button
                       type="button"
                       class="shell-button"

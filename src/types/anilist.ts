@@ -38,6 +38,7 @@ export interface AniListSearchResult {
   popularity?: number | null
   averageScore?: number | null
   countryOfOrigin?: string | null
+  siteUrl: string
 }
 
 export interface AniListPageInfo {

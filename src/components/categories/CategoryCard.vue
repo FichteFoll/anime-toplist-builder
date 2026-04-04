@@ -39,7 +39,8 @@ const selectionTitle = computed(() =>
 
 <template>
   <article
-    class="group flex h-full flex-col rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
+    class="group flex h-full flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
+    :class="selection ? 'border-app-accent/70' : 'border-app-border/70'"
     :data-category-id="category.id"
   >
     <div class="flex items-start justify-between gap-3">
@@ -102,9 +103,6 @@ const selectionTitle = computed(() =>
     <div class="mt-4 flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
       <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
         {{ categoryFilterCount }} custom rule{{ categoryFilterCount === 1 ? '' : 's' }}
-      </span>
-      <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
-        {{ selection ? 'Selected' : 'No selection yet' }}
       </span>
     </div>
 

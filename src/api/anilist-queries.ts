@@ -70,6 +70,7 @@ export const searchAnimeMediaQuery = `
         popularity
         averageScore
         countryOfOrigin
+        siteUrl
       }
     }
   }

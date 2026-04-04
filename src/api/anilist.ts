@@ -44,6 +44,7 @@ const mapAniListSearchResult = (media: AniListMediaResponse): AniListSearchResul
   popularity: media.popularity ?? null,
   averageScore: media.averageScore ?? null,
   countryOfOrigin: media.countryOfOrigin ?? null,
+  siteUrl: media.siteUrl ?? `https://anilist.co/anime/${media.id}`,
 })
 
 const createEmptySearchResponse = (page: number, perPage: number): AniListSearchResponse => ({

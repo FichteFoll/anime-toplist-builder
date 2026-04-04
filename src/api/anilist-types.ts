@@ -85,6 +85,7 @@ export interface AniListMediaResponse {
   popularity?: number | null
   averageScore?: number | null
   countryOfOrigin?: string | null
+  siteUrl?: string | null
 }
 
 export interface AniListMediaSearchData {
