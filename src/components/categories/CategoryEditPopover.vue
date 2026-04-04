@@ -2,7 +2,6 @@
 import {
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogOverlay,
   DialogPortal,
   DialogRoot,
@@ -118,9 +117,6 @@ const save = () => {
             <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
               {{ props.category.name }}
             </DialogTitle>
-            <DialogDescription class="text-sm leading-6 text-app-muted">
-              Update the category name and refine its filters.
-            </DialogDescription>
           </div>
 
           <DialogClose as-child>
@@ -145,9 +141,6 @@ const save = () => {
               class="shell-input"
               placeholder="Best opener"
             >
-            <span class="text-xs leading-5 text-app-muted">
-              Category names must stay non-blank.
-            </span>
           </label>
 
           <label class="mb-5 block space-y-2">

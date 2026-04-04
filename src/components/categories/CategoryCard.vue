@@ -61,8 +61,7 @@ const selectionTitle = computed(() =>
         type="button"
         class="category-drag-handle inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-app-border/80 bg-app-bg/70 text-app-muted transition hover:border-app-accent/50 hover:text-app-text disabled:cursor-default disabled:opacity-50"
         :disabled="!canReorder"
-        :title="canReorder ? 'Drag to reorder categories' : 'Add more categories to enable reordering'"
-        :aria-label="canReorder ? 'Drag to reorder categories' : 'Reordering unavailable'"
+        :aria-label="canReorder ? 'Drag to reorder categories' : 'Category drag handle'"
       >
         <svg
           viewBox="0 0 24 24"

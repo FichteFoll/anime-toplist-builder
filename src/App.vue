@@ -42,6 +42,12 @@ const activeSelectionCount = computed(() =>
   selectionsStore.getSelectionCount(templateStore.activeTemplateId),
 )
 
+const activeOpenCategoryCount = computed(() => {
+  const categoryCount = activeTemplate.value?.categories.length ?? 0
+
+  return Math.max(categoryCount - activeSelectionCount.value, 0)
+})
+
 const groupedTemplates = computed(() => [
   {
     title: 'Predefined',
@@ -498,10 +504,10 @@ onMounted(async () => {
                   </div>
                   <div>
                     <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Filled slots
+                      Open categories
                     </dt>
                     <dd class="mt-2 text-sm text-app-text">
-                      {{ activeSelectionCount }}
+                      {{ activeOpenCategoryCount }} not yet selected
                     </dd>
                   </div>
                   <div>

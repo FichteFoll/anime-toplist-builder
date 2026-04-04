@@ -242,7 +242,7 @@ watch(pickerSort, (value, previousValue) => {
                 type="search"
                 inputmode="search"
                 class="shell-input"
-                placeholder="Search AniList anime titles"
+                placeholder="Type to search ..."
                 :aria-label="`Search anime for ${category.name}`"
               >
             </label>
