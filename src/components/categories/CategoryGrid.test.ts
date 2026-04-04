@@ -163,4 +163,13 @@ describe('CategoryGrid', () => {
     ])
     expect(wrapper.emitted('clearSelection')).toEqual([[ 'cat_gridopening01' ]])
   })
+
+  it('shows open category count in the workspace summary', () => {
+    const wrapper = mountCategoryGrid()
+
+    expect(wrapper.text()).toContain('Open categories')
+    expect(wrapper.text()).toContain('1 not yet selected')
+    expect(wrapper.text()).not.toContain('Filled slots')
+    expect(wrapper.text()).not.toContain('Reordering')
+  })
 })

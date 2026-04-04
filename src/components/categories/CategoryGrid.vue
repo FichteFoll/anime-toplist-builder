@@ -51,6 +51,7 @@ const canReorder = computed(() => props.categories.length > 1)
 const selectedCategoryCount = computed(
   () => props.categories.filter((category) => props.selectionByCategory[category.id]).length,
 )
+const openCategoryCount = computed(() => props.categories.length - selectedCategoryCount.value)
 
 const resetAddDraft = () => {
   newCategoryName.value = `Category ${props.categories.length + 1}`
@@ -233,18 +234,10 @@ onBeforeUnmount(() => {
       </div>
       <div>
         <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-          Filled slots
+          Open categories
         </dt>
         <dd class="mt-2 text-sm text-app-text">
-          {{ selectedCategoryCount }}
-        </dd>
-      </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-          Reordering
-        </dt>
-        <dd class="mt-2 text-sm text-app-text">
-          {{ canReorder ? 'Enabled' : 'Add another category first' }}
+          {{ openCategoryCount }} not yet selected
         </dd>
       </div>
     </div>

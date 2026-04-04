@@ -3,7 +3,6 @@ import { computed } from 'vue'
 
 import CategoryEditPopover from '@/components/categories/CategoryEditPopover.vue'
 import CategoryMediaPickerPopover from '@/components/categories/CategoryMediaPickerPopover.vue'
-import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import type {
   AniListMetadata,
@@ -31,7 +30,6 @@ const emit = defineEmits<{
   clearSelection: [categoryId: string]
 }>()
 
-const categoryFilterCount = computed(() => countConfiguredFilterFields(props.category.filter))
 const selectionTitle = computed(() =>
   props.selection ? resolveAnimeTitle(props.selection.title, props.titleLanguage) : null,
 )
@@ -100,12 +98,6 @@ const selectionTitle = computed(() =>
       </button>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-      <span class="rounded-full bg-app-bg/80 px-3 py-1.5">
-        {{ categoryFilterCount }} custom rule{{ categoryFilterCount === 1 ? '' : 's' }}
-      </span>
-    </div>
-
     <div class="mt-5 flex-1 rounded-[1.5rem] border border-dashed border-app-border/70 bg-app-bg/50 p-4">
       <div
         v-if="selection"
@@ -117,18 +109,12 @@ const selectionTitle = computed(() =>
           class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
         >
         <div class="min-w-0 space-y-2">
-          <p class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-            Current selection
-          </p>
           <p class="break-words text-base font-semibold text-app-text">
             {{ selectionTitle }}
           </p>
           <p class="text-sm text-app-muted">
             {{ selection.seasonYear ?? 'Unknown year' }}
             <span v-if="selection.format"> · {{ selection.format }}</span>
-          </p>
-          <p class="text-sm leading-6 text-app-muted">
-            You can rename or reorder this card without losing the selection.
           </p>
         </div>
       </div>
@@ -145,10 +131,6 @@ const selectionTitle = computed(() =>
             <div class="h-4 w-5/6 rounded-full bg-app-elevated/50" />
           </div>
         </div>
-        <p class="text-sm leading-6 text-app-muted">
-          Search AniList with the merged template and category filters,
-          then save one anime to this stable category slot.
-        </p>
       </div>
     </div>
 
