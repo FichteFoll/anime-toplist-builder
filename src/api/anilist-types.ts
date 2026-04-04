@@ -27,13 +27,13 @@ export interface AniListMediaSearchVariables {
   page: number
   perPage: number
   search?: string
-  seasonIn?: AnimeSeason[]
-  countryOfOriginIn?: string[]
+  season?: AnimeSeason
+  countryOfOrigin?: string
   tagIn?: string[]
-  tagRank?: number
+  minimumTagRank?: number
   genreIn?: string[]
   formatIn?: AnimeFormat[]
-  sourceIn?: AnimeSource[]
+  source?: AnimeSource
   startDateGreater?: number
   startDateLesser?: number
   popularityGreater?: number

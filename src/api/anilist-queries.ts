@@ -3,13 +3,13 @@ export const searchAnimeMediaQuery = `
     $page: Int!
     $perPage: Int!
     $search: String
-    $seasonIn: [MediaSeason]
-    $countryOfOriginIn: [CountryCode]
+    $season: MediaSeason
+    $countryOfOrigin: CountryCode
     $tagIn: [String]
-    $tagRank: Int
+    $minimumTagRank: Int
     $genreIn: [String]
     $formatIn: [MediaFormat]
-    $sourceIn: [MediaSource]
+    $source: MediaSource
     $startDateGreater: FuzzyDateInt
     $startDateLesser: FuzzyDateInt
     $popularityGreater: Int
@@ -28,13 +28,13 @@ export const searchAnimeMediaQuery = `
         type: ANIME
         isAdult: false
         search: $search
-        season_in: $seasonIn
-        countryOfOrigin_in: $countryOfOriginIn
+        season: $season
+        countryOfOrigin: $countryOfOrigin
         tag_in: $tagIn
-        tagRank: $tagRank
+        minimumTagRank: $minimumTagRank
         genre_in: $genreIn
         format_in: $formatIn
-        source_in: $sourceIn
+        source: $source
         startDate_greater: $startDateGreater
         startDate_lesser: $startDateLesser
         popularity_greater: $popularityGreater

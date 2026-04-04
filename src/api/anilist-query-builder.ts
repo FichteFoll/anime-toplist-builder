@@ -26,6 +26,8 @@ const toAniListYearCeiling = (year: number) => (year + 1) * 10000
 
 const withValue = <T>(value: T | undefined) => (value === undefined ? undefined : value)
 
+const pickSingleValue = <T>(values: T[]) => (values.length > 0 ? values[0] : undefined)
+
 export const buildAniListMediaSort = (sort: FilterSort | undefined): AniListMediaSort[] | undefined => {
   if (!sort) {
     return undefined
@@ -70,16 +72,13 @@ export const buildAniListMediaSearchVariables = ({
       page,
       perPage,
       search: mergedFilter.filter.search || undefined,
-      seasonIn: mergedFilter.filter.seasons.length > 0 ? mergedFilter.filter.seasons : undefined,
-      countryOfOriginIn:
-        mergedFilter.filter.countryOfOrigin.length > 0
-          ? mergedFilter.filter.countryOfOrigin
-          : undefined,
+      season: pickSingleValue(mergedFilter.filter.seasons),
+      countryOfOrigin: pickSingleValue(mergedFilter.filter.countryOfOrigin),
       tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags.map((tag) => tag.name) : undefined,
-      tagRank: highestTagRank,
+      minimumTagRank: highestTagRank,
       genreIn: mergedFilter.filter.genres.length > 0 ? mergedFilter.filter.genres : undefined,
       formatIn: mergedFilter.filter.formats.length > 0 ? mergedFilter.filter.formats : undefined,
-      sourceIn: mergedFilter.filter.source.length > 0 ? mergedFilter.filter.source : undefined,
+      source: pickSingleValue(mergedFilter.filter.source),
       startDateGreater: withValue(
         mergedFilter.filter.yearRange?.minimum === undefined
           ? undefined
