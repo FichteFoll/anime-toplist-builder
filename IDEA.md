@@ -115,14 +115,15 @@ or imported from a template.
 - Templates can be uploaded and will create a new user-local template with a generated ID.
 - Template JSON can also be uploaded to a different site and loaded via an input field or query parameter.
   In that case, the URL fragment will look like `#template=<escaped-url>`
-  using percent-encoding for the escaped URL.
+  using `encodeURIComponent` and `decodeURIComponent` for escaping and unescaping.
   The URL is properly unescaped when loading the page.
 - When a template cannot be imported (by file or remote URL),
   display a validation error and abort the import.
 - When the user makes a change
-  to an imported or default template (category order, category name, category filters, template name),
+  to a URL-imported or default template (category order, category name, category filters, template name),
   a new template is automatically forked from it
   and the name gets suffixed with " (modified)".
+  The `template` URL fragment is removed as well.
 - Selections per template are persisted in local storage (by template id)
   so that the user can reload the page and continue where they left off.
 
@@ -172,7 +173,8 @@ but a manga/light novel toplist could be interesting as well.
     - "Export to file" to export the current template as JSON.
     - "Import from file" to import a template file as JSON via file upload.
     - "Import from URL" to load a JSON template file from a remote URL.
-    - "Clear selections" to reset all selections for the current template with a confirmation prompt.
+    - "Clear selections" to reset all selections for the current template with a confirmation prompt,
+      including the persisted selection for this template.
   - The menu items are accompanied by fitting icons.
   - When importing a template (file or URL) fails,
     an error toast is displayed
