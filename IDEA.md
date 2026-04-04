@@ -33,12 +33,12 @@ or imported from a template.
 - Ability to set a name for the toplist.
 - Ability to set an author of the toplist.
 - Categories can be created, removed and moved via drag and drop.
-- Categories must have a non-empty name.
+- Categories must have a non-blank name.
 - Categories include a configurable filter that will be used to limit search results.
-- An overarching filter can be specified that applies to all categories.
-  The overarching filter is then combined with the category filter
+- An overarching "template filter" can be specified that applies to all categories.
+  The template filter is then combined with the category filter
   when searching for anime matches in the respective category.
-  Example: release year 2026
+  Example template filter: Start Date 2026
 - Query Anilist's GraphQL API to search for anime matching filter criteria.
 - Anime title can be configured to use the English, Romaji or Native name.
 - Selections per template are persisted in local storage
@@ -50,17 +50,18 @@ or imported from a template.
 - The global and category filters support many filters that the AniList API exposes, including:
   - Start Date (exact date range or just the year (fuzzydate))
   - End Date (same as Start Date)
-  - Airing date
-  - Season
-  - Country of Origin (Japan, China, Korea)
+  - Season (multi-select/tags)
+  - Country of Origin (Japan, China, Korea) (multi-select/tags)
   - Tags (one or multiple) with a minimum tag rank for each (numeric, 1 to 100) (e.g. Isekai, Primarily Female Cast, Slapstick)
-  - Genre (one or multiple) (e.g. Comedy, Action, etc.)
-  - Format (e.g. TV, Movie, ONA, etc.)
-  - Popularity (minimum)
-  - Source (e.g. Light Novel, Manga, Original)
-- There is a search input field that matches against the media title.
-- Sort order should be configurable, defaulting to popularity.
-  Supported options are: title, start date, trending, favorites, score,
+  - Genre (one or multiple) (e.g. Comedy, Action, etc.) (multi-select/tags, AND-combined)
+  - Format (e.g. TV, Movie, ONA, etc.) (multi-select/tags, AND-combined)
+  - Minimum Popularity
+  - Source (e.g. Light Novel, Manga, Original) (multi-select/tags)
+- There is a search input field that matches against the media title (uses `search` field).
+- Sort fields and order is configurable, defaulting to descending popularity.
+  - Supported fields are: title, start date, trending, favorites, score.
+  - Supported orders are: ascending and descending (default).
+  - Maps to single `MediaSort` enum value in Anilist's API.
 - Available tags and genres should be fetched from the Anilist API, if possible,
   along with their description.
 
@@ -86,6 +87,8 @@ or imported from a template.
 - Four categories are rendered per line.
 - Resolution and number of categories, as well as font size, are configurable in code.
 - Background should be filled and not transparent.
+- Colors and general look-and-feel is inferred from the theme.
+- Categories are rendered in the same order as in the UI.
 
 ### Templates
 
@@ -96,9 +99,10 @@ or imported from a template.
 - Hard-coded category templates can be loaded and referenced via URL fragments
   to give people a common starting ground, such as "Crunchyroll Anime Awards 2026".
   The fragment look like `#template=<template-id>`.
-- When opening the site without an explicitly referenced template,
-  a hard-coded default template will be loaded,
-  defined by a build-time constant.
+- When opening the site without an explicitly referenced template in the URL fragments,
+  either the previously opened template (local storage)
+  or a hard-coded default template (defined by a build-time constant)
+  will be loaded.
 - A set of default templates is provided by the app itself.
 - Users can create their own templates,
   in which case the template's ID will be randomly generated.
@@ -107,11 +111,13 @@ or imported from a template.
   that allows implementing soft-migrations later on.
 - Templates can be uploaded and will create a new user-local template with a generated ID.
 - Template JSON can also be uploaded to a different site and loaded via an input field or query parameter.
-  In that case, the URL fragment will look like `#template=<escaped-url>`.
+  In that case, the URL fragment will look like `#template=<escaped-url>`
+  using percent escaping (as is usual for URLs).
 - When a template cannot be imported (by file or remote URL),
   display a validation error and abort the import.
-- When the user makes a change to an imported or default template,
-  a new Template is automatically forked from it
+- When the user makes any change
+  to an imported or default template categories or the template name,
+  a new template is automatically forked from it
   and the name gets suffixed with " (modified)".
 - Selections per template are persisted in local storage (by template id)
   so that the user can reload the page and continue where they left off.
@@ -156,12 +162,32 @@ where the ids is a comma-separated list of anime ids.
 - Dark and light theme.
 - Settings menu (in a popup) with configuration options for:
   - anime title language (English, Romaji, Native)
+- Template name is displayed in large text at the top of the site, centered.
+  - Below the name is a small clickable text for the "template filter"
+    with a filter icon.
+  - Clicking on the template filter text opens a popover similar to the categories
+    where the template filter can be configured.
+  - There is a "Change Template" button that opens a menu with the following items:
+    - "Create new" to create a new template.
+    - Open one of the user's custom or a predefined templates.
+      - Will also load the user's selection from local storage.
+    - "Export to file" to export the current template as JSON.
+    - "Import from file" to import a template file as JSON via file upload.
+    - "Import from URL" to load a JSON template file from a remote URL.
+    - "Reset" to reset all selections for the current template with a confirmation prompt.
+  - The menu items are accompanied by fitting icons.
+  - When importing a template (file or URL) fails,
+    an error toast is displayed
+    with some details on the error if available
+    or a generic error text.
 - Categories should be rendered in a grid
   - The category is rendered with
     - its name
     - an image for the anime's image (key visual) or a placeholder if none has been selected yet,
     - the name of the selected anime, if any,
-    - a few action buttons in the top right corner.
+    - a few action buttons in the top right corner,
+    - a draggable handle in the form of three vertical lines (icon)
+      that can be used to drag the category to a different position.
   - Each category has an "edit" icon/button that can be clicked to open a popover.
     - In the popover, there will be an input to set the category name.
     - In the popover, the category filters can be configured.
@@ -169,7 +195,7 @@ where the ids is a comma-separated list of anime ids.
     with a confirmation prompt if its configuration is not empty.
   - When clicking on a category's image, a popover will open to search for and select an anime.
     - Shows a text input at the top to search for an anime title matching the given criteria.
-      - Uses the `search` Media query field.
+      - Is added to the category filters and template filter.
     - Shows a result grid with one entry for each matching Anime, including the anime's:
       - image (key visual)
       - title
@@ -177,6 +203,8 @@ where the ids is a comma-separated list of anime ids.
       - format
     - When a search request fails, display an error toast
       and render "Something went wrong" in the result grid.
+    - When no results can be found,
+      render "No results found" in the result grid.
     - Search inputs are debounced by 250ms.
     - Clicking on one anime in the result grid will select this anime for the category.
     - A dropdown to select the sort field and order.
@@ -184,13 +212,13 @@ where the ids is a comma-separated list of anime ids.
     - When the popover opens, results should already be loaded and displayed
       according to the filter criteria and default sort order.
     - Show loading spinner while search results are being requested.
-- There is a button to generate an image.
-  The image will then be displayed in a popup for the user to download or copy.
-- There is a "Template" section/menu.
-  - Can create a new template.
-  - Can select one of the predefined templates.
-  - Can export the current template as JSON.
-  - Can import a template file as JSON via file upload.
+  - There is a clear icon/button that removes the selected anime for this category.
+- There is a button to export an image.
+  The image will then be generated and displayed in a popup for the user to download or copy.
+  - While the image is generated, a loading spinner is shown.
+  - The default image name is `Anime Toplist <template name>.png`
+    with characters that are invalid on NTFS/Windows replaced with `_`.
+  - The copy behavior is defined by the browser.
 - Footer
   - Mentions that it is powered by AniList with a link to it.
   - Mentions that it is open source with a link to a github repository.
@@ -206,6 +234,8 @@ where the ids is a comma-separated list of anime ids.
   - Getting Started: https://docs.anilist.co/guide/graphql/
   - Pagination: https://docs.anilist.co/guide/graphql/pagination
   - Reference: https://docs.anilist.co/reference/
-  - Query: https://docs.anilist.co/reference/query
+    - Media: https://docs.anilist.co/reference/object/media
+    - MediaSort: https://docs.anilist.co/reference/enum/mediasort
+    - Query: https://docs.anilist.co/reference/query
 - Vue.js docs: https://vuejs.org/guide/introduction.html
 - Radix Vue docs: https://www.radix-vue.com/overview/getting-started.html
