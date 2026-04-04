@@ -22,19 +22,28 @@ vi.mock('sortablejs', () => ({
 }))
 
 vi.mock('reka-ui', () => ({
-  PopoverArrow: {
+  DialogClose: {
     template: '<div><slot /></div>',
   },
-  PopoverContent: {
+  DialogContent: {
     template: '<div><slot /></div>',
   },
-  PopoverPortal: {
+  DialogDescription: {
     template: '<div><slot /></div>',
   },
-  PopoverRoot: {
+  DialogOverlay: {
     template: '<div><slot /></div>',
   },
-  PopoverTrigger: {
+  DialogPortal: {
+    template: '<div><slot /></div>',
+  },
+  DialogRoot: {
+    template: '<div><slot /></div>',
+  },
+  DialogTitle: {
+    template: '<div><slot /></div>',
+  },
+  DialogTrigger: {
     template: '<div><slot /></div>',
   },
 }))
