@@ -102,23 +102,6 @@ Useful optional environment variables:
 - PNG export runs in the browser canvas.
   Remote image hosts without suitable CORS headers may fall back to placeholders.
 
-## Testing And QA
-
-Automated coverage currently focuses on:
-
-- filter merge behavior,
-- template validation and normalization,
-- persistence helpers,
-- fork-on-edit store behavior,
-- and a critical category-grid component flow.
-
-Manual QA coverage for mobile layout,
-import and export,
-remote template loading,
-search failures,
-theme switching,
-and PNG export is tracked in `plans/2026-04-04-initial-implementation/step-11-qa-checklist.md`.
-
 ## Build And Deployment
 
 The app targets static hosting,
@@ -128,12 +111,15 @@ including GitHub Pages.
 2. Run `pnpm build`.
 3. Publish the generated `dist/` directory with the existing Pages workflow.
 
-## Known Constraints
+## Known Issues and Constraints
 
 - AniList currently exposes a single `tagRank` argument for tag queries,
   so the app collapses merged tag thresholds to the strictest rank.
   See `plans/2026-04-04-initial-implementation/step-4-deviations.md`.
-- Firefox uses Sortable's fallback drag mode for category reordering.
+- On FireFox, we use Sortable's fallback drag mode for category reordering.
   This avoids the browser's oversized native drag preview for the card.
 - PNG export can fall back to placeholders when remote covers fail to load,
   including CORS-restricted images.
+- The multi-select comboboxes exhibit some unexpected UX,
+  for example the position swapping from the top to the bottom of the input
+  or the scroll position being reset when an item is selected.
