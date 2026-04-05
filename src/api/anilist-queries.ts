@@ -45,8 +45,8 @@ export const searchAnimeMediaQuery = `
         source: $source
         startDate_greater: $startDateGreater
         startDate_lesser: $startDateLesser
-        episode_greater: $episodeGreater
-        episode_lesser: $episodeLesser
+        episodes_greater: $episodeGreater
+        episodes_lesser: $episodeLesser
         duration_greater: $durationGreater
         duration_lesser: $durationLesser
         popularity_greater: $popularityGreater
