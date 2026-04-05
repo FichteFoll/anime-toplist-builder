@@ -11,26 +11,43 @@ import {
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
-import type { Template } from '@/types'
-import { isNonBlankName } from '@/lib/filter-editor'
+import FilterEditor from '@/components/filters/FilterEditor.vue'
+import { countConfiguredFilterFields, isNonBlankName } from '@/lib/filter-editor'
+import type { FilterState, Template } from '@/types'
 
 const props = defineProps<{
   template: Template
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string }]
+  save: [value: { name: string, description: string, filter: FilterState }]
 }>()
 
 const open = ref(false)
 const draftName = ref(props.template.name)
 const draftDescription = ref(props.template.description)
+const draftFilter = ref(cloneFilter(props.template.globalFilter))
 
 const hasValidName = computed(() => isNonBlankName(draftName.value))
+const configuredFilterCount = computed(() => countConfiguredFilterFields(draftFilter.value))
+
+function cloneFilter(filter: FilterState): FilterState {
+  if (typeof structuredClone === 'function') {
+    try {
+      return structuredClone(filter)
+    } catch {
+      // Vue props can be proxies, which structuredClone rejects.
+      // Fall back to JSON cloning for this plain filter state.
+    }
+  }
+
+  return JSON.parse(JSON.stringify(filter)) as FilterState
+}
 
 const resetDraft = () => {
   draftName.value = props.template.name
   draftDescription.value = props.template.description
+  draftFilter.value = cloneFilter(props.template.globalFilter)
 }
 
 watch(open, (isOpen) => {
@@ -60,6 +77,7 @@ const save = () => {
   emit('save', {
     name: nextName,
     description: nextDescription,
+    filter: cloneFilter(draftFilter.value),
   })
   open.value = false
 }
@@ -72,25 +90,39 @@ const save = () => {
         type="button"
         class="shell-button"
         :disabled="!template"
-        :aria-label="`Edit template ${template.name}`"
+        :aria-label="`Open template editor for ${template.name}`"
       >
         Edit template
+        <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
+          {{ configuredFilterCount }} rule{{ configuredFilterCount === 1 ? '' : 's' }}
+        </span>
       </button>
     </DialogTrigger>
 
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
-      <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,42rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell">
-        <div class="shrink-0 space-y-2 border-b border-app-border/70 pb-5">
-          <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-            Template editor
-          </p>
-          <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
-            {{ template.name }}
-          </DialogTitle>
-          <DialogDescription class="text-sm leading-6 text-app-muted">
-            Update the template title and summary.
-          </DialogDescription>
+      <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,72rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell">
+        <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
+          <div class="space-y-2">
+            <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+              Template editor
+            </p>
+            <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
+              {{ template.name }}
+            </DialogTitle>
+            <DialogDescription class="text-sm leading-6 text-app-muted">
+              Update the template title, summary, and shared filter rules.
+            </DialogDescription>
+          </div>
+
+          <DialogClose as-child>
+            <button
+              type="button"
+              class="shell-button"
+            >
+              Close
+            </button>
+          </DialogClose>
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
@@ -118,6 +150,15 @@ const save = () => {
               placeholder="Short context for this template"
             />
           </label>
+
+          <div class="my-5 border-t border-app-border/70" />
+
+          <FilterEditor
+            v-model="draftFilter"
+            mode="global"
+            :metadata="null"
+            metadata-status="idle"
+          />
 
           <div class="mt-6 flex flex-wrap justify-end gap-2">
             <button
