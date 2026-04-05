@@ -92,13 +92,6 @@ const exportActiveTemplate = async () => {
 
   const payload = stringifyTemplateExportPayload(activeTemplate.value)
 
-  try {
-    await navigator.clipboard.writeText(payload)
-    toastStore.success('Template JSON copied to the clipboard.')
-  } catch {
-    toastStore.info('Clipboard copy blocked.', 'Downloading template JSON instead.')
-  }
-
   const blob = new Blob([payload], { type: 'application/json' })
   const downloadUrl = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
@@ -365,7 +358,7 @@ onMounted(async () => {
             :disabled="!activeTemplate"
             @click="exportActiveTemplate"
           >
-            Export JSON
+            Export template
           </button>
           <ImageExportDialog
             :template="activeTemplate"
