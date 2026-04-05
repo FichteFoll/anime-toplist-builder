@@ -93,3 +93,9 @@ a {
 .category-sort-ghost {
   opacity: 0.45;
 }
+
+.sortable-fallback {
+  width: fit-content !important;
+  height: fit-content !important;
+  max-width: min(28rem, calc(100vw - 2rem)) !important;
+}

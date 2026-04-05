@@ -101,5 +101,7 @@ including GitHub Pages.
 - AniList currently exposes a single `tagRank` argument for tag queries,
   so the app collapses merged tag thresholds to the strictest rank.
   See `plans/2026-04-04-initial-implementation/step-4-deviations.md`.
+- Firefox uses Sortable's fallback drag mode for category reordering.
+  This avoids the browser's oversized native drag preview for the card.
 - PNG export runs in the browser canvas.
   Remote image hosts without suitable CORS headers may fall back to placeholders in the generated image.

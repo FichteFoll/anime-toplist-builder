@@ -80,6 +80,9 @@ const createCategory = () => {
   isAddOpen.value = false
 }
 
+const shouldUseFallbackDrag = () =>
+  typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent)
+
 const mountSortable = async () => {
   await nextTick()
 
@@ -95,6 +98,8 @@ const mountSortable = async () => {
     delay: 180,
     delayOnTouchOnly: true,
     draggable: '[data-category-id]',
+    fallbackOnBody: shouldUseFallbackDrag(),
+    forceFallback: shouldUseFallbackDrag(),
     ghostClass: 'category-sort-ghost',
     chosenClass: 'category-sort-chosen',
     dragClass: 'category-sort-drag',
@@ -277,7 +282,7 @@ onBeforeUnmount(() => {
     <div
       v-else
       ref="gridRef"
-      class="mt-6 flex flex-wrap gap-4"
+      class="mt-6 flex flex-wrap items-start gap-4"
     >
       <CategoryCard
         v-for="category in categories"

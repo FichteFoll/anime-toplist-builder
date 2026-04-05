@@ -37,7 +37,7 @@ const selectionTitle = computed(() =>
 
 <template>
   <article
-    class="group flex h-full flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
+    class="group flex flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
     :class="selection ? 'border-app-accent/70' : 'border-app-border/70'"
     :data-category-id="category.id"
   >

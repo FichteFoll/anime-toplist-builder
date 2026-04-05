@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
@@ -174,5 +174,46 @@ describe('CategoryGrid', () => {
     expect(wrapper.text()).toContain('1 not yet selected')
     expect(wrapper.text()).not.toContain('Filled slots')
     expect(wrapper.text()).not.toContain('Reordering')
+  })
+
+  it('configures sortable drag behavior on the category cards', () => {
+    mountCategoryGrid()
+
+    expect(sortableCreate).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({
+        draggable: '[data-category-id]',
+        handle: '.category-drag-handle',
+        ghostClass: 'category-sort-ghost',
+        chosenClass: 'category-sort-chosen',
+        dragClass: 'category-sort-drag',
+      }),
+    )
+  })
+
+  it('enables fallback dragging in Firefox', async () => {
+    const ua = window.navigator.userAgent
+
+    sortableCreate.mockClear()
+
+    Object.defineProperty(window.navigator, 'userAgent', {
+      configurable: true,
+      value: `${ua} Firefox/125.0`,
+    })
+    mountCategoryGrid()
+    await nextTick()
+
+    expect(sortableCreate).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({
+        fallbackOnBody: true,
+        forceFallback: true,
+      }),
+    )
+
+    Object.defineProperty(window.navigator, 'userAgent', {
+      configurable: true,
+      value: ua,
+    })
   })
 })

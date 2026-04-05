@@ -11,6 +11,8 @@ declare module 'sortablejs' {
     delayOnTouchOnly?: boolean
     dragClass?: string
     draggable?: string
+    fallbackOnBody?: boolean
+    forceFallback?: boolean
     ghostClass?: string
     handle?: string
     touchStartThreshold?: number
