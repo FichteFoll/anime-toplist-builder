@@ -16,7 +16,7 @@ import { normalizeAniListError, searchAnimeMedia } from '@/api'
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
 import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { mergeFilterStates } from '@/lib/filter-merge'
-import { formatAnimeFormatLabel } from '@/lib/format-label'
+import { buildActiveFilterSummary } from '@/lib/filter-summary'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import {
@@ -74,72 +74,9 @@ const templateSortFieldLabel = computed(() => {
   return templateSort.field.toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 })
 
-const toTitleLabel = (value: string) =>
-  value
-    .toLowerCase()
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-
-const formatRangeLabel = (label: string, range?: { minimum?: number; maximum?: number }) => {
-  if (!range) {
-    return null
-  }
-
-  if (range.minimum !== undefined && range.maximum !== undefined) {
-    return `${label}: ${range.minimum}-${range.maximum}`
-  }
-
-  if (range.minimum !== undefined) {
-    return `${label}: ${range.minimum}+`
-  }
-
-  if (range.maximum !== undefined) {
-    return `${label}: up to ${range.maximum}`
-  }
-
-  return null
-}
-
 const activeFilterSummary = computed(() => {
   const { filter } = mergeFilterStates(props.globalFilter, props.category.filter)
-  const summary: string[] = []
-
-  const rangeLabels = [
-    formatRangeLabel('Year', filter.yearRange),
-    formatRangeLabel('Popularity', filter.popularity),
-  ].filter((value): value is string => Boolean(value))
-
-  summary.push(...rangeLabels)
-
-  if (filter.seasons.length > 0) {
-    summary.push(`Season: ${filter.seasons.map(toTitleLabel).join(', ')}`)
-  }
-
-  if (filter.countryOfOrigin) {
-    summary.push(`Country: ${filter.countryOfOrigin}`)
-  }
-
-  if (filter.genres.length > 0) {
-    summary.push(`Genres: ${filter.genres.join(', ')}`)
-  }
-
-  if (filter.formats.length > 0) {
-    summary.push(`Formats: ${filter.formats.map(formatAnimeFormatLabel).join(', ')}`)
-  }
-
-  if (filter.source.length > 0) {
-    summary.push(`Source: ${filter.source.map(toTitleLabel).join(', ')}`)
-  }
-
-  if (filter.tags.length > 0) {
-    summary.push(`Tags: ${filter.tags.join(', ')}`)
-  }
-
-  if (filter.tags.length > 0 && filter.minimumTagRank !== undefined) {
-    summary.push(`Tag rank: ${filter.minimumTagRank}+`)
-  }
-
-  return summary
+  return buildActiveFilterSummary(filter)
 })
 
 const sortFieldPlaceholderLabel = computed(() => `Template: ${templateSortFieldLabel.value}`)
