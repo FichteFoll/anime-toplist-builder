@@ -135,7 +135,7 @@ const activeFilterSummary = computed(() => {
     summary.push(`Tags: ${filter.tags.join(', ')}`)
   }
 
-  if (filter.minimumTagRank !== undefined) {
+  if (filter.tags.length > 0 && filter.minimumTagRank !== undefined) {
     summary.push(`Tag rank: ${filter.minimumTagRank}+`)
   }
 
