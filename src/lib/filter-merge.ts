@@ -14,7 +14,9 @@ export interface MergeFilterStateResult {
 export const createEmptyFilterState = (): FilterState => ({
   seasons: [],
   tags: [],
+  excludedTags: [],
   genres: [],
+  excludedGenres: [],
   formats: [],
   source: [],
 })
@@ -103,35 +105,49 @@ const mergeStringArray = <T extends string>(
   }
 }
 
-const mergeTags = (
-  globalTags: string[],
-  categoryTags: string[],
-): { tags: string[]; hasConflict: boolean } => {
-  const normalizedGlobalTags = normalizeStringArray(globalTags.map((tag) => tag.trim()).filter((tag) => tag.length > 0))
-  const normalizedCategoryTags = normalizeStringArray(
-    categoryTags.map((tag) => tag.trim()).filter((tag) => tag.length > 0),
-  )
+const normalizeSelection = (values: string[]) =>
+  normalizeStringArray(values.map((value) => value.trim()).filter((value) => value.length > 0))
 
-  if (normalizedGlobalTags.length === 0) {
+const mergeSelectionFilters = (
+  globalIncluded: string[],
+  globalExcluded: string[],
+  categoryIncluded: string[],
+  categoryExcluded: string[],
+): { included: string[]; excluded: string[]; hasConflict: boolean } => {
+  const normalizedGlobalIncluded = normalizeSelection(globalIncluded)
+  const normalizedGlobalExcluded = normalizeSelection(globalExcluded)
+  const normalizedCategoryIncluded = normalizeSelection(categoryIncluded)
+  const normalizedCategoryExcluded = normalizeSelection(categoryExcluded)
+
+  const excluded = normalizeStringArray([...normalizedGlobalExcluded, ...normalizedCategoryExcluded])
+  const categoryIncludedAfterExclude = normalizedCategoryIncluded.filter((value) => !excluded.includes(value))
+
+  if (normalizedGlobalIncluded.length === 0) {
     return {
-      tags: normalizedCategoryTags,
-      hasConflict: false,
+      included: categoryIncludedAfterExclude,
+      excluded,
+      hasConflict: normalizedCategoryIncluded.some((value) => excluded.includes(value)),
     }
   }
 
-  if (normalizedCategoryTags.length === 0) {
+  if (normalizedCategoryIncluded.length === 0) {
     return {
-      tags: normalizedGlobalTags,
-      hasConflict: false,
+      included: normalizedGlobalIncluded.filter((value) => !excluded.includes(value)),
+      excluded,
+      hasConflict: normalizedGlobalIncluded.some((value) => excluded.includes(value)),
     }
   }
 
-  const categoryTagSet = new Set(normalizedCategoryTags)
-  const intersection = normalizedGlobalTags.filter((tag) => categoryTagSet.has(tag))
+  const included = normalizedGlobalIncluded.filter((value) => categoryIncludedAfterExclude.includes(value))
+  const hasConflict =
+    included.length === 0 ||
+    normalizedGlobalIncluded.some((value) => excluded.includes(value)) ||
+    normalizedCategoryIncluded.some((value) => normalizedGlobalExcluded.includes(value))
 
   return {
-    tags: intersection,
-    hasConflict: intersection.length === 0,
+    included,
+    excluded,
+    hasConflict,
   }
 }
 
@@ -145,10 +161,20 @@ export const mergeFilterStates = (
   const popularity = mergeRange(globalFilter.popularity, categoryFilter.popularity)
   const seasons = mergeStringArray<AnimeSeason>(globalFilter.seasons, categoryFilter.seasons)
   const countryOfOrigin = mergeSingleValue(globalFilter.countryOfOrigin, categoryFilter.countryOfOrigin)
-  const genres = mergeStringArray(globalFilter.genres, categoryFilter.genres)
+  const genres = mergeSelectionFilters(
+    globalFilter.genres,
+    globalFilter.excludedGenres,
+    categoryFilter.genres,
+    categoryFilter.excludedGenres,
+  )
   const formats = mergeStringArray<AnimeFormat>(globalFilter.formats, categoryFilter.formats)
   const source = mergeStringArray<AnimeSource>(globalFilter.source, categoryFilter.source)
-  const tags = mergeTags(globalFilter.tags, categoryFilter.tags)
+  const tags = mergeSelectionFilters(
+    globalFilter.tags,
+    globalFilter.excludedTags,
+    categoryFilter.tags,
+    categoryFilter.excludedTags,
+  )
 
   return {
     filter: {
@@ -157,8 +183,10 @@ export const mergeFilterStates = (
       duration: duration.range,
       seasons: seasons.values,
       countryOfOrigin: countryOfOrigin.value,
-      tags: tags.tags,
-      genres: genres.values,
+      tags: tags.included,
+      excludedTags: tags.excluded,
+      genres: genres.included,
+      excludedGenres: genres.excluded,
       formats: formats.values,
       popularity: popularity.range,
       source: source.values,

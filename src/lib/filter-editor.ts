@@ -16,13 +16,13 @@ export const getCategoryFilterDisabledReasons = (
   duration: hasRangeValue(globalFilter.duration) ? inheritedFieldReason : undefined,
   seasons: globalFilter.seasons.length > 0 ? inheritedFieldReason : undefined,
   countryOfOrigin: globalFilter.countryOfOrigin ? inheritedFieldReason : undefined,
-  tags: globalFilter.tags.length > 0 ? inheritedFieldReason : undefined,
-  genres: globalFilter.genres.length > 0 ? inheritedFieldReason : undefined,
+  tags: globalFilter.tags.length > 0 || globalFilter.excludedTags.length > 0 ? inheritedFieldReason : undefined,
+  genres: globalFilter.genres.length > 0 || globalFilter.excludedGenres.length > 0 ? inheritedFieldReason : undefined,
   formats: globalFilter.formats.length > 0 ? inheritedFieldReason : undefined,
   popularity: hasRangeValue(globalFilter.popularity) ? inheritedFieldReason : undefined,
   source: globalFilter.source.length > 0 ? inheritedFieldReason : undefined,
   minimumTagRank:
-    globalFilter.tags.length > 0
+    globalFilter.tags.length > 0 || globalFilter.excludedTags.length > 0
       ? inheritedFieldReason
       : undefined,
 })
@@ -50,15 +50,15 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
     count += 1
   }
 
-  if (filter.tags.length > 0) {
+  if (filter.tags.length > 0 || filter.excludedTags.length > 0) {
     count += 1
   }
 
-  if (filter.tags.length > 0 && filter.minimumTagRank !== undefined) {
+  if ((filter.tags.length > 0 || filter.excludedTags.length > 0) && filter.minimumTagRank !== undefined) {
     count += 1
   }
 
-  if (filter.genres.length > 0) {
+  if (filter.genres.length > 0 || filter.excludedGenres.length > 0) {
     count += 1
   }
 

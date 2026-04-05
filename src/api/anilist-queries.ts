@@ -6,8 +6,10 @@ export const searchAnimeMediaQuery = `
     $season: MediaSeason
     $countryOfOrigin: CountryCode
     $tagIn: [String]
+    $tagNotIn: [String]
     $minimumTagRank: Int
     $genreIn: [String]
+    $genreNotIn: [String]
     $formatIn: [MediaFormat]
     $source: MediaSource
     $startDateGreater: FuzzyDateInt
@@ -35,8 +37,10 @@ export const searchAnimeMediaQuery = `
         season: $season
         countryOfOrigin: $countryOfOrigin
         tag_in: $tagIn
+        tag_not_in: $tagNotIn
         minimumTagRank: $minimumTagRank
         genre_in: $genreIn
+        genre_not_in: $genreNotIn
         format_in: $formatIn
         source: $source
         startDate_greater: $startDateGreater

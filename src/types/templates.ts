@@ -57,10 +57,13 @@ export interface TemplateExportCategoryPayloadV1 {
   filter: TemplateExportFilterStateV1
 }
 
-export interface TemplateExportFilterStateV1 extends Omit<FilterState, 'seasons' | 'tags' | 'genres' | 'formats' | 'source'> {
+export interface TemplateExportFilterStateV1
+  extends Omit<FilterState, 'seasons' | 'tags' | 'excludedTags' | 'genres' | 'excludedGenres' | 'formats' | 'source'> {
   seasons?: FilterState['seasons']
   tags?: FilterState['tags']
+  excludedTags?: FilterState['excludedTags']
   genres?: FilterState['genres']
+  excludedGenres?: FilterState['excludedGenres']
   formats?: FilterState['formats']
   source?: FilterState['source']
 }

@@ -18,6 +18,7 @@ describe('filter editor helpers', () => {
     const filterWithTags: FilterState = {
       ...createEmptyFilterState(),
       tags: ['Action'],
+      excludedTags: [],
       minimumTagRank: 50,
     }
 
@@ -29,6 +30,7 @@ describe('filter editor helpers', () => {
     const filter: FilterState = {
       ...createEmptyFilterState(),
       tags: ['Action'],
+      excludedTags: [],
       minimumTagRank: 60,
     }
 
@@ -53,6 +55,8 @@ describe('filter editor helpers', () => {
       countryOfOrigin: 'JP',
       popularity: { minimum: 100 },
       tags: ['Action'],
+      excludedTags: [],
+      excludedGenres: [],
       minimumTagRank: 50,
       episodes: { minimum: 1 },
       duration: { maximum: 24 },
@@ -74,6 +78,7 @@ describe('filter editor helpers', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       tags: ['Action'],
+      excludedTags: [],
       minimumTagRank: 40,
     }
 

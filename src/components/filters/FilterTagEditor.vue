@@ -13,6 +13,7 @@ const props = defineProps<{
 }>()
 
 const model = defineModel<string[]>({ required: true })
+const excludedModel = defineModel<string[]>('excludedValues', { required: true })
 
 const options = computed<FilterOption[]>(() => {
   const optionMap = new Map(props.metadataTags.map((tag) => [tag.name, tag]))
@@ -52,8 +53,10 @@ const emptyMessage = computed(() => {
   <div class="space-y-5">
     <FilterMultiComboboxField
       v-model="model"
+      v-model:excluded-values="excludedModel"
+      enable-exclusion
       label="Tags"
-      description="Pick tags. Set the minimum tag rank in Advanced filters."
+      description="Pick tags. Select twice to exclude."
       :options="options"
       :empty-message="emptyMessage"
       clear-label="Clear tags"

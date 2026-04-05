@@ -8,6 +8,7 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       genres: ['Action', 'Drama'],
+      excludedGenres: [],
       sort: {
         field: 'POPULARITY' as const,
         direction: 'desc' as const,
@@ -28,6 +29,7 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       genres: ['Action', 'Drama'],
+      excludedGenres: [],
       formats: ['MOVIE', 'TV'],
       yearRange: {
         minimum: 2000,
@@ -43,12 +45,14 @@ describe('mergeFilterStates', () => {
         minimum: 100,
       },
       tags: ['Cyberpunk'],
+      excludedTags: [],
       minimumTagRank: 20,
     }
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
       genres: ['Action', 'Mystery'],
+      excludedGenres: [],
       formats: ['TV'],
       yearRange: {
         minimum: 2010,
@@ -63,6 +67,7 @@ describe('mergeFilterStates', () => {
         maximum: 500,
       },
       tags: ['Cyberpunk'],
+      excludedTags: [],
       minimumTagRank: 50,
     }
 
@@ -120,6 +125,7 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       genres: ['Action'],
+      excludedGenres: [],
       yearRange: {
         minimum: 2020,
       },
@@ -131,6 +137,7 @@ describe('mergeFilterStates', () => {
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
       genres: ['Comedy'],
+      excludedGenres: [],
       yearRange: {
         maximum: 2010,
       },
@@ -157,12 +164,14 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       tags: [' Time Travel ', 'Time Travel'],
+      excludedTags: [],
       minimumTagRank: 35,
     }
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
       tags: ['Time Travel', 'Iyashikei'],
+      excludedTags: [],
       minimumTagRank: 10,
     }
 

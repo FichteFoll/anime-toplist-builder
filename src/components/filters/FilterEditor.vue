@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import FilterField from '@/components/filters/FilterField.vue'
 import FilterMultiSelectField from '@/components/filters/FilterMultiSelectField.vue'
@@ -36,6 +36,11 @@ const props = defineProps<{
 }>()
 
 const model = defineModel<FilterState>({ required: true })
+const pendingModel = ref<FilterState | null>(null)
+
+watch(model, () => {
+  pendingModel.value = null
+})
 
 const staticCountryOptions = ['CN', 'JP', 'KR', 'TW']
 const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' })
@@ -81,6 +86,10 @@ const genresModel = computed({
   get: () => model.value.genres,
   set: (value: string[]) => updateFilter({ genres: value }),
 })
+const excludedGenresModel = computed({
+  get: () => model.value.excludedGenres,
+  set: (value: string[]) => updateFilter({ excludedGenres: value }),
+})
 const formatsModel = computed({
   get: () => model.value.formats,
   set: (value: string[]) => updateFilter({ formats: value as AnimeFormat[] }),
@@ -89,16 +98,23 @@ const tagNamesModel = computed({
   get: () => model.value.tags,
   set: (value: string[]) => updateFilter({ tags: value }),
 })
+const excludedTagNamesModel = computed({
+  get: () => model.value.excludedTags,
+  set: (value: string[]) => updateFilter({ excludedTags: value }),
+})
 const sortModel = computed<FilterSort | undefined>({
   get: () => model.value.sort,
   set: (value) => updateFilter({ sort: value }),
 })
 
 const updateFilter = (patch: Partial<FilterState>) => {
-  model.value = {
-    ...model.value,
+  const nextModel = {
+    ...(pendingModel.value ?? model.value),
     ...patch,
   }
+
+  pendingModel.value = nextModel
+  model.value = nextModel
 }
 
 const updateRange = (
@@ -222,8 +238,10 @@ const updateMinimumTagRank = (rawValue: string) => {
 
     <FilterMultiComboboxField
       v-model="genresModel"
+      v-model:excluded-values="excludedGenresModel"
+      enable-exclusion
       label="Genres"
-      description="Pick one or more genres you want to see."
+      description="Pick genres. Select twice to exclude."
       :options="genreOptions"
       :empty-message="genreEmptyMessage"
       clear-label="Clear genres"
@@ -233,6 +251,8 @@ const updateMinimumTagRank = (rawValue: string) => {
 
     <FilterTagEditor
       v-model="tagNamesModel"
+      v-model:excluded-values="excludedTagNamesModel"
+      enable-exclusion
       :metadata-tags="metadata?.tags ?? []"
       :metadata-status="metadataStatus"
       :metadata-error="metadataError"

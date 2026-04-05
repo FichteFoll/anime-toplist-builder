@@ -57,7 +57,9 @@ export interface FilterState {
   seasons: AnimeSeason[]
   countryOfOrigin?: string
   tags: string[]
+  excludedTags: string[]
   genres: string[]
+  excludedGenres: string[]
   formats: AnimeFormat[]
   popularity?: NumericRange
   source: AnimeSource[]

@@ -30,8 +30,10 @@ export interface AniListMediaSearchVariables {
   season?: AnimeSeason
   countryOfOrigin?: string
   tagIn?: string[]
+  tagNotIn?: string[]
   minimumTagRank?: number
   genreIn?: string[]
+  genreNotIn?: string[]
   formatIn?: AnimeFormat[]
   source?: AnimeSource
   startDateGreater?: number
