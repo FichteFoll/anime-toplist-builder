@@ -29,6 +29,7 @@
 
 - Use TypeScript throughout.
 - In Vue SFCs, keep the `<script>` block before `<template>`.
+- In Vue templates, follow Vue's recommended attribute order.
 - Make components re-usable and encapsulate functionality to keep per-component context minimal and isolated.
 - Prefer bi-directional data transfer using the `defineModel` directive.
 - Prefer small pure helpers in `src/lib` for normalization, validation, and merge logic.
