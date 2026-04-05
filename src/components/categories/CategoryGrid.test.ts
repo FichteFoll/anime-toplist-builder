@@ -117,7 +117,7 @@ const mountCategoryGrid = () =>
       metadata: null,
       metadataStatus: 'idle',
       metadataError: null,
-      titleLanguage: 'userPreferred',
+      titleLanguage: 'english',
     },
     global: {
       stubs: {

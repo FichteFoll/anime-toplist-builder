@@ -15,8 +15,6 @@ export const resolveAnimeTitle = (title: AnimeTitle, titleLanguage: AnimeTitleLa
         return title.english
       case 'native':
         return title.native
-      case 'userPreferred':
-        return title.userPreferred
     }
   })()
 

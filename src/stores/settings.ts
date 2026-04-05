@@ -7,7 +7,7 @@ import { loadStoredSettings, saveStoredSettings } from '@/lib/persistence'
 
 export const useSettingsStore = defineStore('settings', () => {
   const themePreference = ref<ThemePreference>('system')
-  const titleLanguage = ref<AnimeTitleLanguage>('userPreferred')
+  const titleLanguage = ref<AnimeTitleLanguage>('english')
   const lastOpenedTemplateId = ref<string | null>(null)
   const isHydrated = ref(false)
 

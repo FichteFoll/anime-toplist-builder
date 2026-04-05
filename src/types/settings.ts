@@ -1,4 +1,4 @@
-export const animeTitleLanguages = ['userPreferred', 'romaji', 'english', 'native'] as const
+export const animeTitleLanguages = ['romaji', 'english', 'native'] as const
 
 export type AnimeTitleLanguage = (typeof animeTitleLanguages)[number]
 

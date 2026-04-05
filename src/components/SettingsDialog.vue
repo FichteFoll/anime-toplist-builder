@@ -13,7 +13,6 @@ import {
 import { animeTitleLanguages, type AnimeTitleLanguage } from '@/types'
 
 const titleLanguageLabels: Record<AnimeTitleLanguage, string> = {
-  userPreferred: 'User preferred',
   romaji: 'Romaji',
   english: 'English',
   native: 'Native',
@@ -83,7 +82,7 @@ const model = defineModel<AnimeTitleLanguage>({ required: true })
               <div>
                 <p class="text-sm font-medium text-app-text">{{ titleLanguageLabels[language] }}</p>
                 <p class="mt-1 text-sm leading-6 text-app-muted">
-                  {{ language === 'userPreferred' ? 'Use AniList\'s preferred title ordering for each anime.' : `Prefer the ${titleLanguageLabels[language].toLowerCase()} title when available.` }}
+                  {{ `Prefer the ${titleLanguageLabels[language].toLowerCase()} title when available.` }}
                 </p>
               </div>
             </label>

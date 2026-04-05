@@ -131,7 +131,7 @@ describe('persistence helpers', () => {
     expect(loadStoredSettings(storage)).toEqual({
       schemaVersion: 1,
       themePreference: 'system',
-      titleLanguage: 'userPreferred',
+      titleLanguage: 'english',
       lastOpenedTemplateId: undefined,
     })
   })

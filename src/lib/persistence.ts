@@ -97,7 +97,7 @@ const isHttpUrl = (value: unknown): value is string => {
 const createDefaultSettingsRecord = (): StoredSettingsRecordV1 => ({
   schemaVersion: settingsStorageSchemaVersion,
   themePreference: 'system',
-  titleLanguage: 'userPreferred',
+  titleLanguage: 'english',
 })
 
 export const getBrowserStorage = (): BrowserStorage | null => {
@@ -277,7 +277,7 @@ export const loadStoredSettings = (storage = getBrowserStorage()): StoredSetting
       : 'system',
     titleLanguage: animeTitleLanguages.includes(value.titleLanguage as AnimeTitleLanguage)
       ? (value.titleLanguage as AnimeTitleLanguage)
-      : 'userPreferred',
+      : 'english',
     lastOpenedTemplateId: isString(value.lastOpenedTemplateId) ? value.lastOpenedTemplateId : undefined,
   }
 }
