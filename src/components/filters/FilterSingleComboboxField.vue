@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -28,9 +28,19 @@ const props = defineProps<{
 
 const model = defineModel<string | undefined>({ required: true })
 
+const searchTerm = ref('')
+
 const optionLabelByValue = computed(() => new Map(props.options.map((option) => [option.value, option.label])))
 
 const displayValue = (value: string) => optionLabelByValue.value.get(value) ?? ''
+
+watch(
+  model,
+  (value) => {
+    searchTerm.value = value ? displayValue(value) : ''
+  },
+  { immediate: true },
+)
 
 const updateValue = (value: string | undefined) => {
   model.value = value || undefined
@@ -52,6 +62,7 @@ const updateValue = (value: string | undefined) => {
       <ComboboxAnchor as-child>
         <div class="relative">
           <ComboboxInput
+            v-model="searchTerm"
             class="shell-input pr-10"
             :display-value="displayValue"
             :placeholder="placeholder ?? 'Choose an option'"
