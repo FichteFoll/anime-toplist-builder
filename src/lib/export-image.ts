@@ -295,6 +295,39 @@ const drawCoverPlaceholder = (
   context.textBaseline = 'alphabetic'
 }
 
+const drawMissingSelectionPlaceholder = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  palette: ExportPalette,
+  tone: string,
+) => {
+  fillRoundedRect(context, x, y, width, height, radius, tone)
+  strokeRoundedRect(context, x, y, width, height, radius, palette.border, 2)
+
+  const iconSize = clamp(Math.round(Math.min(width, height) * 0.34), 48, 68)
+  const iconX = x + (width - iconSize) / 2
+  const iconY = y + (height - iconSize) / 2
+  const stroke = palette.muted
+
+  context.save()
+  context.strokeStyle = stroke
+  context.lineCap = 'round'
+  context.lineJoin = 'round'
+  context.lineWidth = 4
+  drawRoundedRect(context, iconX, iconY, iconSize, iconSize, 18)
+  context.stroke()
+
+  context.beginPath()
+  context.moveTo(iconX + 12, iconY + 12)
+  context.lineTo(iconX + iconSize - 12, iconY + iconSize - 12)
+  context.stroke()
+  context.restore()
+}
+
 const createCanvas = (width: number, height: number) => {
   if (typeof document === 'undefined') {
     throw new Error('PNG export is only available in the browser.')
@@ -341,9 +374,9 @@ export const renderTemplatePng = async ({
   const fonts = createFontConfig()
   const outerPadding = Math.round(width * 0.04)
   const headerHeight = Math.round(width * 0.135)
-  const footerHeight = 84
+  const footerHeight = 56
   const gridGap = 24
-  const columns = Math.max(1, appConfig.exportCategoriesPerRow)
+  const columns = 3
   const filledSelections = template.categories.filter((category) => selectionByCategory[category.id]).length
   const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
   const cardWidth = Math.floor(
@@ -352,53 +385,70 @@ export const renderTemplatePng = async ({
   const cardPadding = 20
   const coverWidth = clamp(Math.round(cardWidth * 0.34), 92, 132)
   const coverHeight = Math.round(coverWidth * 1.45)
-  const cardHeight = Math.max(coverHeight + cardPadding * 2, 244)
+  const cardHeight = coverHeight + cardPadding * 2
   const gridHeight = rows * cardHeight + (rows - 1) * gridGap
   const height = outerPadding + headerHeight + 28 + gridHeight + footerHeight + outerPadding
   const { canvas, context } = createCanvas(width, height)
   const authorLabel = author.trim() || 'Anonymous'
-  const generatedLabel = new Date().toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  const generatedLabel = new Date().toISOString().slice(0, 10)
 
   context.fillStyle = palette.background
   context.fillRect(0, 0, width, height)
 
   fillRoundedRect(context, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, 36, palette.surface)
   strokeRoundedRect(context, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, 36, palette.border, 2)
-  fillRoundedRect(context, outerPadding + 24, outerPadding + 24, 180, 38, 999, palette.accentSoft)
 
-  setCanvasFont(context, 600, fonts.meta)
-  context.fillStyle = palette.accent
-  context.fillText('Anime Toplist PNG Export', outerPadding + 44, outerPadding + 50)
+  const headerTextX = outerPadding + 24
+  const headerTitleY = outerPadding + 32
+  const headerTitleLineHeight = Math.round(fonts.templateTitle * 1.15)
+  const headerDescriptionLineHeight = Math.round(fonts.body * 1.35)
+  const headerMetaLineHeight = Math.round(fonts.headerMeta * 1.3)
 
+  context.textBaseline = 'top'
   setCanvasFont(context, 700, fonts.templateTitle)
   context.fillStyle = palette.text
-  drawWrappedText(
+  const titleBottomY = drawWrappedText(
     context,
     template.name,
-    outerPadding + 28,
-    outerPadding + 98,
-    width - outerPadding * 2 - 56,
-    Math.round(fonts.templateTitle * 1.15),
+    headerTextX,
+    headerTitleY,
+    width - outerPadding * 2 - 40,
+    headerTitleLineHeight,
     2,
     palette.text,
   )
+
+  let descriptionBottomY = titleBottomY
+
+  if (template.description.trim().length > 0) {
+    setCanvasFont(context, 500, fonts.body)
+    context.fillStyle = palette.muted
+    descriptionBottomY = drawWrappedText(
+      context,
+      template.description,
+      headerTextX,
+      titleBottomY + 10,
+      width - outerPadding * 2 - 40,
+      headerDescriptionLineHeight,
+      2,
+      palette.muted,
+    )
+  }
 
   setCanvasFont(context, 500, fonts.headerMeta)
   context.fillStyle = palette.muted
   drawWrappedText(
     context,
-    `Author: ${authorLabel}  •  Filled slots: ${filledSelections}/${template.categories.length}  •  Theme: ${theme}  •  Generated: ${generatedLabel}`,
-    outerPadding + 28,
-    outerPadding + headerHeight - 28,
-    width - outerPadding * 2 - 56,
-    Math.round(fonts.headerMeta * 1.3),
+    `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+    headerTextX,
+    descriptionBottomY + 12,
+    width - outerPadding * 2 - 40,
+    headerMetaLineHeight,
     2,
     palette.muted,
   )
+
+  context.textBaseline = 'alphabetic'
 
   const imageEntries = await Promise.all(
     template.categories.map(async (category) => {
@@ -445,27 +495,18 @@ export const renderTemplatePng = async ({
     const coverY = y + cardPadding
     const textX = coverX + coverWidth + 18
     const textWidth = cardWidth - (textX - x) - cardPadding
-    const selectionTitle = selection
-      ? resolveAnimeTitle(selection.title, titleLanguage)
-      : 'No anime selected'
+    const selectionTitle = selection ? resolveAnimeTitle(selection.title, titleLanguage) : ''
     const metaParts = [selection?.seasonYear ?? null, selection?.format ?? null].filter(
       (value): value is number | AnimeFormat => value !== null,
     )
 
     fillRoundedRect(context, x, y, cardWidth, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, cardWidth, cardHeight, 28, palette.border, 2)
-    fillRoundedRect(context, x + 16, y + 14, 52, 28, 999, palette.accentSoft)
-
-    setCanvasFont(context, 700, fonts.meta)
-    context.fillStyle = palette.accent
-    context.textAlign = 'center'
-    context.fillText(String(index + 1), x + 42, y + 34)
-    context.textAlign = 'left'
 
     if (selection && image) {
       drawCoverImage(context, image, coverX, coverY, coverWidth, coverHeight, 18)
       strokeRoundedRect(context, coverX, coverY, coverWidth, coverHeight, 18, palette.border, 2)
-    } else {
+    } else if (selection) {
       drawCoverPlaceholder(
         context,
         coverX,
@@ -477,6 +518,17 @@ export const renderTemplatePng = async ({
         category.name,
         selection?.coverImage.color ?? palette.elevated,
       )
+    } else {
+      drawMissingSelectionPlaceholder(
+        context,
+        coverX,
+        coverY,
+        coverWidth,
+        coverHeight,
+        18,
+        palette,
+        palette.elevated,
+      )
     }
 
     setCanvasFont(context, 600, fonts.categoryTitle)
@@ -485,7 +537,7 @@ export const renderTemplatePng = async ({
       context,
       category.name,
       textX,
-      y + 42,
+      y + cardPadding + 22,
       textWidth,
       Math.round(fonts.categoryTitle * 1.2),
       2,
@@ -509,7 +561,7 @@ export const renderTemplatePng = async ({
     context.fillStyle = palette.muted
     drawWrappedText(
       context,
-      metaParts.length > 0 ? metaParts.join(' • ') : 'Awaiting selection metadata',
+      metaParts.join(' • '),
       textX,
       titleBottomY + 16,
       textWidth,
@@ -520,26 +572,11 @@ export const renderTemplatePng = async ({
 
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted
-    drawWrappedText(
-      context,
-      selection
-        ? `AniList media id: ${selection.mediaId}`
-        : 'This slot stays reserved in the export until an anime is chosen.',
-      textX,
-      y + cardHeight - 28,
-      textWidth,
-      Math.round(fonts.meta * 1.3),
-      2,
-      palette.muted,
-    )
   })
 
   setCanvasFont(context, 500, fonts.meta)
   context.fillStyle = palette.muted
-  context.fillText(appConfig.exportWatermark, outerPadding, height - outerPadding)
-  context.textAlign = 'right'
-  context.fillText(appConfig.appName, width - outerPadding, height - outerPadding)
-  context.textAlign = 'left'
+  context.fillText(`Generated with ${appConfig.exportSiteUrl}`, outerPadding, height - outerPadding)
 
   return {
     blob: await toBlob(canvas),

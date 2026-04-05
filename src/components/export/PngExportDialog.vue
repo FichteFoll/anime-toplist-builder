@@ -40,7 +40,7 @@ let renderRequestId = 0
 
 const layoutSummary = computed(
   () =>
-    `${appConfig.exportImageWidth}px wide, ${appConfig.exportCategoriesPerRow} categories per row, title ${appConfig.exportFontSizeTemplateTitle}px, card titles ${appConfig.exportFontSizeCategoryTitle}px, body ${appConfig.exportFontSizeBody}px.`,
+    `${appConfig.exportImageWidth}px wide, 3 categories per row, title ${appConfig.exportFontSizeTemplateTitle}px, card titles ${appConfig.exportFontSizeCategoryTitle}px, body ${appConfig.exportFontSizeBody}px.`,
 )
 
 const filename = computed(() =>
@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
             </DialogTitle>
             <DialogDescription class="mt-3 max-w-3xl text-sm leading-6 text-app-muted">
               The preview uses browser-side canvas rendering,
-              so it stays compatible with static hosting while matching the current app theme and category order.
+              so it stays compatible with static hosting while matching the current category order.
             </DialogDescription>
           </div>
 
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
                     Watermark
                   </dt>
                   <dd class="mt-1">
-                    {{ appConfig.exportWatermark }}
+                    Generated with {{ appConfig.exportSiteUrl }}
                   </dd>
                 </div>
                 <div>
@@ -282,9 +282,6 @@ onBeforeUnmount(() => {
               <h3 class="text-lg font-semibold tracking-tight text-app-text">
                 Generated preview
               </h3>
-              <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-                {{ resolvedTheme }} theme
-              </span>
             </div>
 
             <div class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-surface/80 p-3">

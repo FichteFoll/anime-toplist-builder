@@ -7,7 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_DEFAULT_TEMPLATE_ID?: string
   readonly VITE_EXPORT_CATEGORIES_PER_ROW?: string
   readonly VITE_EXPORT_IMAGE_WIDTH?: string
-  readonly VITE_EXPORT_WATERMARK?: string
+  readonly VITE_EXPORT_SITE_URL?: string
   readonly VITE_REPOSITORY_URL?: string
 }
 

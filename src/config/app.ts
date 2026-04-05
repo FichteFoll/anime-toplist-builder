@@ -9,7 +9,7 @@ const parsePositiveInteger = (value: string | undefined, fallback: number) => {
 export const appConfig = {
   appName: import.meta.env.VITE_APP_NAME?.trim() || 'Anime Toplist',
   repositoryUrl:
-    import.meta.env.VITE_REPOSITORY_URL?.trim() || 'https://github.com/fichte/anime-toplist',
+    import.meta.env.VITE_REPOSITORY_URL?.trim() || 'https://github.com/_/anime-toplist',
   anilistUrl: import.meta.env.VITE_ANILIST_URL?.trim() || 'https://anilist.co',
   defaultTemplateId: import.meta.env.VITE_DEFAULT_TEMPLATE_ID?.trim() || '',
   defaultTheme: defaultThemePreference,
@@ -32,7 +32,7 @@ export const appConfig = {
   ),
   exportFontSizeBody: parsePositiveInteger(import.meta.env.VITE_EXPORT_FONT_SIZE_BODY, 18),
   exportFontSizeMeta: parsePositiveInteger(import.meta.env.VITE_EXPORT_FONT_SIZE_META, 16),
-  exportWatermark:
-    import.meta.env.VITE_EXPORT_WATERMARK?.trim() || 'Generated with Anime Toplist',
+  exportSiteUrl:
+    import.meta.env.VITE_EXPORT_SITE_URL?.trim() || 'https://_.github.io/anime-toplist/',
   baseUrl: import.meta.env.BASE_URL,
 }
