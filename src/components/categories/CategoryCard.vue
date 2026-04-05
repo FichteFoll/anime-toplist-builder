@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
-import CategoryEditPopover from '@/components/categories/CategoryEditPopover.vue'
-import CategoryMediaPickerPopover from '@/components/categories/CategoryMediaPickerPopover.vue'
+import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
+import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import type {
   AniListMetadata,
@@ -142,7 +142,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
     </div>
 
     <div class="mt-5 flex flex-wrap gap-2">
-      <CategoryMediaPickerPopover
+      <CategoryMediaPickerDialog
         :category="category"
         :global-filter="globalFilter"
         :selected-media-id="selection?.mediaId ?? null"
@@ -158,7 +158,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
       >
         Clear
       </button>
-      <CategoryEditPopover
+      <CategoryEditDialog
         :category="category"
         :global-filter="globalFilter"
         :metadata="metadata"

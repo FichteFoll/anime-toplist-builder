@@ -9,7 +9,7 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import PngExportDialog from '@/components/export/PngExportDialog.vue'
-import GlobalFilterPopover from '@/components/filters/GlobalFilterPopover.vue'
+import GlobalFilterDialog from '@/components/filters/GlobalFilterDialog.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { sanitizeDownloadFilename } from '@/lib/export-filename'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
@@ -455,7 +455,7 @@ onMounted(async () => {
                   </div>
 
                   <div class="flex flex-wrap gap-2">
-                    <GlobalFilterPopover
+                    <GlobalFilterDialog
                       v-if="activeTemplate"
                       :model-value="activeTemplate.globalFilter"
                       :metadata="metadata"
