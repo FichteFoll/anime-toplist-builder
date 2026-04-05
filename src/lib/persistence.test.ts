@@ -8,7 +8,12 @@ import {
   saveStoredTemplates,
 } from '@/lib/persistence'
 import { normalizeImportedTemplate } from '@/lib/template-validation'
-import { templateSchemaVersion, type AnimeSelection } from '@/types'
+import {
+  defaultAnimeTitleLanguage,
+  defaultThemePreference,
+  templateSchemaVersion,
+  type AnimeSelection,
+} from '@/types'
 
 type MockStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> & {
   read: (key: string) => unknown
@@ -130,8 +135,8 @@ describe('persistence helpers', () => {
 
     expect(loadStoredSettings(storage)).toEqual({
       schemaVersion: 1,
-      themePreference: 'system',
-      titleLanguage: 'english',
+      themePreference: defaultThemePreference,
+      titleLanguage: defaultAnimeTitleLanguage,
       lastOpenedTemplateId: undefined,
     })
   })

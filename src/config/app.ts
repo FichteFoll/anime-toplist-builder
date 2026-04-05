@@ -1,3 +1,5 @@
+import { defaultThemePreference } from '@/types'
+
 const parsePositiveInteger = (value: string | undefined, fallback: number) => {
   const parsedValue = Number.parseInt(value ?? '', 10)
 
@@ -10,7 +12,7 @@ export const appConfig = {
     import.meta.env.VITE_REPOSITORY_URL?.trim() || 'https://github.com/fichte/anime-toplist',
   anilistUrl: import.meta.env.VITE_ANILIST_URL?.trim() || 'https://anilist.co',
   defaultTemplateId: import.meta.env.VITE_DEFAULT_TEMPLATE_ID?.trim() || '',
-  defaultTheme: 'system' as const,
+  defaultTheme: defaultThemePreference,
   exportImageWidth: parsePositiveInteger(import.meta.env.VITE_EXPORT_IMAGE_WIDTH, 1400),
   exportCategoriesPerRow: parsePositiveInteger(
     import.meta.env.VITE_EXPORT_CATEGORIES_PER_ROW,

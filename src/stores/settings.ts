@@ -1,13 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import type { AnimeTitleLanguage, ThemePreference } from '@/types'
+import {
+  defaultAnimeTitleLanguage,
+  defaultThemePreference,
+  type AnimeTitleLanguage,
+  type ThemePreference,
+} from '@/types'
 
 import { loadStoredSettings, saveStoredSettings } from '@/lib/persistence'
 
 export const useSettingsStore = defineStore('settings', () => {
-  const themePreference = ref<ThemePreference>('system')
-  const titleLanguage = ref<AnimeTitleLanguage>('english')
+  const themePreference = ref<ThemePreference>(defaultThemePreference)
+  const titleLanguage = ref<AnimeTitleLanguage>(defaultAnimeTitleLanguage)
   const lastOpenedTemplateId = ref<string | null>(null)
   const isHydrated = ref(false)
 

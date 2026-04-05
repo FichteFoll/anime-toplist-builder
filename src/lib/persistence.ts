@@ -2,6 +2,8 @@ import {
   animeFormats,
   animeSeasons,
   animeTitleLanguages,
+  defaultAnimeTitleLanguage,
+  defaultThemePreference,
   themePreferences,
   type AnimeSelection,
   type AnimeTitleLanguage,
@@ -96,8 +98,8 @@ const isHttpUrl = (value: unknown): value is string => {
 
 const createDefaultSettingsRecord = (): StoredSettingsRecordV1 => ({
   schemaVersion: settingsStorageSchemaVersion,
-  themePreference: 'system',
-  titleLanguage: 'english',
+  themePreference: defaultThemePreference,
+  titleLanguage: defaultAnimeTitleLanguage,
 })
 
 export const getBrowserStorage = (): BrowserStorage | null => {
@@ -274,10 +276,10 @@ export const loadStoredSettings = (storage = getBrowserStorage()): StoredSetting
     schemaVersion: settingsStorageSchemaVersion,
     themePreference: themePreferences.includes(value.themePreference as ThemePreference)
       ? (value.themePreference as ThemePreference)
-      : 'system',
+      : defaultThemePreference,
     titleLanguage: animeTitleLanguages.includes(value.titleLanguage as AnimeTitleLanguage)
       ? (value.titleLanguage as AnimeTitleLanguage)
-      : 'english',
+      : defaultAnimeTitleLanguage,
     lastOpenedTemplateId: isString(value.lastOpenedTemplateId) ? value.lastOpenedTemplateId : undefined,
   }
 }
