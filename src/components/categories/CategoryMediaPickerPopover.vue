@@ -8,6 +8,11 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
+  TooltipArrow,
+  TooltipContent,
+  TooltipPortal,
+  TooltipRoot,
+  TooltipTrigger,
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
@@ -196,9 +201,9 @@ watch(pickerSort, (value, previousValue) => {
       <button
         type="button"
         class="shell-button shell-button-active"
-        :aria-label="selectedMediaId ? `Replace anime for ${category.name}` : `Pick anime for ${category.name}`"
+        :aria-label="selectedMediaId ? `Replace selection for ${category.name}` : `Pick selection for ${category.name}`"
       >
-        {{ selectedMediaId ? 'Replace anime' : 'Pick anime' }}
+        {{ selectedMediaId ? 'Replace' : 'Pick' }}
       </button>
     </DialogTrigger>
 

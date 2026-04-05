@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
 import CategoryEditPopover from '@/components/categories/CategoryEditPopover.vue'
 import CategoryMediaPickerPopover from '@/components/categories/CategoryMediaPickerPopover.vue'
@@ -33,6 +34,7 @@ const emit = defineEmits<{
 const selectionTitle = computed(() =>
   props.selection ? resolveAnimeTitle(props.selection.title, props.titleLanguage) : null,
 )
+const deleteCategoryTooltip = computed(() => `Delete category ${props.category.name}`)
 </script>
 
 <template>
@@ -151,10 +153,10 @@ const selectionTitle = computed(() =>
         type="button"
         class="shell-button"
         :disabled="!selection"
-        :aria-label="`Clear selected anime for ${category.name}`"
+        :aria-label="`Clear selection for ${category.name}`"
         @click="emit('clearSelection', category.id)"
       >
-        Clear anime
+        Clear
       </button>
       <CategoryEditPopover
         :category="category"
@@ -164,14 +166,43 @@ const selectionTitle = computed(() =>
         :metadata-error="metadataError"
         @save="emit('save', $event)"
       />
-      <button
-        type="button"
-        class="shell-button"
-        :aria-label="`Delete category ${category.name}`"
-        @click="emit('delete', category.id)"
-      >
-        Delete
-      </button>
+      <TooltipRoot>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            class="shell-button inline-flex h-10 w-10 items-center justify-center p-0"
+            :aria-label="deleteCategoryTooltip"
+            @click="emit('delete', category.id)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M6 6l1 14h10l1-14" />
+              <path d="M10 11v5" />
+              <path d="M14 11v5" />
+            </svg>
+          </button>
+        </TooltipTrigger>
+
+        <TooltipPortal>
+          <TooltipContent
+            class="rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+            :side-offset="8"
+          >
+            Delete category
+            <TooltipArrow class="fill-app-surface" />
+          </TooltipContent>
+        </TooltipPortal>
+      </TooltipRoot>
     </div>
   </article>
 </template>

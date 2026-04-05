@@ -7,12 +7,16 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
+  TooltipArrow,
+  TooltipContent,
+  TooltipPortal,
+  TooltipRoot,
+  TooltipTrigger,
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import {
-  countConfiguredFilterFields,
   getCategoryFilterDisabledReasons,
   isNonBlankName,
 } from '@/lib/filter-editor'
@@ -49,7 +53,6 @@ function cloneFilter(filter: FilterState): FilterState {
 }
 
 const disabledFields = computed(() => getCategoryFilterDisabledReasons(props.globalFilter))
-const filterRuleCount = computed(() => countConfiguredFilterFields(props.category.filter))
 const hasValidName = computed(() => isNonBlankName(draftName.value))
 
 const resetDraft = () => {
@@ -93,18 +96,41 @@ const save = () => {
 
 <template>
   <DialogRoot v-model:open="open">
-    <DialogTrigger as-child>
-      <button
-        type="button"
-        class="shell-button"
-        :aria-label="`Edit category ${props.category.name}`"
-      >
-        Edit
-        <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
-          {{ filterRuleCount }} rule{{ filterRuleCount === 1 ? '' : 's' }}
-        </span>
-      </button>
-    </DialogTrigger>
+    <TooltipRoot>
+      <DialogTrigger as-child>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            class="shell-button inline-flex h-10 w-10 items-center justify-center p-0"
+            :aria-label="`Edit category ${props.category.name}`"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+        </TooltipTrigger>
+      </DialogTrigger>
+
+      <TooltipPortal>
+        <TooltipContent
+          class="rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+          :side-offset="8"
+        >
+          Edit
+          <TooltipArrow class="fill-app-surface" />
+        </TooltipContent>
+      </TooltipPortal>
+    </TooltipRoot>
 
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
