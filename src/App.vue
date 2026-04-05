@@ -5,6 +5,7 @@ import { ConfigProvider, TooltipProvider } from 'reka-ui'
 import { fetchAniListMetadata } from '@/api'
 import AppFooter from '@/components/AppFooter.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import PngExportDialog from '@/components/export/PngExportDialog.vue'
@@ -14,6 +15,7 @@ import { sanitizeDownloadFilename } from '@/lib/export-filename'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import { createBlankCategory } from '@/lib/template-factories'
 import { stringifyTemplateExportPayload, TemplateValidationError } from '@/lib/template-validation'
+import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
 import { useTheme } from '@/composables/useTheme'
 import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
@@ -26,6 +28,12 @@ const templateStore = useTemplateStore()
 const selectionsStore = useSelectionsStore()
 const toastStore = useToastStore()
 const { resolvedTheme, theme } = useTheme()
+const {
+  isOpen: isConfirmationOpen,
+  state: confirmationState,
+  requestConfirmation,
+  confirmAction,
+} = useConfirmationDialog()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const remoteUrlInput = ref(templateStore.pendingStartupTemplateUrl ?? '')
@@ -190,22 +198,22 @@ const resetActiveTemplate = () => {
     return
   }
 
-  const shouldReset = window.confirm(
-    activeTemplate.value.origin === 'predefined'
-      ? `Reopen the built-in template "${activeTemplate.value.name}"? Local selections stay untouched.`
-      : `Reset "${activeTemplate.value.name}"? This removes the local template, but keeps stored selections for other templates.`,
-  )
+  requestConfirmation({
+    title: 'Reset template',
+    description:
+      activeTemplate.value.origin === 'predefined'
+        ? `Reopen the built-in template "${activeTemplate.value.name}"? Local selections stay untouched.`
+        : `Reset "${activeTemplate.value.name}"? This removes the local template, but keeps stored selections for other templates.`,
+    confirmLabel: 'Reset template',
+    onConfirm: () => {
+      if (!templateStore.resetActiveTemplate()) {
+        toastStore.error('Template reset failed.')
+        return
+      }
 
-  if (!shouldReset) {
-    return
-  }
-
-  if (!templateStore.resetActiveTemplate()) {
-    toastStore.error('Template reset failed.')
-    return
-  }
-
-  toastStore.success('Template reset complete.')
+      toastStore.success('Template reset complete.')
+    },
+  })
 }
 
 const updateGlobalFilter = (filter: FilterState) => {
@@ -267,13 +275,21 @@ const deleteCategory = (categoryId: string) => {
         ? `the saved selection "${resolveAnimeTitle(selection.title, settingsStore.titleLanguage)}"`
         : null,
     ].filter((value): value is string => value !== null)
-    const shouldDelete = window.confirm(
-      `Delete "${category.name}"? This removes ${affectedParts.join(' and ')}.`,
-    )
 
-    if (!shouldDelete) {
-      return
-    }
+    requestConfirmation({
+      title: 'Delete category',
+      description: `Delete "${category.name}"? This removes ${affectedParts.join(' and ')}.`,
+      confirmLabel: 'Delete category',
+      onConfirm: () => {
+        templateStore.updateActiveTemplate((template) => {
+          template.categories = template.categories.filter((entry) => entry.id !== categoryId)
+        })
+        selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
+        toastStore.success('Deleted category.', category.name)
+      },
+    })
+
+    return
   }
 
   templateStore.updateActiveTemplate((template) => {
@@ -302,16 +318,17 @@ const clearActiveSelections = () => {
     return
   }
 
-  const shouldClearSelections = window.confirm(
-    `Clear all selections for "${activeTemplate.value.name}"?`,
-  )
+  const templateId = activeTemplate.value.id
 
-  if (!shouldClearSelections) {
-    return
-  }
-
-  selectionsStore.clearSelectionsForTemplate(activeTemplate.value.id)
-  toastStore.success('Selections cleared for the active template.')
+  requestConfirmation({
+    title: 'Clear selections',
+    description: `Clear all selections for "${activeTemplate.value.name}"?`,
+    confirmLabel: 'Clear selections',
+    onConfirm: () => {
+      selectionsStore.clearSelectionsForTemplate(templateId)
+      toastStore.success('Selections cleared for the active template.')
+    },
+  })
 }
 
 const selectCategoryAnime = (categoryId: string, selection: AnimeSelection) => {
@@ -652,6 +669,14 @@ onMounted(async () => {
           <AppFooter />
         </div>
         <AppToastViewport />
+
+        <ConfirmationDialog
+          v-model:open="isConfirmationOpen"
+          :title="confirmationState?.title ?? 'Confirm action'"
+          :description="confirmationState?.description ?? ''"
+          :confirm-label="confirmationState?.confirmLabel ?? 'Confirm'"
+          @confirm="confirmAction"
+        />
       </div>
     </TooltipProvider>
   </ConfigProvider>
