@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
-import { defineComponent, nextTick, ref } from 'vue'
+import { nextTick, ref, type Component } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import FilterSingleComboboxField from '@/components/filters/FilterSingleComboboxField.vue'
@@ -13,7 +13,7 @@ vi.mock('reka-ui', () => ({
   ComboboxContent: {
     template: '<div><slot /></div>',
   },
-  ComboboxInput: defineComponent({
+  ComboboxInput: {
     name: 'ComboboxInput',
     props: {
       displayValue: {
@@ -31,7 +31,7 @@ vi.mock('reka-ui', () => ({
     },
     emits: ['update:modelValue'],
     template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)">',
-  }),
+  } satisfies Component,
   ComboboxItem: {
     template: '<div><slot /></div>',
   },
@@ -55,7 +55,7 @@ vi.mock('reka-ui', () => ({
     },
     emits: ['update:modelValue'],
     template: '<div><slot /></div>',
-  },
+  } satisfies Component,
   ComboboxViewport: {
     template: '<div><slot /></div>',
   },
@@ -63,7 +63,7 @@ vi.mock('reka-ui', () => ({
 
 describe('FilterSingleComboboxField', () => {
   it('clears the displayed text when the selection is cleared', async () => {
-    const Parent = defineComponent({
+    const Parent = {
       components: { FilterSingleComboboxField },
       setup() {
         const model = ref<string | undefined>('JP')
@@ -81,7 +81,7 @@ describe('FilterSingleComboboxField', () => {
           clear-label="Clear country of origin"
         />
       `,
-    })
+    } satisfies Component
 
     const wrapper = mount(Parent)
     const input = wrapper.get('input')

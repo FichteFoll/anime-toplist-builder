@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
-import { defineComponent, nextTick, ref } from 'vue'
+import { nextTick, ref, type Component } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import FilterMultiComboboxField from '@/components/filters/FilterMultiComboboxField.vue'
@@ -13,7 +13,7 @@ vi.mock('reka-ui', () => ({
   ComboboxContent: {
     template: '<div><slot /></div>',
   },
-  ComboboxInput: defineComponent({
+  ComboboxInput: {
     name: 'ComboboxInput',
     props: {
       modelValue: {
@@ -27,7 +27,7 @@ vi.mock('reka-ui', () => ({
     },
     emits: ['update:modelValue'],
     template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)">',
-  }),
+  } satisfies Component,
   ComboboxItem: {
     template: '<div><slot /></div>',
   },
@@ -59,7 +59,7 @@ vi.mock('reka-ui', () => ({
     },
     emits: ['update:modelValue'],
     template: '<div><slot /></div>',
-  },
+  } satisfies Component,
   ComboboxViewport: {
     template: '<div><slot /></div>',
   },
@@ -71,12 +71,12 @@ vi.mock('reka-ui', () => ({
       },
     },
     template: '<div />',
-  },
+  } satisfies Component,
 }))
 
 describe('FilterMultiComboboxField', () => {
   it('clears all selections from the clear button', async () => {
-    const Parent = defineComponent({
+    const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
         const model = ref<string[]>(['JP', 'KR'])
@@ -94,7 +94,7 @@ describe('FilterMultiComboboxField', () => {
           clear-label="Clear countries"
         />
       `,
-    })
+    } satisfies Component
 
     const wrapper = mount(Parent)
 
