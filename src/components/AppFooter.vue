@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { appConfig } from '@/config/app'
+
+const buildDate = new Date(__BUILD_TIME__).toISOString().slice(0, 10)
+const buildCommitSha = __BUILD_COMMIT__ !== 'unknown' ? __BUILD_COMMIT__ : ''
+const buildCommitUrl = buildCommitSha
+  ? `${appConfig.repositoryUrl.replace(/\/$/, '')}/commit/${buildCommitSha}`
+  : ''
 </script>
 
 <template>
@@ -30,6 +36,22 @@ import { appConfig } from '@/config/app'
         </a>
         .
         AniList is not affiliated with this project.
+      </p>
+
+      <p class="leading-6 sm:text-right">
+        Built on {{ buildDate }}
+        <template v-if="buildCommitSha">
+          from commit
+          <a
+            :href="buildCommitUrl"
+            class="font-medium text-app-text underline decoration-app-border underline-offset-4 transition hover:decoration-app-accent"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {{ buildCommitSha }}
+          </a>
+        </template>
+        .
       </p>
     </div>
   </footer>
