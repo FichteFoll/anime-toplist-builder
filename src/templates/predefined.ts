@@ -25,7 +25,11 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'filmoftheyear01',
         name: 'Film Of The Year',
         description: 'The strongest anime film of the year',
-        filter: { formats: ['MOVIE' as const] },
+        filter: {
+          formats: ['MOVIE' as const, 'ONA' as const],
+          episodes: { maximum: 1 },
+          duration: { minimum: 30 },
+        },
       },
       {
         id: 'bestcontinuingseries01',
