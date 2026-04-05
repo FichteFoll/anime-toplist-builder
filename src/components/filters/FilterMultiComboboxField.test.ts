@@ -180,7 +180,7 @@ describe('FilterMultiComboboxField', () => {
 
     await clickActionOption()
     await nextTick()
-    expect(wrapper.vm.model).toEqual([])
+    expect(wrapper.vm.model).toEqual(['Action'])
     expect(wrapper.vm.excludedValues).toEqual([])
   })
 
@@ -322,10 +322,61 @@ describe('FilterMultiComboboxField', () => {
 
     const excludedChip = wrapper.get('[data-filter-chip="excluded"]')
 
-    expect(excludedChip.attributes('class')).toContain('bg-red-500/10')
+    expect(excludedChip.attributes('class')).toContain('bg-red-500/15')
 
     const excludedPopupItem = wrapper.get('[data-filter-popup-item="Action"]')
 
     expect(excludedPopupItem.attributes('class')).toContain('bg-red-500/10')
+  })
+
+  it('keeps chip order stable when a value becomes excluded and re-included', async () => {
+    const Parent = {
+      components: { FilterMultiComboboxField },
+      setup() {
+        const model = ref<string[]>(['Action', 'Drama'])
+        const excludedValues = ref<string[]>([])
+
+        return { excludedValues, model }
+      },
+      template: `
+        <FilterMultiComboboxField
+          v-model="model"
+          v-model:excluded-values="excludedValues"
+          enable-exclusion
+          label="Genres"
+          :options="[
+            { value: 'Action', label: 'Action' },
+            { value: 'Drama', label: 'Drama' },
+          ]"
+          clear-label="Clear genres"
+        />
+      `,
+    } satisfies Component
+
+    const wrapper = mount(Parent)
+    await nextTick()
+
+    const actionChip = wrapper.get('[data-filter-chip="selected"]')
+
+    await actionChip.trigger('click')
+    await nextTick()
+
+    expect(wrapper.vm.model).toEqual(['Drama'])
+    expect(wrapper.vm.excludedValues).toEqual(['Action'])
+
+    const chipsAfterExclude = wrapper.findAll('[data-filter-chip]')
+
+    expect(chipsAfterExclude.map((chip) => chip.text().trim())).toEqual(['Action', 'Drama'])
+    expect(chipsAfterExclude[0].attributes('data-filter-chip')).toBe('excluded')
+
+    await wrapper.get('[data-filter-chip="excluded"]').trigger('click')
+    await nextTick()
+
+    expect(wrapper.vm.model).toEqual(['Action', 'Drama'])
+    expect(wrapper.vm.excludedValues).toEqual([])
+
+    const chipsAfterInclude = wrapper.findAll('[data-filter-chip]')
+
+    expect(chipsAfterInclude.map((chip) => chip.text().trim())).toEqual(['Action', 'Drama'])
   })
 })

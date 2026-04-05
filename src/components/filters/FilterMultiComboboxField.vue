@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -38,16 +38,57 @@ const normalizeValues = (values: string[]) =>
     left.localeCompare(right),
   )
 
+const normalizeOrderedValues = (values: string[]) => {
+  const seen = new Set<string>()
+  const normalizedValues: string[] = []
+
+  for (const rawValue of values) {
+    const value = rawValue.trim()
+
+    if (value.length === 0 || seen.has(value)) {
+      continue
+    }
+
+    seen.add(value)
+    normalizedValues.push(value)
+  }
+
+  return normalizedValues
+}
+
+const mergePreservingOrder = (currentValues: string[], nextValues: string[]) => {
+  const nextValueSet = new Set(nextValues)
+  const currentValueSet = new Set(currentValues)
+  const mergedValues = currentValues.filter((value) => nextValueSet.has(value))
+
+  for (const value of nextValues) {
+    if (!currentValueSet.has(value)) {
+      mergedValues.push(value)
+    }
+  }
+
+  return mergedValues
+}
+
+const areSameValues = (left: string[], right: string[]) =>
+  left.length === right.length && left.every((value, index) => value === right[index])
+
 const searchTerm = ref('')
 const ignoreNextComboboxUpdate = ref(false)
-const handledPopupValue = ref<string | null>(null)
+const selectedValues = ref<string[]>([])
+const excludedValues = ref<string[]>([])
+const pendingPropState = ref<{ model: string[]; excluded: string[] } | null>(null)
 
 const normalizedSearchTerm = computed(() => searchTerm.value.trim().toLocaleLowerCase())
+
+const excludedValueSet = computed(() => new Set(excludedValues.value))
+
+const includedValues = computed(() => selectedValues.value.filter((value) => !excludedValueSet.value.has(value)))
 
 const normalizedOptions = computed(() => {
   const optionMap = new Map(props.options.map((option) => [option.value, option]))
 
-  for (const selectedValue of model.value) {
+  for (const selectedValue of selectedValues.value) {
     if (!optionMap.has(selectedValue)) {
       optionMap.set(selectedValue, {
         value: selectedValue,
@@ -61,41 +102,17 @@ const normalizedOptions = computed(() => {
 
 const selectedOptions = computed(() => {
   const optionMap = new Map(normalizedOptions.value.map((option) => [option.value, option]))
-  const excludedValues = props.enableExclusion ? excludedOptionValues.value : new Set<string>()
 
-  return normalizeValues(model.value)
-    .filter((value) => !excludedValues.has(value))
-    .map((value) => optionMap.get(value))
-    .filter((option): option is FilterOption => option !== undefined)
-})
-
-const excludedOptionValues = computed(() => new Set(normalizeValues(excludedModel.value ?? [])))
-
-const includedModelValues = computed(() => {
-  const values = normalizeValues(model.value)
-
-  if (!props.enableExclusion) {
-    return values
-  }
-
-  return values.filter((value) => !excludedOptionValues.value.has(value))
-})
-
-const excludedOptions = computed(() => {
-  if (!props.enableExclusion) {
-    return []
-  }
-
-  const optionMap = new Map(normalizedOptions.value.map((option) => [option.value, option]))
-
-  return normalizeValues(excludedModel.value ?? [])
+  return selectedValues.value
     .map((value) => optionMap.get(value))
     .filter((option): option is FilterOption => option !== undefined)
 })
 
 const displayedOptions = computed(() => [
-  ...selectedOptions.value.map((option) => ({ ...option, tone: 'selected' as const })),
-  ...excludedOptions.value.map((option) => ({ ...option, tone: 'excluded' as const })),
+  ...selectedOptions.value.map((option) => ({
+    ...option,
+    tone: excludedValueSet.value.has(option.value) ? ('excluded' as const) : ('selected' as const),
+  })),
 ])
 
 const filteredOptions = computed(() => {
@@ -129,6 +146,39 @@ const emitExcludedValues = (values: string[] | undefined) => {
   excludedModel.value = normalizeValues(values ?? [])
 }
 
+const setPendingPropState = (nextModelValues: string[], nextExcludedValues: string[]) => {
+  pendingPropState.value = {
+    model: normalizeValues(nextModelValues),
+    excluded: normalizeValues(nextExcludedValues),
+  }
+}
+
+const syncInternalStateFromProps = () => {
+  const nextModelValues = normalizeValues(model.value ?? [])
+  const nextExcludedValues = normalizeValues(excludedModel.value ?? [])
+
+  if (pendingPropState.value !== null) {
+    if (
+      areSameValues(nextModelValues, pendingPropState.value.model) &&
+      areSameValues(nextExcludedValues, pendingPropState.value.excluded)
+    ) {
+      pendingPropState.value = null
+      return
+    }
+
+    return
+  }
+
+  const nextSelectedValues = normalizeOrderedValues([...nextModelValues, ...nextExcludedValues])
+
+  selectedValues.value = mergePreservingOrder(selectedValues.value, nextSelectedValues)
+  excludedValues.value = mergePreservingOrder(excludedValues.value, nextExcludedValues).filter((value) =>
+    selectedValues.value.includes(value),
+  )
+}
+
+watch([model, excludedModel], syncInternalStateFromProps, { immediate: true })
+
 const updateValuesFromCombobox = (values: string[] | undefined) => {
   if (ignoreNextComboboxUpdate.value) {
     ignoreNextComboboxUpdate.value = false
@@ -136,50 +186,44 @@ const updateValuesFromCombobox = (values: string[] | undefined) => {
     return
   }
 
-  const nextValues = normalizeValues(values ?? [])
+  selectedValues.value = normalizeOrderedValues(values ?? [])
 
   if (props.enableExclusion) {
-    const currentIncludedValues = includedModelValues.value
-    const removedValues = currentIncludedValues.filter((value) => !nextValues.includes(value))
-    const addedValues = nextValues.filter((value) => !currentIncludedValues.includes(value))
-
-    emitExcludedValues([
-      ...(excludedModel.value ?? []).filter((value) => !addedValues.includes(value)),
-      ...removedValues,
-    ])
-
-    emitValues(nextValues)
+    excludedValues.value = excludedValues.value.filter((value) => selectedValues.value.includes(value))
   } else {
-    emitValues(nextValues)
+    excludedValues.value = []
+  }
+
+  setPendingPropState(includedValues.value, props.enableExclusion ? excludedValues.value : [])
+  emitValues(includedValues.value)
+
+  if (props.enableExclusion) {
+    emitExcludedValues(excludedValues.value)
   }
 
   searchTerm.value = ''
 }
 
 const cyclePopupSelection = (value: string) => {
-  if (handledPopupValue.value === value) {
-    return
-  }
-
-  handledPopupValue.value = value
   ignoreNextComboboxUpdate.value = true
 
-  queueMicrotask(() => {
-    if (handledPopupValue.value === value) {
-      handledPopupValue.value = null
-    }
-  })
-
-  const isSelected = model.value.includes(value)
-  const isExcluded = (excludedModel.value ?? []).includes(value)
+  const isExcluded = excludedValues.value.includes(value)
+  const isSelected = selectedValues.value.includes(value)
 
   if (!props.enableExclusion) {
     if (isSelected) {
-      emitValues(model.value.filter((entry) => entry !== value))
+      selectedValues.value = selectedValues.value.filter((entry) => entry !== value)
+      emitValues(selectedValues.value)
       return
     }
 
-    emitValues([...model.value, value])
+    selectedValues.value = [...selectedValues.value, value]
+    emitValues(selectedValues.value)
+    return
+  }
+
+  if (isExcluded) {
+    includeValue(value)
     return
   }
 
@@ -188,32 +232,48 @@ const cyclePopupSelection = (value: string) => {
     return
   }
 
-  if (isExcluded) {
-    emitExcludedValues((excludedModel.value ?? []).filter((entry) => entry !== value))
-    return
-  }
-
   includeValue(value)
 }
 
 const includeValue = (value: string) => {
-  emitValues([...model.value.filter((entry) => entry !== value), value])
+  if (!selectedValues.value.includes(value)) {
+    selectedValues.value = [...selectedValues.value, value]
+  }
+
+  excludedValues.value = excludedValues.value.filter((entry) => entry !== value)
+
+  setPendingPropState(includedValues.value, excludedValues.value)
+  emitValues(includedValues.value)
 
   if (props.enableExclusion) {
-    emitExcludedValues((excludedModel.value ?? []).filter((entry) => entry !== value))
+    emitExcludedValues(excludedValues.value)
   }
 }
 
 const excludeValue = (value: string) => {
-  emitValues(model.value.filter((entry) => entry !== value))
+  if (!selectedValues.value.includes(value)) {
+    selectedValues.value = [...selectedValues.value, value]
+  }
+
+  if (!excludedValues.value.includes(value)) {
+    excludedValues.value = [...excludedValues.value, value]
+  }
+
+  setPendingPropState(includedValues.value, excludedValues.value)
+  emitValues(includedValues.value)
 
   if (props.enableExclusion) {
-    emitExcludedValues([...(excludedModel.value ?? []).filter((entry) => entry !== value), value])
+    emitExcludedValues(excludedValues.value)
   }
 }
 
 const clearValues = () => {
+  selectedValues.value = []
+  excludedValues.value = []
+
+  setPendingPropState([], [])
   emitValues([])
+
   if (props.enableExclusion) {
     emitExcludedValues([])
   }
@@ -221,25 +281,31 @@ const clearValues = () => {
 }
 
 const removeValue = (value: string) => {
-  emitValues(model.value.filter((entry) => entry !== value))
+  selectedValues.value = selectedValues.value.filter((entry) => entry !== value)
+  excludedValues.value = excludedValues.value.filter((entry) => entry !== value)
+
+  setPendingPropState(includedValues.value, excludedValues.value)
+  emitValues(includedValues.value)
 
   if (props.enableExclusion) {
-    emitExcludedValues((excludedModel.value ?? []).filter((entry) => entry !== value))
+    emitExcludedValues(excludedValues.value)
   }
 }
 
 const toggleChipSelection = (value: string) => {
   if (!props.enableExclusion) {
-    if (model.value.includes(value)) {
-      emitValues(model.value.filter((entry) => entry !== value))
+    if (selectedValues.value.includes(value)) {
+      selectedValues.value = selectedValues.value.filter((entry) => entry !== value)
+      emitValues(selectedValues.value)
       return
     }
 
-    emitValues([...model.value, value])
+    selectedValues.value = [...selectedValues.value, value]
+    emitValues(selectedValues.value)
     return
   }
 
-  if ((excludedModel.value ?? []).includes(value)) {
+  if (excludedValues.value.includes(value)) {
     includeValue(value)
     return
   }
@@ -256,7 +322,7 @@ const toggleChipSelection = (value: string) => {
   >
     <ComboboxRoot
       :multiple="true"
-      :model-value="includedModelValues"
+      :model-value="selectedValues"
       :disabled="Boolean(disabledReason)"
       open-on-focus
       :ignore-filter="true"
@@ -341,20 +407,19 @@ const toggleChipSelection = (value: string) => {
                 :value="option.value"
                 :text-value="option.label"
                 :data-filter-popup-item="option.value"
-                :class="excludedOptionValues.has(option.value)
+                :class="excludedValueSet.has(option.value)
                   ? 'flex w-full cursor-pointer items-center rounded-xl bg-red-500/10 px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-red-500/20'
                   : 'flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[state=checked]:bg-app-accent/20 data-[highlighted]:bg-app-accentSoft'"
-                @click.prevent.stop="cyclePopupSelection(option.value)"
                 @select.prevent="cyclePopupSelection(option.value)"
               >
                 <span class="flex w-full items-center justify-between gap-3">
                   <span>{{ option.label }}</span>
                   <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
-                    <template v-if="selectedOptions.some((selectedOption) => selectedOption.value === option.value)">
-                      Include
-                    </template>
-                    <template v-else-if="props.enableExclusion && excludedOptions.some((excludedOption) => excludedOption.value === option.value)">
+                    <template v-if="props.enableExclusion && excludedValueSet.has(option.value)">
                       Exclude
+                    </template>
+                    <template v-else-if="selectedValues.includes(option.value)">
+                      Include
                     </template>
                   </span>
                 </span>
@@ -368,20 +433,19 @@ const toggleChipSelection = (value: string) => {
                 :value="option.value"
                 :text-value="option.label"
                 :data-filter-popup-item="option.value"
-                :class="excludedOptionValues.has(option.value)
+                :class="excludedValueSet.has(option.value)
                   ? 'flex w-full cursor-pointer items-center rounded-xl bg-red-500/10 px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-red-500/20'
                   : 'flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[state=checked]:bg-app-accent/20 data-[highlighted]:bg-app-accentSoft'"
-                @click.prevent.stop="cyclePopupSelection(option.value)"
                 @select.prevent="cyclePopupSelection(option.value)"
               >
                 <span class="flex w-full items-center justify-between gap-3">
                   <span>{{ option.label }}</span>
                   <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
-                    <template v-if="selectedOptions.some((selectedOption) => selectedOption.value === option.value)">
-                      Include
-                    </template>
-                    <template v-else-if="props.enableExclusion && excludedOptions.some((excludedOption) => excludedOption.value === option.value)">
+                    <template v-if="props.enableExclusion && excludedValueSet.has(option.value)">
                       Exclude
+                    </template>
+                    <template v-else-if="selectedValues.includes(option.value)">
+                      Include
                     </template>
                   </span>
                 </span>
