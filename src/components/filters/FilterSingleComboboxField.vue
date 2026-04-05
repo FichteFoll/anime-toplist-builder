@@ -92,7 +92,7 @@ const updateValue = (value: string | undefined) => {
               :key="option.value"
               :value="option.value"
               :text-value="option.label"
-              class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
+              class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[state=checked]:bg-app-accent/20 data-[highlighted]:bg-app-accentSoft"
             >
               {{ option.label }}
             </ComboboxItem>
