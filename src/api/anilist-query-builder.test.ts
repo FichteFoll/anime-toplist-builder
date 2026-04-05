@@ -20,6 +20,7 @@ describe('buildAniListMediaSearchVariables', () => {
         popularity: { minimum: 100 },
       },
       categoryFilter: createEmptyFilterState(),
+      search: '  mecha  ',
       page: 2,
       perPage: 20,
     })
@@ -39,7 +40,7 @@ describe('buildAniListMediaSearchVariables', () => {
       startDateLesser: 20250000,
       popularityGreater: 99,
       popularityLesser: undefined,
-      search: undefined,
+      search: 'mecha',
       sort: undefined,
     })
   })

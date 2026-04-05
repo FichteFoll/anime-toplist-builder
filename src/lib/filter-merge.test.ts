@@ -7,7 +7,6 @@ describe('mergeFilterStates', () => {
   it('keeps global constraints when the category filter is empty', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
-      search: '  mecha  ',
       genres: ['Action', 'Drama'],
       sort: {
         field: 'POPULARITY' as const,
@@ -18,7 +17,6 @@ describe('mergeFilterStates', () => {
     const result = mergeFilterStates(globalFilter, createEmptyFilterState())
 
     expect(result.hasConflicts).toBe(false)
-    expect(result.filter.search).toBe('mecha')
     expect(result.filter.genres).toEqual(['Action', 'Drama'])
     expect(result.filter.sort).toEqual({
       field: 'POPULARITY',
@@ -73,10 +71,9 @@ describe('mergeFilterStates', () => {
     expect(result.filter.minimumTagRank).toBe(50)
   })
 
-  it('prefers an explicit search override and category sort', () => {
+  it('keeps category sort while merging filters', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
-      search: 'global',
       sort: {
         field: 'POPULARITY' as const,
         direction: 'desc' as const,
@@ -85,16 +82,14 @@ describe('mergeFilterStates', () => {
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
-      search: 'category',
       sort: {
         field: 'TITLE' as const,
         direction: 'asc' as const,
       },
     }
 
-    const result = mergeFilterStates(globalFilter, categoryFilter, '  user search  ')
+    const result = mergeFilterStates(globalFilter, categoryFilter)
 
-    expect(result.filter.search).toBe('user search')
     expect(result.filter.sort).toEqual({
       field: 'TITLE',
       direction: 'asc',
@@ -128,25 +123,22 @@ describe('mergeFilterStates', () => {
     })
   })
 
-  it('deduplicates tags and falls back to the first non-empty search term', () => {
+  it('deduplicates tags and keeps the strongest minimum tag rank', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
-      search: '  global  ',
       tags: [' Time Travel ', 'Time Travel'],
       minimumTagRank: 35,
     }
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
-      search: '  ',
       tags: ['Time Travel', 'Iyashikei'],
       minimumTagRank: 10,
     }
 
-    const result = mergeFilterStates(globalFilter, categoryFilter, '   ')
+    const result = mergeFilterStates(globalFilter, categoryFilter)
 
     expect(result.hasConflicts).toBe(false)
-    expect(result.filter.search).toBe('global')
     expect(result.filter.tags).toEqual(['Time Travel'])
     expect(result.filter.minimumTagRank).toBe(35)
   })

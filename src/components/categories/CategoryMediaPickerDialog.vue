@@ -102,10 +102,6 @@ const activeFilterSummary = computed(() => {
   const { filter } = mergeFilterStates(props.globalFilter, props.category.filter)
   const summary: string[] = []
 
-  if (filter.search) {
-    summary.push(`Search: ${filter.search}`)
-  }
-
   const rangeLabels = [
     formatRangeLabel('Year', filter.yearRange),
     formatRangeLabel('Popularity', filter.popularity),

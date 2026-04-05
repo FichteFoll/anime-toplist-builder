@@ -205,7 +205,6 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
   }
 
   const filterState: FilterState = {
-    search: hasOwn(value, 'search') ? asTrimmedSearchString(value.search, `${path}.search`) : '',
     yearRange: asOptionalRange(value.yearRange, `${path}.yearRange`),
     seasons: asEnumArray<AnimeSeason>(value.seasons, `${path}.seasons`, animeSeasons),
     countryOfOrigin: asOptionalStringArray(value.countryOfOrigin, `${path}.countryOfOrigin`),
@@ -219,10 +218,6 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
       maximum: 100,
     }),
     sort: asOptionalSort(value.sort, `${path}.sort`),
-  }
-
-  if (filterState.search.length === 0) {
-    filterState.search = ''
   }
 
   return filterState

@@ -12,7 +12,6 @@ export interface MergeFilterStateResult {
 }
 
 export const createEmptyFilterState = (): FilterState => ({
-  search: '',
   seasons: [],
   countryOfOrigin: [],
   tags: [],
@@ -25,20 +24,6 @@ const sortStrings = <T extends string>(values: T[]) =>
   [...values].sort((left, right) => left.localeCompare(right))
 
 const normalizeStringArray = <T extends string>(values: T[]) => sortStrings(Array.from(new Set(values)))
-
-const resolveSearchTerm = (searchOverride: string | undefined, categorySearch: string, globalSearch: string) => {
-  const candidates = [searchOverride, categorySearch, globalSearch]
-
-  for (const candidate of candidates) {
-    const normalizedCandidate = candidate?.trim()
-
-    if (normalizedCandidate) {
-      return normalizedCandidate
-    }
-  }
-
-  return ''
-}
 
 const mergeRange = (
   globalRange: NumericRange | undefined,
@@ -136,7 +121,6 @@ const mergeTags = (
 export const mergeFilterStates = (
   globalFilter: FilterState,
   categoryFilter: FilterState,
-  searchOverride?: string,
 ): MergeFilterStateResult => {
   const yearRange = mergeRange(globalFilter.yearRange, categoryFilter.yearRange)
   const popularity = mergeRange(globalFilter.popularity, categoryFilter.popularity)
@@ -149,7 +133,6 @@ export const mergeFilterStates = (
 
   return {
     filter: {
-      search: resolveSearchTerm(searchOverride, categoryFilter.search, globalFilter.search),
       yearRange: yearRange.range,
       seasons: seasons.values,
       countryOfOrigin: countryOfOrigin.values,

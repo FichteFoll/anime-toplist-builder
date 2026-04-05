@@ -58,13 +58,13 @@ export const buildAniListMediaSearchVariables = ({
   page,
   perPage,
 }: BuildAniListMediaSearchVariablesOptions): BuildAniListMediaSearchVariablesResult => {
-  const mergedFilter = mergeFilterStates(globalFilter, categoryFilter, search)
+  const mergedFilter = mergeFilterStates(globalFilter, categoryFilter)
 
   return {
     variables: {
       page,
       perPage,
-      search: mergedFilter.filter.search || undefined,
+      search: search?.trim() || undefined,
       season: pickSingleValue(mergedFilter.filter.seasons),
       countryOfOrigin: pickSingleValue(mergedFilter.filter.countryOfOrigin),
       tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags : undefined,

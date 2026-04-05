@@ -51,7 +51,6 @@ export interface NumericRange {
 }
 
 export interface FilterState {
-  search: string
   yearRange?: NumericRange
   seasons: AnimeSeason[]
   countryOfOrigin: string[]

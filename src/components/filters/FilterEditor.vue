@@ -131,10 +131,6 @@ const updateRange = (
   updateFilter({ [field]: nextRange })
 }
 
-const setSearch = (value: string) => {
-  updateFilter({ search: value.trim() })
-}
-
 const setSort = (value: FilterSort | undefined) => {
   updateFilter({ sort: value })
 }
@@ -165,22 +161,6 @@ const genreEmptyMessage = computed(() => {
 
 <template>
   <div class="grid gap-5 lg:grid-cols-2">
-    <FilterField
-      v-if="mode === 'category'"
-      label="Search"
-      description="Search text is trimmed before it is applied."
-      :disabled-reason="disabledFields?.search"
-    >
-      <input
-        type="text"
-        class="shell-input"
-        :disabled="Boolean(disabledFields?.search)"
-        :value="model.search"
-        placeholder="Search AniList titles"
-        @input="setSearch(($event.target as HTMLInputElement).value)"
-      >
-    </FilterField>
-
     <FilterSortEditor
       v-model="sortModel"
       label="Sort"

@@ -18,7 +18,6 @@ describe('template validation', () => {
       name: '  Favorites  ',
       description: '  Template context  ',
       globalFilter: {
-        search: '  mecha  ',
         genres: ['Drama', 'Action', 'Drama'],
         tags: ['Cyberpunk', 'Cyberpunk'],
         minimumTagRank: 70,
@@ -41,7 +40,6 @@ describe('template validation', () => {
       name: 'Favorites',
       description: 'Template context',
       globalFilter: {
-        search: 'mecha',
         yearRange: undefined,
         seasons: [],
         countryOfOrigin: [],
@@ -59,7 +57,6 @@ describe('template validation', () => {
           name: 'Best Pick',
           description: 'A focused choice',
           filter: {
-            search: '',
             yearRange: undefined,
             seasons: ['SPRING', 'WINTER'],
             countryOfOrigin: [],
@@ -112,7 +109,6 @@ describe('template validation', () => {
         name: 'Generated ids',
         description: '  Shared context  ',
         globalFilter: {
-          search: '  thriller  ',
         },
         categories: [
           {
@@ -127,7 +123,6 @@ describe('template validation', () => {
     expect(isTemplateId(template.id)).toBe(true)
     expect(template.origin).toBe('imported-file')
     expect(template.description).toBe('Shared context')
-    expect(template.globalFilter.search).toBe('thriller')
     expect(template.categories).toHaveLength(1)
     expect(isCategoryId(template.categories[0]?.id)).toBe(true)
     expect(template.categories[0]?.description).toBe('Short context')
@@ -164,7 +159,6 @@ describe('template validation', () => {
       name: 'Export me',
       description: 'Export context',
       globalFilter: {
-        search: '',
         yearRange: undefined,
         seasons: [],
         countryOfOrigin: [],
@@ -182,7 +176,6 @@ describe('template validation', () => {
           name: 'Pick',
           description: 'Nice pacing',
           filter: {
-            search: '',
             yearRange: undefined,
             seasons: [],
             countryOfOrigin: [],
