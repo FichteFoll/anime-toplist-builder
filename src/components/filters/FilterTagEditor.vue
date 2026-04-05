@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import FilterField from '@/components/filters/FilterField.vue'
 import FilterMultiComboboxField, { type FilterOption } from '@/components/filters/FilterMultiComboboxField.vue'
 import type { AniListTag } from '@/types'
 
