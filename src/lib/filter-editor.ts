@@ -3,6 +3,7 @@ import type { FilterState, NumericRange } from '@/types'
 export type FilterDisabledReasons = Partial<Record<keyof FilterState, string>>
 
 const inheritedFieldReason = 'This field is controlled by the template-wide filter.'
+const defaultMinimumTagRank = 60
 
 const hasRangeValue = (range: NumericRange | undefined) =>
   range?.minimum !== undefined || range?.maximum !== undefined
@@ -74,6 +75,36 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
   }
 
   if (filter.sort) {
+    count += 1
+  }
+
+  return count
+}
+
+export const countAdvancedFilterFields = (filter: FilterState) => {
+  let count = 0
+
+  if (filter.sort) {
+    count += 1
+  }
+
+  if (filter.countryOfOrigin) {
+    count += 1
+  }
+
+  if (hasRangeValue(filter.popularity)) {
+    count += 1
+  }
+
+  if (filter.minimumTagRank !== undefined && filter.minimumTagRank !== defaultMinimumTagRank) {
+    count += 1
+  }
+
+  if (hasRangeValue(filter.episodes)) {
+    count += 1
+  }
+
+  if (hasRangeValue(filter.duration)) {
     count += 1
   }
 

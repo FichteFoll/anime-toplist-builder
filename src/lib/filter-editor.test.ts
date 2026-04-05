@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  countAdvancedFilterFields,
   countConfiguredFilterFields,
   getCategoryFilterDisabledReasons,
 } from '@/lib/filter-editor'
@@ -24,6 +25,16 @@ describe('filter editor helpers', () => {
     expect(countConfiguredFilterFields(filterWithTags)).toBe(2)
   })
 
+  it('still counts minimum tag rank in the total filter count when tags exist', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      tags: ['Action'],
+      minimumTagRank: 60,
+    }
+
+    expect(countConfiguredFilterFields(filter)).toBe(2)
+  })
+
   it('counts advanced ranges as configured fields', () => {
     const filter: FilterState = {
       ...createEmptyFilterState(),
@@ -33,6 +44,30 @@ describe('filter editor helpers', () => {
     }
 
     expect(countConfiguredFilterFields(filter)).toBe(3)
+  })
+
+  it('counts only advanced filter fields in the advanced section', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      sort: { field: 'POPULARITY', direction: 'desc' },
+      countryOfOrigin: 'JP',
+      popularity: { minimum: 100 },
+      tags: ['Action'],
+      minimumTagRank: 50,
+      episodes: { minimum: 1 },
+      duration: { maximum: 24 },
+    }
+
+    expect(countAdvancedFilterFields(filter)).toBe(6)
+  })
+
+  it('does not count the default minimum tag rank value', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      minimumTagRank: 60,
+    }
+
+    expect(countAdvancedFilterFields(filter)).toBe(0)
   })
 
   it('disables minimum tag rank when tags are inherited', () => {

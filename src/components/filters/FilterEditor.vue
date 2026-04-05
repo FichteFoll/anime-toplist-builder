@@ -8,6 +8,7 @@ import FilterSingleComboboxField from '@/components/filters/FilterSingleCombobox
 import FilterSortEditor from '@/components/filters/FilterSortEditor.vue'
 import FilterTagEditor from '@/components/filters/FilterTagEditor.vue'
 import CaretIcon from '@/components/icons/CaretIcon.vue'
+import { countAdvancedFilterFields } from '@/lib/filter-editor'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import type { FilterDisabledReasons } from '@/lib/filter-editor'
 import {
@@ -65,6 +66,7 @@ const countryOptions = computed(() =>
 )
 
 const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], model.value.genres))
+const advancedFilterCount = computed(() => countAdvancedFilterFields(model.value))
 
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
 const countryOfOriginModel = computed({
@@ -241,6 +243,12 @@ const updateMinimumTagRank = (rawValue: string) => {
       <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-app-text">
         <CaretIcon class="h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-90" />
         <span>Advanced filters</span>
+        <span
+          v-if="advancedFilterCount > 0"
+          class="ml-1 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text"
+        >
+          {{ advancedFilterCount }}
+        </span>
       </summary>
 
       <div class="mt-4 grid gap-5 lg:grid-cols-2">
