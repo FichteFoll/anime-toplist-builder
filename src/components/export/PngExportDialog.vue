@@ -152,11 +152,8 @@ onBeforeUnmount(() => {
               Image Export
             </p>
             <DialogTitle class="mt-3 text-2xl font-semibold tracking-tight text-app-text">
-              Render the current toplist
+              Generate toplist selection image
             </DialogTitle>
-            <DialogDescription class="mt-3 max-w-3xl text-sm leading-6 text-app-muted">
-              Generate an image preview of the current toplist.
-            </DialogDescription>
           </div>
 
           <DialogClose as-child>
