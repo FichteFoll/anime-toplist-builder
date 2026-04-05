@@ -145,16 +145,13 @@ onBeforeUnmount(() => {
   <section class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
     <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 md:flex-row md:items-start md:justify-between">
       <div>
-        <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-          Category workspace
-        </p>
         <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Build the toplist layout
+          Categories
         </h2>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-app-muted">
-          Edit category names and filters from each card,
+          Edit category names and filters for each card,
           drag by the handle to reorder,
-          and keep the mobile layout in a single column.
+          and make your selections.
         </p>
       </div>
 
