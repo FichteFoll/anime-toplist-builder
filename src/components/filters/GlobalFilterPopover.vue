@@ -13,7 +13,7 @@ import FilterEditor from '@/components/filters/FilterEditor.vue'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import type { AniListMetadata, FilterState } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
@@ -32,9 +32,9 @@ const model = defineModel<FilterState>({ required: true })
       >
         Template filter
         <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
-        {{ countConfiguredFilterFields(model) }} rule{{ countConfiguredFilterFields(model) === 1 ? '' : 's' }}
-      </span>
-    </button>
+          {{ countConfiguredFilterFields(model) }} rule{{ countConfiguredFilterFields(model) === 1 ? '' : 's' }}
+        </span>
+      </button>
     </DialogTrigger>
 
     <DialogPortal>
@@ -54,8 +54,8 @@ const model = defineModel<FilterState>({ required: true })
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
           <FilterEditor
-            mode="global"
             v-model="model"
+            mode="global"
             :metadata="metadata"
             :metadata-status="metadataStatus"
             :metadata-error="metadataError"

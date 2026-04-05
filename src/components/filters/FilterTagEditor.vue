@@ -48,9 +48,9 @@ const emptyMessage = computed(() => {
 
 <template>
   <FilterMultiComboboxField
+    v-model="model"
     label="Tags"
     description="AniList applies a single minimum rank threshold across all selected tags."
-    v-model="model"
     :options="options"
     :empty-message="emptyMessage"
     virtualized

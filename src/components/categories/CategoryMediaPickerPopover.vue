@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-v-html */
 import {
   DialogClose,
   DialogContent,
@@ -8,11 +9,6 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-  TooltipArrow,
-  TooltipContent,
-  TooltipPortal,
-  TooltipRoot,
-  TooltipTrigger,
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
@@ -386,7 +382,6 @@ watch(pickerSort, (value, previousValue) => {
                         </p>
 
                         <p class="line-clamp-3 text-sm leading-6 text-app-muted">
-                          <!-- eslint-disable-next-line vue/no-v-html -->
                           <span
                             v-if="result.description"
                             v-html="sanitizeAnimeDescriptionHtml(result.description)"

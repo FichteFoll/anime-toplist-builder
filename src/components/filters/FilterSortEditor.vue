@@ -10,7 +10,7 @@ import {
   type FilterSortField,
 } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   label: string
   description?: string
   inheritLabel?: string
