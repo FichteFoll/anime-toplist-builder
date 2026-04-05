@@ -13,7 +13,7 @@ export const EXPORT_IMAGE_WIDTH = 1400
 export const EXPORT_CATEGORIES_PER_ROW = 3
 export const EXPORT_FONT_SIZE_TEMPLATE_TITLE = 44
 export const EXPORT_FONT_SIZE_HEADER_META = 22
-export const EXPORT_FONT_SIZE_CATEGORY_TITLE = 24
+export const EXPORT_FONT_SIZE_CATEGORY_TITLE = 20
 export const EXPORT_FONT_SIZE_BODY = 18
 export const EXPORT_FONT_SIZE_META = 16
 
@@ -91,8 +91,9 @@ const setCanvasFont = (
   context: CanvasRenderingContext2D,
   weight: 400 | 500 | 600 | 700,
   size: number,
+  style: 'normal' | 'italic' = 'normal',
 ) => {
-  context.font = `${weight} ${size}px ${fontFamily}`
+  context.font = `${style} ${weight} ${size}px ${fontFamily}`
 }
 
 const drawRoundedRect = (
@@ -539,7 +540,7 @@ export const renderTemplatePng = async ({
       )
     }
 
-    setCanvasFont(context, 600, fonts.categoryTitle)
+    setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
     context.fillStyle = palette.text
     const categoryBottomY = drawWrappedText(
       context,
@@ -547,8 +548,8 @@ export const renderTemplatePng = async ({
       textX,
       y + cardPadding + 22,
       textWidth,
-      Math.round(fonts.categoryTitle * 1.2),
-      2,
+      Math.round(fonts.categoryTitle * 1.15),
+      3,
       palette.text,
     )
 
