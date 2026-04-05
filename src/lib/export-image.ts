@@ -79,6 +79,96 @@ const imageCache = new Map<string, Promise<HTMLImageElement | null>>()
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
+const fitTextToWidth = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+) => {
+  if (context.measureText(text).width <= maxWidth) {
+    return text
+  }
+
+  const characters = Array.from(text)
+  let low = 0
+  let high = characters.length
+
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2)
+    const candidate = `${characters.slice(0, mid).join('').trimEnd()}...`
+
+    if (context.measureText(candidate).width <= maxWidth) {
+      low = mid
+    } else {
+      high = mid - 1
+    }
+  }
+
+  if (low <= 0) {
+    return '...'
+  }
+
+  return `${characters.slice(0, low).join('').trimEnd()}...`
+}
+
+const drawWrappedText = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number,
+  color: string,
+) => {
+  const words = text.trim().split(/\s+/).filter(Boolean)
+
+  if (words.length === 0) {
+    return y
+  }
+
+  const lines: string[] = []
+  let currentLine = ''
+  let index = 0
+
+  while (index < words.length && lines.length < maxLines - 1) {
+    const word = words[index]
+    const candidate = currentLine.length > 0 ? `${currentLine} ${word}` : word
+
+    if (context.measureText(candidate).width <= maxWidth || currentLine.length === 0) {
+      currentLine = candidate
+      index += 1
+      continue
+    }
+
+    lines.push(currentLine)
+    currentLine = ''
+  }
+
+  if (index >= words.length) {
+    if (currentLine.length > 0) {
+      lines.push(currentLine)
+    }
+  } else {
+    const remainingText = [currentLine, ...words.slice(index)].filter(Boolean).join(' ')
+    const finalLine = fitTextToWidth(context, remainingText, maxWidth)
+
+    if (finalLine.length > 0) {
+      lines.push(finalLine)
+    }
+  }
+
+  context.save()
+  context.fillStyle = color
+
+  for (const [index, line] of lines.slice(0, maxLines).entries()) {
+    context.fillText(line, x, y + index * lineHeight, maxWidth)
+  }
+
+  context.restore()
+
+  return y + lines.slice(0, maxLines).length * lineHeight
+}
+
 const createFontConfig = (): ExportFontConfig => ({
   templateTitle: EXPORT_FONT_SIZE_TEMPLATE_TITLE,
   headerMeta: EXPORT_FONT_SIZE_HEADER_META,
@@ -151,70 +241,6 @@ const strokeRoundedRect = (
   drawRoundedRect(context, x, y, width, height, radius)
   context.stroke()
   context.restore()
-}
-
-const drawWrappedText = (
-  context: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-  maxLines: number,
-  color: string,
-) => {
-  const words = text.trim().split(/\s+/).filter(Boolean)
-
-  if (words.length === 0) {
-    return y
-  }
-
-  const lines: string[] = []
-  let currentLine = ''
-
-  for (const word of words) {
-    const candidate = currentLine.length > 0 ? `${currentLine} ${word}` : word
-
-    if (context.measureText(candidate).width <= maxWidth || currentLine.length === 0) {
-      currentLine = candidate
-      continue
-    }
-
-    lines.push(currentLine)
-    currentLine = word
-
-    if (lines.length === maxLines - 1) {
-      break
-    }
-  }
-
-  if (lines.length < maxLines && currentLine.length > 0) {
-    lines.push(currentLine)
-  }
-
-  const visibleLines = lines.slice(0, maxLines)
-
-  if (lines.length > maxLines || words.join(' ').length > visibleLines.join(' ').length) {
-    const lastLineIndex = visibleLines.length - 1
-    let lastLine = visibleLines[lastLineIndex] ?? ''
-
-    while (lastLine.length > 0 && context.measureText(`${lastLine}...`).width > maxWidth) {
-      lastLine = lastLine.slice(0, -1).trimEnd()
-    }
-
-    visibleLines[lastLineIndex] = lastLine.length > 0 ? `${lastLine}...` : '...'
-  }
-
-  context.save()
-  context.fillStyle = color
-
-  for (const [index, line] of visibleLines.entries()) {
-    context.fillText(line, x, y + index * lineHeight, maxWidth)
-  }
-
-  context.restore()
-
-  return y + visibleLines.length * lineHeight
 }
 
 const loadImage = async (url: string | null | undefined) => {
@@ -392,7 +418,7 @@ export const renderTemplatePng = async ({
     (width - outerPadding * 2 - gridGap * (columns - 1)) / columns,
   )
   const cardPadding = 20
-  const coverWidth = clamp(Math.round(cardWidth * 0.34), 92, 132)
+  const coverWidth = clamp(Math.round(cardWidth * 0.31), 88, 126)
   const coverHeight = Math.round(coverWidth * 1.45)
   const cardHeight = coverHeight + cardPadding * 2
   const gridHeight = rows * cardHeight + (rows - 1) * gridGap
@@ -502,7 +528,7 @@ export const renderTemplatePng = async ({
     const image = imagesByCategoryId.get(category.id) ?? null
     const coverX = x + cardPadding
     const coverY = y + cardPadding
-    const textX = coverX + coverWidth + 18
+    const textX = coverX + coverWidth + 14
     const textWidth = cardWidth - (textX - x) - cardPadding
     const selectionTitle = selection ? resolveAnimeTitle(selection.title, titleLanguage) : ''
     const metaParts = [selection?.seasonYear ?? null, selection?.format ?? null].filter(
