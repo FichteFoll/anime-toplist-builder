@@ -16,6 +16,7 @@ import { normalizeAniListError, searchAnimeMedia } from '@/api'
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
 import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { mergeFilterStates } from '@/lib/filter-merge'
+import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import {
   filterSortFields,
@@ -122,7 +123,7 @@ const activeFilterSummary = computed(() => {
   }
 
   if (filter.formats.length > 0) {
-    summary.push(`Formats: ${filter.formats.join(', ')}`)
+    summary.push(`Formats: ${filter.formats.map(formatAnimeFormatLabel).join(', ')}`)
   }
 
   if (filter.source.length > 0) {

@@ -15,6 +15,7 @@ import FilterMultiComboboxField from '@/components/filters/FilterMultiComboboxFi
 import FilterMultiSelectField from '@/components/filters/FilterMultiSelectField.vue'
 import FilterSortEditor from '@/components/filters/FilterSortEditor.vue'
 import FilterTagEditor from '@/components/filters/FilterTagEditor.vue'
+import { formatAnimeFormatLabel } from '@/lib/format-label'
 import type { FilterDisabledReasons } from '@/lib/filter-editor'
 import {
   animeFormats,
@@ -45,16 +46,10 @@ const model = defineModel<FilterState>({ required: true })
 const staticCountryOptions = ['CN', 'JP', 'KR', 'TW']
 const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' })
 
-const toTitleLabel = (value: string) =>
-  value
-    .toLowerCase()
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-
 const createEnumOptions = (values: readonly string[]): FilterOption[] =>
   values.map((value) => ({
     value,
-    label: toTitleLabel(value),
+    label: formatAnimeFormatLabel(value),
   }))
 
 const mergedOptions = (values: string[], currentValues: string[]): FilterOption[] =>
