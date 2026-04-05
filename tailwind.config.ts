@@ -19,7 +19,7 @@ export default {
         },
       },
       boxShadow: {
-        shell: '0 20px 60px rgb(15 23 42 / 0.18)',
+        shell: '0 14px 36px rgb(15 23 42 / 0.12)',
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
