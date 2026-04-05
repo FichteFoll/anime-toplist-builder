@@ -1,0 +1,38 @@
+<template>
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <circle
+      cx="8"
+      cy="6.5"
+      r="1.5"
+    />
+    <circle
+      cx="16"
+      cy="6.5"
+      r="1.5"
+    />
+    <circle
+      cx="8"
+      cy="12"
+      r="1.5"
+    />
+    <circle
+      cx="16"
+      cy="12"
+      r="1.5"
+    />
+    <circle
+      cx="8"
+      cy="17.5"
+      r="1.5"
+    />
+    <circle
+      cx="16"
+      cy="17.5"
+      r="1.5"
+    />
+  </svg>
+</template>

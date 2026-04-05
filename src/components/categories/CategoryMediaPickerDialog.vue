@@ -18,6 +18,7 @@ import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { mergeFilterStates } from '@/lib/filter-merge'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import {
   filterSortFields,
   type AniListSearchResponse,
@@ -493,15 +494,7 @@ watch(pickerSort, (value, previousValue) => {
                       class="inline-flex items-center gap-1 text-xs font-medium text-app-muted transition hover:text-app-text"
                     >
                       AniList
-                      <svg
-                        viewBox="0 0 24 24"
-                        class="h-3.5 w-3.5"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path d="M14 3h7v7h-2V6.41l-8.29 8.3-1.42-1.42 8.3-8.29H14V3Z" />
-                        <path d="M5 5h6v2H7v10h10v-4h2v6H5V5Z" />
-                      </svg>
+                      <ExternalLinkIcon class="h-3.5 w-3.5" />
                     </a>
                     <button
                       type="button"

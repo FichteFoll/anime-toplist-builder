@@ -16,6 +16,7 @@ import {
 import { computed, ref, watch } from 'vue'
 
 import FilterEditor from '@/components/filters/FilterEditor.vue'
+import EditIcon from '@/components/icons/EditIcon.vue'
 import {
   getCategoryFilterDisabledReasons,
   isNonBlankName,
@@ -104,19 +105,7 @@ const save = () => {
             class="shell-button inline-flex h-10 w-10 items-center justify-center p-0"
             :aria-label="`Edit category ${props.category.name}`"
           >
-            <svg
-              viewBox="0 0 24 24"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg>
+            <EditIcon class="h-4 w-4" />
           </button>
         </TooltipTrigger>
       </DialogTrigger>

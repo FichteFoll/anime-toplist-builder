@@ -20,6 +20,7 @@
   UI code should not build GraphQL requests directly.
 - `src/components`: reusable UI primitives and composed interface pieces.
   Export UI lives under `src/components/export`.
+  SVG icons should live as reusable components in `src/components/icons`.
 - `src/composables`: reusable stateful Vue helpers.
 - `src/templates`: predefined template definitions only.
 - `src/config`: app-wide configuration constants.

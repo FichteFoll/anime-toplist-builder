@@ -4,6 +4,8 @@ import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigge
 
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
+import DeleteIcon from '@/components/icons/DeleteIcon.vue'
+import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import type {
   AniListMetadata,
@@ -65,43 +67,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         :disabled="!canReorder"
         :aria-label="canReorder ? 'Drag to reorder categories' : 'Category drag handle'"
       >
-        <svg
-          viewBox="0 0 24 24"
-          class="h-4 w-4"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <circle
-            cx="8"
-            cy="6.5"
-            r="1.5"
-          />
-          <circle
-            cx="16"
-            cy="6.5"
-            r="1.5"
-          />
-          <circle
-            cx="8"
-            cy="12"
-            r="1.5"
-          />
-          <circle
-            cx="16"
-            cy="12"
-            r="1.5"
-          />
-          <circle
-            cx="8"
-            cy="17.5"
-            r="1.5"
-          />
-          <circle
-            cx="16"
-            cy="17.5"
-            r="1.5"
-          />
-        </svg>
+        <DragHandleIcon class="h-4 w-4" />
       </button>
     </div>
 
@@ -174,22 +140,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             :aria-label="deleteCategoryTooltip"
             @click="emit('delete', category.id)"
           >
-            <svg
-              viewBox="0 0 24 24"
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="M6 6l1 14h10l1-14" />
-              <path d="M10 11v5" />
-              <path d="M14 11v5" />
-            </svg>
+            <DeleteIcon class="h-4 w-4" />
           </button>
         </TooltipTrigger>
 
