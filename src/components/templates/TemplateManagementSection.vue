@@ -153,20 +153,6 @@ const importFromRemoteUrl = async (urlOverride?: string) => {
   }
 }
 
-const resetActiveTemplate = () => {
-  if (!activeTemplate.value) {
-    toastStore.error('No active template to reset.')
-    return
-  }
-
-  if (!templateStore.resetActiveTemplate()) {
-    toastStore.error('Template reset failed.')
-    return
-  }
-
-  toastStore.success('Template reset complete.')
-}
-
 const updateTemplateDetails = (value: { name: string, description: string, filter: FilterState }) => {
   templateStore.updateActiveTemplate((template) => {
     template.name = value.name
@@ -367,14 +353,6 @@ onMounted(async () => {
             :resolved-theme="props.resolvedTheme"
             :title-language="props.titleLanguage"
           />
-          <button
-            type="button"
-            class="shell-button"
-            :disabled="!activeTemplate"
-            @click="resetActiveTemplate"
-          >
-            Reset
-          </button>
         </div>
       </div>
 

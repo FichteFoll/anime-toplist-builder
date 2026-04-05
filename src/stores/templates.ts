@@ -300,26 +300,6 @@ export const useTemplateStore = defineStore('templates', () => {
     return true
   }
 
-  const resetActiveTemplate = () => {
-    const template = activeTemplate.value
-
-    if (!template) {
-      return false
-    }
-
-    if (template.origin === 'predefined') {
-      return true
-    }
-
-    const wasRemoved = removeLocalTemplate(template.id)
-
-    if (!wasRemoved) {
-      return false
-    }
-
-    return true
-  }
-
   const ensureEditableTemplate = (templateId = activeTemplateId.value) => {
     if (!templateId) {
       return null
@@ -381,7 +361,6 @@ export const useTemplateStore = defineStore('templates', () => {
     importTemplateFromRemoteUrl,
     hydratePendingStartupTemplateUrl,
     removeLocalTemplate,
-    resetActiveTemplate,
     ensureEditableTemplate,
     updateActiveTemplate,
   }
