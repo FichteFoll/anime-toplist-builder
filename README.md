@@ -57,8 +57,6 @@ Useful optional environment variables:
   base path for GitHub Pages or other subpath hosting.
 - `VITE_DEFAULT_TEMPLATE_ID`:
   default template id used when there is no URL hash and no persisted last-opened template.
-- `VITE_EXPORT_IMAGE_WIDTH` and related `VITE_EXPORT_*` variables:
-  tune PNG export sizing and typography.
 - `VITE_REPOSITORY_URL`:
   repository link shown in the UI.
 

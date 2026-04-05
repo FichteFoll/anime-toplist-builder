@@ -13,7 +13,14 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { appConfig } from '@/config/app'
 import { createPngExportFilename } from '@/lib/export-filename'
-import { renderTemplatePng } from '@/lib/export-image'
+import {
+  EXPORT_CATEGORIES_PER_ROW,
+  EXPORT_FONT_SIZE_BODY,
+  EXPORT_FONT_SIZE_CATEGORY_TITLE,
+  EXPORT_FONT_SIZE_TEMPLATE_TITLE,
+  EXPORT_IMAGE_WIDTH,
+  renderTemplatePng,
+} from '@/lib/export-image'
 import type {
   AnimeTitleLanguage,
   CategorySelectionMap,
@@ -40,7 +47,7 @@ let renderRequestId = 0
 
 const layoutSummary = computed(
   () =>
-    `${appConfig.exportImageWidth}px wide, 3 categories per row, title ${appConfig.exportFontSizeTemplateTitle}px, card titles ${appConfig.exportFontSizeCategoryTitle}px, body ${appConfig.exportFontSizeBody}px.`,
+    `${EXPORT_IMAGE_WIDTH}px wide, ${EXPORT_CATEGORIES_PER_ROW} categories per row, title ${EXPORT_FONT_SIZE_TEMPLATE_TITLE}px, card titles ${EXPORT_FONT_SIZE_CATEGORY_TITLE}px, body ${EXPORT_FONT_SIZE_BODY}px.`,
 )
 
 const filename = computed(() =>

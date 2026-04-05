@@ -9,6 +9,14 @@ import type {
 
 type ExportTheme = 'light' | 'dark'
 
+export const EXPORT_IMAGE_WIDTH = 1400
+export const EXPORT_CATEGORIES_PER_ROW = 3
+export const EXPORT_FONT_SIZE_TEMPLATE_TITLE = 44
+export const EXPORT_FONT_SIZE_HEADER_META = 22
+export const EXPORT_FONT_SIZE_CATEGORY_TITLE = 24
+export const EXPORT_FONT_SIZE_BODY = 18
+export const EXPORT_FONT_SIZE_META = 16
+
 interface ExportPalette {
   background: string
   surface: string
@@ -72,11 +80,11 @@ const imageCache = new Map<string, Promise<HTMLImageElement | null>>()
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
 const createFontConfig = (): ExportFontConfig => ({
-  templateTitle: appConfig.exportFontSizeTemplateTitle,
-  headerMeta: appConfig.exportFontSizeHeaderMeta,
-  categoryTitle: appConfig.exportFontSizeCategoryTitle,
-  body: appConfig.exportFontSizeBody,
-  meta: appConfig.exportFontSizeMeta,
+  templateTitle: EXPORT_FONT_SIZE_TEMPLATE_TITLE,
+  headerMeta: EXPORT_FONT_SIZE_HEADER_META,
+  categoryTitle: EXPORT_FONT_SIZE_CATEGORY_TITLE,
+  body: EXPORT_FONT_SIZE_BODY,
+  meta: EXPORT_FONT_SIZE_META,
 })
 
 const setCanvasFont = (
@@ -369,14 +377,14 @@ export const renderTemplatePng = async ({
   titleLanguage,
   author,
 }: ExportRenderInput): Promise<ExportRenderResult> => {
-  const width = appConfig.exportImageWidth
+  const width = EXPORT_IMAGE_WIDTH
   const palette = exportPaletteByTheme[theme]
   const fonts = createFontConfig()
   const outerPadding = Math.round(width * 0.04)
   const headerHeight = Math.round(width * 0.135)
   const footerHeight = 56
   const gridGap = 24
-  const columns = 3
+  const columns = EXPORT_CATEGORIES_PER_ROW
   const filledSelections = template.categories.filter((category) => selectionByCategory[category.id]).length
   const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
   const cardWidth = Math.floor(
