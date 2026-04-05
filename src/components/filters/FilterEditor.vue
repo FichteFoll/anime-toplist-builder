@@ -305,6 +305,7 @@ const genreEmptyMessage = computed(() => {
     <div class="lg:col-span-2">
       <FilterTagEditor
         v-model="tagNamesModel"
+        v-model:minimum-tag-rank="model.minimumTagRank"
         :metadata-tags="metadata?.tags ?? []"
         :metadata-status="metadataStatus"
         :metadata-error="metadataError"

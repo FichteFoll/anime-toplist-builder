@@ -19,6 +19,10 @@ export const getCategoryFilterDisabledReasons = (
   formats: globalFilter.formats.length > 0 ? inheritedFieldReason : undefined,
   popularity: hasRangeValue(globalFilter.popularity) ? inheritedFieldReason : undefined,
   source: globalFilter.source.length > 0 ? inheritedFieldReason : undefined,
+  minimumTagRank:
+    globalFilter.tags.length > 0
+      ? inheritedFieldReason
+      : undefined,
 })
 
 export const countConfiguredFilterFields = (filter: FilterState) => {
@@ -37,6 +41,10 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
   }
 
   if (filter.tags.length > 0) {
+    count += 1
+  }
+
+  if (filter.tags.length > 0 && filter.minimumTagRank !== undefined) {
     count += 1
   }
 

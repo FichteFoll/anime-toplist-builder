@@ -1,5 +1,7 @@
 import type { FilterState } from '@/types'
 
+export const defaultMinimumTagRank = 60
+
 export const createEmptyFilterState = (): FilterState => ({
   seasons: [],
   countryOfOrigin: [],
@@ -7,5 +9,5 @@ export const createEmptyFilterState = (): FilterState => ({
   genres: [],
   formats: [],
   source: [],
-  minimumTagRank: undefined,
+  minimumTagRank: defaultMinimumTagRank,
 })

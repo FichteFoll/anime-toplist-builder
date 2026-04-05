@@ -1,0 +1,38 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  countConfiguredFilterFields,
+  getCategoryFilterDisabledReasons,
+} from '@/lib/filter-editor'
+import { createEmptyFilterState } from '@/lib/filter-state'
+import type { FilterState } from '@/types'
+
+describe('filter editor helpers', () => {
+  it('counts minimum tag rank only when tags are selected', () => {
+    const filterWithoutTags: FilterState = {
+      ...createEmptyFilterState(),
+      minimumTagRank: 50,
+    }
+
+    const filterWithTags: FilterState = {
+      ...createEmptyFilterState(),
+      tags: ['Action'],
+      minimumTagRank: 50,
+    }
+
+    expect(countConfiguredFilterFields(filterWithoutTags)).toBe(0)
+    expect(countConfiguredFilterFields(filterWithTags)).toBe(2)
+  })
+
+  it('disables minimum tag rank when tags are inherited', () => {
+    const globalFilter: FilterState = {
+      ...createEmptyFilterState(),
+      tags: ['Action'],
+      minimumTagRank: 40,
+    }
+
+    expect(getCategoryFilterDisabledReasons(globalFilter).minimumTagRank).toBe(
+      'This field is controlled by the template-wide filter.',
+    )
+  })
+})
