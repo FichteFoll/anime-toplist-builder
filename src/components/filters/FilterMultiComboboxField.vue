@@ -79,10 +79,10 @@ const filteredOptions = computed(() => {
 
 const emptyStateMessage = computed(() => {
   if (normalizedOptions.value.length === 0) {
-    return props.emptyMessage ?? 'No options available yet.'
+    return props.emptyMessage ?? 'No suggestions are available yet.'
   }
 
-  return 'No matching options.'
+  return 'No results match your search.'
 })
 
 const emitValues = (values: string[] | undefined) => {
@@ -194,7 +194,7 @@ const removeValue = (value: string) => {
       v-if="normalizedOptions.length === 0 && selectedOptions.length === 0"
       class="text-sm text-app-muted"
     >
-      {{ emptyMessage ?? 'No options available yet.' }}
+      {{ emptyMessage ?? 'No suggestions are available yet.' }}
     </p>
   </FilterField>
 </template>

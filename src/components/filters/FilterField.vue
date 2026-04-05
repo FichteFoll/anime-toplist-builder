@@ -34,9 +34,9 @@ defineProps<{
           <button
             type="button"
             class="rounded-full border border-app-border/80 bg-app-bg/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-app-muted"
-            aria-label="Inherited filter field"
+            aria-label="Inherited from template"
           >
-            Inherited
+            From template
           </button>
         </TooltipTrigger>
 

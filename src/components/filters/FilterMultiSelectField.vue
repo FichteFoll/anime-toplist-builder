@@ -71,7 +71,7 @@ const toggleValue = (value: string) => {
       v-else
       class="text-sm text-app-muted"
     >
-      {{ emptyMessage ?? 'No options available yet.' }}
+      {{ emptyMessage ?? 'No suggestions are available yet.' }}
     </p>
   </FilterField>
 </template>

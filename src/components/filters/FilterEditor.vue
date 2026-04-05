@@ -142,11 +142,11 @@ const setSeason = (value: string) => {
 
 const genreEmptyMessage = computed(() => {
   if (props.metadataStatus === 'loading' || props.metadataStatus === 'idle') {
-    return 'Additional genres will appear automatically when available.'
+    return 'More genres will appear here when available.'
   }
 
   if (props.metadataStatus === 'error') {
-    return props.metadataError ?? 'Genre metadata is unavailable right now.'
+    return props.metadataError ?? 'We could not load more genres right now.'
   }
 
   return 'No genres available.'
@@ -159,13 +159,13 @@ const genreEmptyMessage = computed(() => {
     <FilterSortEditor
       v-model="sortModel"
       label="Sort"
-      :description="mode === 'global' ? 'Default result ordering for the template.' : 'Adjust ordering for this category.'"
-      :inherit-label="mode === 'category' ? 'Use template sort' : 'No explicit sort'"
+      :description="mode === 'global' ? 'Choose how results should be ordered by default.' : 'Choose how this category should be ordered.'"
+      :inherit-label="mode === 'category' ? 'Use template order' : 'No sort set'"
     />
 
     <FilterField
       label="Release year"
-      description="Set a year range to narrow results."
+      description="Limit results to a release year range."
       :disabled-reason="disabledFields?.yearRange"
     >
       <div class="grid gap-3 sm:grid-cols-2">
@@ -190,7 +190,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterField
       label="Popularity"
-      description="Use popularity thresholds to narrow broad searches."
+      description="Limit results to a popularity range."
       :disabled-reason="disabledFields?.popularity"
     >
       <div class="grid gap-3 sm:grid-cols-2">
@@ -215,7 +215,7 @@ const genreEmptyMessage = computed(() => {
 
     <FilterField
       label="Season"
-      description="Choose a single airing season."
+      description="Choose one season to focus on."
       :disabled-reason="disabledFields?.seasons"
     >
       <div class="flex flex-wrap gap-2">
@@ -238,7 +238,7 @@ const genreEmptyMessage = computed(() => {
     <FilterMultiComboboxField
       v-model="countryOfOriginModel"
       label="Country of origin"
-      description="Common anime-producing regions are always available."
+      description="Pick the country where the anime was made."
       :options="countryOptions"
       placeholder="Search or select countries"
       :disabled-reason="disabledFields?.countryOfOrigin"
@@ -247,7 +247,7 @@ const genreEmptyMessage = computed(() => {
     <FilterMultiComboboxField
       v-model="genresModel"
       label="Genres"
-      description="Genre choices update automatically as more data becomes available."
+      description="Pick one or more genres you want to see."
       :options="genreOptions"
       :empty-message="genreEmptyMessage"
       placeholder="Search or select genres"
@@ -257,14 +257,14 @@ const genreEmptyMessage = computed(() => {
     <FilterMultiSelectField
       v-model="formatsModel"
       label="Formats"
-      description="Filter by anime release format."
+      description="Choose the release formats you want included."
       :options="formatOptions"
       :disabled-reason="disabledFields?.formats"
     />
 
     <FilterField
       label="Source material"
-      description="Choose a single source material type."
+      description="Pick the type of source it was adapted from."
       :disabled-reason="disabledFields?.source"
     >
       <ComboboxRoot

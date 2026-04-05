@@ -35,14 +35,14 @@ const options = computed<FilterOption[]>(() => {
 
 const emptyMessage = computed(() => {
   if (props.metadataStatus === 'loading' || props.metadataStatus === 'idle') {
-    return 'Additional tag options will appear automatically when available.'
+    return 'More tag options will appear here when AniList provides them.'
   }
 
   if (props.metadataStatus === 'error') {
-    return props.metadataError ?? 'AniList tag metadata is unavailable right now.'
+    return props.metadataError ?? 'Tag suggestions are unavailable right now.'
   }
 
-  return 'No tag options available yet.'
+  return 'No tag suggestions are available yet.'
 })
 </script>
 
@@ -50,7 +50,7 @@ const emptyMessage = computed(() => {
   <FilterMultiComboboxField
     v-model="model"
     label="Tags"
-    description="AniList applies a single minimum rank threshold across all selected tags."
+    description="Pick tags and set the minimum rank you want them to meet."
     :options="options"
     :empty-message="emptyMessage"
     virtualized
