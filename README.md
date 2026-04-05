@@ -4,6 +4,16 @@ Anime Toplist Builder is a statically hosted Vue 3 app for building anime rankin
 It lets you manage templates, search AniList, persist local progress,
 and export the current list as a themed PNG image.
 
+## Screenshots
+
+### Main page
+
+![Main page](./docs/assets/main_page.png)
+
+### Anime picker
+
+![Anime picker](./docs/assets/anime_picker.png)
+
 ## Features
 
 - Template management for predefined,
