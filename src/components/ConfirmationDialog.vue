@@ -45,7 +45,7 @@ const emit = defineEmits<{
           </DialogClose>
           <button
             type="button"
-            class="shell-button border-red-500/40 bg-red-500/10 text-red-100 hover:border-red-400/60 hover:bg-red-500/20"
+            class="shell-button border-red-500/40 bg-red-500/10 text-app-text hover:border-red-400/60 hover:bg-red-500/20"
             @click="emit('confirm')"
           >
             {{ confirmLabel }}
