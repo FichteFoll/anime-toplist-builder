@@ -209,6 +209,11 @@ const drawRoundedRect = (
   context.closePath()
 }
 
+const setImageSmoothing = (context: CanvasRenderingContext2D) => {
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+}
+
 const fillRoundedRect = (
   context: CanvasRenderingContext2D,
   x: number,
@@ -280,6 +285,20 @@ const drawCoverImage = (
   height: number,
   radius: number,
 ) => {
+  const drawImageSection = (
+    targetContext: CanvasRenderingContext2D,
+    source: CanvasImageSource,
+    sourceX: number,
+    sourceY: number,
+    sourceWidth: number,
+    sourceHeight: number,
+    targetWidth: number,
+    targetHeight: number,
+  ) => {
+    setImageSmoothing(targetContext)
+    targetContext.drawImage(source, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight)
+  }
+
   const sourceAspectRatio = image.width / image.height
   const targetAspectRatio = width / height
 
@@ -296,10 +315,50 @@ const drawCoverImage = (
     sourceY = (image.height - sourceHeight) / 2
   }
 
+  let source: CanvasImageSource = image
+  let currentWidth = sourceWidth
+  let currentHeight = sourceHeight
+
+  while (currentWidth / 2 > width || currentHeight / 2 > height) {
+    const scale = Math.max(width / currentWidth, height / currentHeight, 0.5)
+    const nextWidth = Math.max(width, Math.round(currentWidth * scale))
+    const nextHeight = Math.max(height, Math.round(currentHeight * scale))
+    const bufferCanvas = document.createElement('canvas')
+    const bufferContext = bufferCanvas.getContext('2d')
+
+    if (!bufferContext) {
+      break
+    }
+
+    bufferCanvas.width = nextWidth
+    bufferCanvas.height = nextHeight
+    drawImageSection(
+      bufferContext,
+      source,
+      sourceX,
+      sourceY,
+      currentWidth,
+      currentHeight,
+      nextWidth,
+      nextHeight,
+    )
+
+    source = bufferCanvas
+    sourceX = 0
+    sourceY = 0
+    currentWidth = nextWidth
+    currentHeight = nextHeight
+  }
+
   context.save()
+  setImageSmoothing(context)
   drawRoundedRect(context, x, y, width, height, radius)
   context.clip()
-  context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height)
+  if (source === image && currentWidth === sourceWidth && currentHeight === sourceHeight) {
+    context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height)
+  } else {
+    context.drawImage(source, 0, 0, currentWidth, currentHeight, x, y, width, height)
+  }
   context.restore()
 }
 
