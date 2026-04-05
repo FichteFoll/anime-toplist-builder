@@ -229,13 +229,13 @@ const genreEmptyMessage = computed(() => {
     </FilterField>
 
     <FilterSingleComboboxField
+      v-model="countryOfOriginModel"
       label="Country of origin"
       description="Pick the country where the anime was made."
       :options="countryOptions"
       placeholder="Choose a country of origin"
       clear-label="Clear country of origin"
       :disabled-reason="disabledFields?.countryOfOrigin"
-      v-model="countryOfOriginModel"
     />
 
     <FilterMultiComboboxField
@@ -244,6 +244,7 @@ const genreEmptyMessage = computed(() => {
       description="Pick one or more genres you want to see."
       :options="genreOptions"
       :empty-message="genreEmptyMessage"
+      clear-label="Clear genres"
       placeholder="Search or select genres"
       :disabled-reason="disabledFields?.genres"
     />
@@ -257,13 +258,13 @@ const genreEmptyMessage = computed(() => {
     />
 
     <FilterSingleComboboxField
+      v-model="sourceValue"
       label="Source material"
       description="Pick the type of source it was adapted from."
       :options="sourceOptions"
       placeholder="Choose a source type"
       clear-label="Clear source material"
       :disabled-reason="disabledFields?.source"
-      v-model="sourceValue"
     />
 
     <div class="lg:col-span-2">

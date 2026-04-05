@@ -24,6 +24,7 @@ const props = defineProps<{
   options: FilterOption[]
   emptyMessage?: string
   placeholder?: string
+  clearLabel: string
   disabledReason?: string
   virtualized?: boolean
 }>()
@@ -94,6 +95,11 @@ const updateValuesFromCombobox = (values: string[] | undefined) => {
   searchTerm.value = ''
 }
 
+const clearValues = () => {
+  emitValues([])
+  searchTerm.value = ''
+}
+
 const removeValue = (value: string) => {
   emitValues(model.value.filter((entry) => entry !== value))
 }
@@ -114,31 +120,44 @@ const removeValue = (value: string) => {
       @update:model-value="(value) => updateValuesFromCombobox(value as unknown as string[])"
     >
       <ComboboxAnchor as-child>
-        <div
-          class="flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-sm text-app-text outline-none transition focus-within:border-app-accent/60 focus-within:ring-2 focus-within:ring-app-accent/30"
-        >
-          <span
-            v-for="option in selectedOptions"
-            :key="option.value"
-            class="inline-flex shrink-0 items-center gap-1 rounded-full bg-app-accentSoft px-2 py-0.5 text-xs leading-5 text-app-text"
+        <div class="relative">
+          <div
+            class="flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 pr-10 text-sm text-app-text outline-none transition focus-within:border-app-accent/60 focus-within:ring-2 focus-within:ring-app-accent/30"
           >
-            {{ option.label }}
-            <button
-              type="button"
-              class="text-[10px] leading-none text-app-muted transition hover:text-app-text"
-              :disabled="Boolean(disabledReason)"
-              :aria-label="`Remove ${option.label}`"
-              @click="removeValue(option.value)"
+            <span
+              v-for="option in selectedOptions"
+              :key="option.value"
+              class="inline-flex shrink-0 items-center gap-1 rounded-full bg-app-accentSoft px-2 py-0.5 text-xs leading-5 text-app-text"
             >
-              ×
-            </button>
-          </span>
+              {{ option.label }}
+              <button
+                type="button"
+                class="text-[10px] leading-none text-app-muted transition hover:text-app-text"
+                :disabled="Boolean(disabledReason)"
+                :aria-label="`Remove ${option.label}`"
+                @click="removeValue(option.value)"
+              >
+                ×
+              </button>
+            </span>
 
-          <ComboboxInput
-            v-model="searchTerm"
-            class="min-w-[6rem] flex-1 border-0 bg-transparent px-0 py-1 text-sm text-app-text outline-none placeholder:text-app-muted/70 focus:ring-0"
-            :placeholder="placeholder ?? 'Search options'"
-          />
+            <ComboboxInput
+              v-model="searchTerm"
+              class="min-w-[6rem] flex-1 border-0 bg-transparent px-0 py-1 text-sm text-app-text outline-none placeholder:text-app-muted/70 focus:ring-0"
+              :placeholder="placeholder ?? 'Search options'"
+            />
+          </div>
+
+          <button
+            v-if="selectedOptions.length > 0"
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2 py-1 text-xs text-app-muted transition hover:bg-app-accentSoft hover:text-app-text"
+            :disabled="Boolean(disabledReason)"
+            :aria-label="clearLabel"
+            @click="clearValues"
+          >
+            ×
+          </button>
         </div>
       </ComboboxAnchor>
 

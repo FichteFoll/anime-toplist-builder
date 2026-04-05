@@ -78,6 +78,7 @@ watch(hasSelectedTags, (hasTags) => {
         description="Pick tags and set the minimum rank you want them to meet."
         :options="options"
         :empty-message="emptyMessage"
+        clear-label="Clear tags"
         virtualized
         placeholder="Search or select tags"
         :disabled-reason="disabledReason"
