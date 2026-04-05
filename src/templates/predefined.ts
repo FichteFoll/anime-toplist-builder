@@ -5,7 +5,7 @@ import { normalizeImportedTemplate } from '@/lib/template-validation'
 const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   {
     version: 1 as const,
-    id: 'cr_animeawards_202501',
+    id: 'cr-anime-awards-2025',
     name: 'Crunchyroll Anime Awards 2025',
     description: 'My picks for the the 2025 Crunchyroll Anime Awards',
     globalFilter: {
@@ -152,8 +152,8 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   },
   {
     version: 1 as const,
-    id: 'favoritesalltime01',
-    name: 'Favorites All Time',
+    id: 'all-time-favorites',
+    name: 'All-Time Favorites',
     description: 'My all-time favorite anime',
     globalFilter: {
       sort: {
@@ -203,7 +203,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   },
   {
     version: 1 as const,
-    id: 'seasonalshowcase01',
+    id: 'seasonal-showcase',
     name: 'Seasonal Showcase',
     description: 'Standout shows from recent anime seasons',
     globalFilter: {
@@ -253,7 +253,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   },
   {
     version: 1 as const,
-    id: 'genrespotlight01',
+    id: 'genre-spotlight',
     name: 'Genre Spotlight',
     description: 'Strong anime across major genre categories',
     globalFilter: {
