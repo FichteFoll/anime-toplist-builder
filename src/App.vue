@@ -30,6 +30,7 @@ import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import PngExportDialog from '@/components/export/PngExportDialog.vue'
 import GlobalFilterDialog from '@/components/filters/GlobalFilterDialog.vue'
+import TemplateEditDialog from '@/components/templates/TemplateEditDialog.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { sanitizeDownloadFilename } from '@/lib/export-filename'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
@@ -216,6 +217,13 @@ const resetActiveTemplate = () => {
 const updateGlobalFilter = (filter: FilterState) => {
   templateStore.updateActiveTemplate((template) => {
     template.globalFilter = filter
+  })
+}
+
+const updateTemplateDetails = (value: { name: string, description: string }) => {
+  templateStore.updateActiveTemplate((template) => {
+    template.name = value.name
+    template.description = value.description
   })
 }
 
@@ -532,6 +540,11 @@ onMounted(async () => {
                       :metadata-status="metadataStatus"
                       :metadata-error="metadataError"
                       @update:model-value="updateGlobalFilter"
+                    />
+                    <TemplateEditDialog
+                      v-if="activeTemplate"
+                      :template="activeTemplate"
+                      @save="updateTemplateDetails"
                     />
                     <button
                       type="button"
