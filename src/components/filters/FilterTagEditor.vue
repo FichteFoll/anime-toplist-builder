@@ -88,7 +88,7 @@ watch(hasSelectedTags, (hasTags) => {
     <FilterField
       v-if="hasSelectedTags"
       label="Minimum tag rank"
-      description="Only keep tags that meet this rank or higher. (Range: 1-100)"
+      description="Only match if all tags are ranked higher than this value. (Range: 1-100)"
       :disabled-reason="disabledReason"
     >
       <input
