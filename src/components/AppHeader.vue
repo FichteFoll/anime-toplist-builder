@@ -17,9 +17,6 @@ const titleLanguage = defineModel<AnimeTitleLanguage>('titleLanguage', { require
   >
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div class="max-w-3xl">
-        <p class="text-sm font-medium uppercase tracking-[0.35em] text-app-muted">
-          Anime Toplist
-        </p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
           Award-style Anime Toplist Builder
         </h1>

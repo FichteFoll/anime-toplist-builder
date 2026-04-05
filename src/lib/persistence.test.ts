@@ -102,7 +102,7 @@ describe('persistence helpers', () => {
       storage,
     )
 
-    const storedRecord = storage.read('anime-toplist.templates.v1') as {
+    const storedRecord = storage.read('anime-toplist-builder.templates.v1') as {
       templates: Array<{ id: string, origin: string, remoteUrl?: string }>
     }
 
@@ -126,7 +126,7 @@ describe('persistence helpers', () => {
   it('falls back to default settings when stored values are invalid', () => {
     const storage = createMockStorage()
 
-    storage.write('anime-toplist.settings.v1', {
+    storage.write('anime-toplist-builder.settings.v1', {
       schemaVersion: 1,
       themePreference: 'neon',
       titleLanguage: 'pirate',
@@ -145,7 +145,7 @@ describe('persistence helpers', () => {
     const storage = createMockStorage()
     const validSelection = createSelection()
 
-    storage.write('anime-toplist.selections.v1', {
+    storage.write('anime-toplist-builder.selections.v1', {
       schemaVersion: 1,
       selections: {
         valid: {
@@ -172,6 +172,6 @@ describe('persistence helpers', () => {
 
     saveStoredSelections({}, storage)
 
-    expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist.selections.v1')
+    expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist-builder.selections.v1')
   })
 })

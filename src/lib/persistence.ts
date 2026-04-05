@@ -19,9 +19,9 @@ import {
   parseTemplateImportPayload,
 } from '@/lib/template-validation'
 
-const templatesStorageKey = 'anime-toplist.templates.v1'
-const settingsStorageKey = 'anime-toplist.settings.v1'
-const selectionsStorageKey = 'anime-toplist.selections.v1'
+const templatesStorageKey = 'anime-toplist-builder.templates.v1'
+const settingsStorageKey = 'anime-toplist-builder.settings.v1'
+const selectionsStorageKey = 'anime-toplist-builder.selections.v1'
 
 const templatesStorageSchemaVersion = 1 as const
 const settingsStorageSchemaVersion = 1 as const
