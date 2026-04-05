@@ -310,6 +310,7 @@ export const parseTemplateImportPayload = (value: unknown): TemplateImportPayloa
     version: value.version,
     id: templateId,
     name: asTrimmedString(value.name, 'name'),
+    description: hasOwn(value, 'description') ? asTrimmedSearchString(value.description, 'description') : '',
     categories,
     globalFilter: parseFilterState(value.globalFilter, 'globalFilter'),
   }
@@ -333,6 +334,8 @@ export const normalizeImportedTemplate = (
 ): Template => ({
   id: payload.id ?? createTemplateId(),
   name: payload.name,
+  description:
+    payload.description === undefined ? '' : asTrimmedSearchString(payload.description, 'description'),
   categories: payload.categories.map((category) => ({
     id: category.id ?? createCategoryId(),
     name: category.name,
@@ -369,6 +372,7 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
     version: templateSchemaVersion,
     id: template.id,
     name: asTrimmedString(template.name, 'name'),
+    description: asTrimmedSearchString(template.description, 'description'),
     categories,
     globalFilter: parseFilterState(template.globalFilter, 'globalFilter'),
   }

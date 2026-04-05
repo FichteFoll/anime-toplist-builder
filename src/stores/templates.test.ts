@@ -62,6 +62,7 @@ describe('template store fork-on-edit behavior', () => {
     expect(updatedTemplate?.origin).toBe('user')
     expect(updatedTemplate?.version).toBe(templateSchemaVersion)
     expect(updatedTemplate?.name).toBe('Forked Predefined Copy')
+    expect(updatedTemplate?.description).toBe(sourceTemplate.description)
     expect(templateStore.activeTemplateId).toBe(updatedTemplate?.id)
     expect(selectionsStore.getCategorySelection(updatedTemplate!.id, sourceCategoryId!)).toEqual(selection)
     expect(selectionsStore.getCategorySelection(sourceTemplate.id, sourceCategoryId!)).toEqual(selection)
@@ -80,11 +81,13 @@ describe('template store fork-on-edit behavior', () => {
     const createdTemplate = templateStore.createTemplate('Editable Template')
     const updatedTemplate = templateStore.updateActiveTemplate((template) => {
       template.name = 'Edited In Place'
+      template.description = 'Edited context'
     })
 
     expect(updatedTemplate?.id).toBe(createdTemplate.id)
     expect(updatedTemplate?.origin).toBe('user')
     expect(templateStore.activeTemplate?.id).toBe(createdTemplate.id)
     expect(templateStore.activeTemplate?.name).toBe('Edited In Place')
+    expect(templateStore.activeTemplate?.description).toBe('Edited context')
   })
 })

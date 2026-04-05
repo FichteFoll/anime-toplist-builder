@@ -391,7 +391,7 @@ onMounted(async () => {
           <main class="flex-1 py-8">
             <section class="mt-6 grid gap-4">
               <article class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
-                <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex flex-col gap-5 pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
                       Template
@@ -400,7 +400,7 @@ onMounted(async () => {
                       {{ activeTemplate?.name ?? 'No active template' }}
                     </h2>
                     <p class="mt-3 max-w-2xl text-sm leading-6 text-app-muted">
-                      Template management and global filter editing stay available here while category cards handle the main toplist layout below.
+                      {{ activeTemplate?.description || 'No description provided' }}
                     </p>
                   </div>
 

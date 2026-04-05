@@ -22,6 +22,7 @@ export const createBlankTemplate = (
 ): Template => ({
   id: createTemplateId(),
   name,
+  description: '',
   categories: [],
   globalFilter: createEmptyFilterState(),
   origin,

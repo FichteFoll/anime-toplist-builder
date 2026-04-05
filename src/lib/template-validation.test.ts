@@ -16,6 +16,7 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_validationcase01',
       name: '  Favorites  ',
+      description: '  Template context  ',
       globalFilter: {
         search: '  mecha  ',
         genres: ['Drama', 'Action', 'Drama'],
@@ -38,6 +39,7 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_validationcase01',
       name: 'Favorites',
+      description: 'Template context',
       globalFilter: {
         search: 'mecha',
         yearRange: undefined,
@@ -108,6 +110,7 @@ describe('template validation', () => {
       {
         version: templateSchemaVersion,
         name: 'Generated ids',
+        description: '  Shared context  ',
         globalFilter: {
           search: '  thriller  ',
         },
@@ -123,6 +126,7 @@ describe('template validation', () => {
 
     expect(isTemplateId(template.id)).toBe(true)
     expect(template.origin).toBe('imported-file')
+    expect(template.description).toBe('Shared context')
     expect(template.globalFilter.search).toBe('thriller')
     expect(template.categories).toHaveLength(1)
     expect(isCategoryId(template.categories[0]?.id)).toBe(true)
@@ -135,6 +139,7 @@ describe('template validation', () => {
         version: templateSchemaVersion,
         id: 'tpl_exportcase01',
         name: 'Export me',
+        description: 'Export context',
         globalFilter: {
           formats: ['TV', 'MOVIE'],
           minimumTagRank: 40,
@@ -157,6 +162,7 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_exportcase01',
       name: 'Export me',
+      description: 'Export context',
       globalFilter: {
         search: '',
         yearRange: undefined,
@@ -202,6 +208,7 @@ describe('template validation', () => {
       version: templateSchemaVersion,
       id: 'tpl_documentedshape01',
       name: 'Documented Shape',
+      description: 'Documented context',
       categories: [
         {
           id: 'cat_documentedshape01',
@@ -212,5 +219,15 @@ describe('template validation', () => {
     }
 
     expect(parseTemplateImportPayload(payload).id).toBe('tpl_documentedshape01')
+  })
+
+  it('defaults template descriptions when omitted', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      name: 'No description',
+      categories: [],
+    })
+
+    expect(payload.description).toBe('')
   })
 })

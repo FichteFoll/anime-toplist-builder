@@ -27,6 +27,7 @@ export interface Category {
 export interface Template {
   id: TemplateId
   name: string
+  description: string
   categories: Category[]
   globalFilter: FilterState
   origin: TemplateOrigin
@@ -44,6 +45,7 @@ export interface TemplateImportPayloadV1 {
   version: TemplateVersion
   id?: TemplateId
   name: string
+  description?: string
   categories: TemplateImportCategoryPayloadV1[]
   globalFilter?: Partial<FilterState>
 }
@@ -59,6 +61,7 @@ export interface TemplateExportPayloadV1 {
   version: TemplateVersion
   id: TemplateId
   name: string
+  description: string
   categories: TemplateExportCategoryPayloadV1[]
   globalFilter: FilterState
 }
