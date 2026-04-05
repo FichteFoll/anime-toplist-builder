@@ -21,10 +21,10 @@ const titleLanguage = defineModel<AnimeTitleLanguage>('titleLanguage', { require
           Anime Toplist
         </p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Build ranked anime lists from AniList data.
+          Award-style Anime Toplist Builder
         </h1>
         <p class="mt-4 max-w-2xl text-sm leading-6 text-app-muted sm:text-base">
-          Manage templates, edit shared filters, and prepare category-specific constraints before anime selection.
+          Use a predefined template or make your own, adjust common and category-specific filters, and select your anime for each category.
         </p>
       </div>
 
