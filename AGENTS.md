@@ -5,7 +5,11 @@
 - Vite with Vue 3 Composition API and TypeScript.
 - Pinia for shared state and local persistence integration.
 - Tailwind CSS for styling.
-- Reka UI for headless UI primitives.
+- Reka UI for dialogs,
+  menus,
+  tooltips,
+  and other headless UI primitives.
+- SortableJS for category drag and drop.
 - Vitest and Vue Test Utils for tests.
 - ESLint for linting.
 - `pnpm` for dependency and script management.
@@ -16,8 +20,8 @@
 - `src/lib`: pure helpers, validation, persistence adapters, id helpers, and filter logic.
 - `src/stores`: Pinia stores only.
   Keep serialization and validation outside stores.
-- `src/api`: AniList GraphQL access and response mapping.
-  UI code should not build GraphQL requests directly.
+- `src/api`: AniList access and query building.
+  UI code should not build GraphQL payloads directly.
 - `src/components`: reusable UI primitives and composed interface pieces.
   Export UI lives under `src/components/export`.
   SVG icons should live as reusable components in `src/components/icons`.
@@ -56,6 +60,7 @@
 - Filters are a single shared model used by both global template filters and category filters.
 - Category filters must only narrow or refine the effective query relative to the global filter.
   Later UI should disable fields already fixed by the global filter.
+- Preserve static-hosting compatibility for GitHub Pages.
 
 ## Persistence Rules
 
@@ -112,5 +117,6 @@
 
 - Remote template startup hydration is triggered from the app after store initialization,
   using `pendingStartupTemplateUrl` captured by the template store.
+- `ImageExportDialog` renders the PNG preview in-browser and downloads the generated blob.
 - PNG export can fall back to placeholders when remote covers fail to load,
   including CORS-restricted images.
