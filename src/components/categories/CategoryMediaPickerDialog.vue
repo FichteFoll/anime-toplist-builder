@@ -15,6 +15,7 @@ import { computed, ref, watch } from 'vue'
 import { normalizeAniListError, searchAnimeMedia } from '@/api'
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
 import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
+import { mergeFilterStates } from '@/lib/filter-merge'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import {
   filterSortFields,
@@ -69,6 +70,78 @@ const templateSortFieldLabel = computed(() => {
   }
 
   return templateSort.field.toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+})
+
+const toTitleLabel = (value: string) =>
+  value
+    .toLowerCase()
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+
+const formatRangeLabel = (label: string, range?: { minimum?: number; maximum?: number }) => {
+  if (!range) {
+    return null
+  }
+
+  if (range.minimum !== undefined && range.maximum !== undefined) {
+    return `${label}: ${range.minimum}-${range.maximum}`
+  }
+
+  if (range.minimum !== undefined) {
+    return `${label}: ${range.minimum}+`
+  }
+
+  if (range.maximum !== undefined) {
+    return `${label}: up to ${range.maximum}`
+  }
+
+  return null
+}
+
+const activeFilterSummary = computed(() => {
+  const { filter } = mergeFilterStates(props.globalFilter, props.category.filter)
+  const summary: string[] = []
+
+  if (filter.search) {
+    summary.push(`Search: ${filter.search}`)
+  }
+
+  const rangeLabels = [
+    formatRangeLabel('Year', filter.yearRange),
+    formatRangeLabel('Popularity', filter.popularity),
+  ].filter((value): value is string => Boolean(value))
+
+  summary.push(...rangeLabels)
+
+  if (filter.seasons.length > 0) {
+    summary.push(`Season: ${filter.seasons.map(toTitleLabel).join(', ')}`)
+  }
+
+  if (filter.countryOfOrigin.length > 0) {
+    summary.push(`Country: ${filter.countryOfOrigin.join(', ')}`)
+  }
+
+  if (filter.genres.length > 0) {
+    summary.push(`Genres: ${filter.genres.join(', ')}`)
+  }
+
+  if (filter.formats.length > 0) {
+    summary.push(`Formats: ${filter.formats.join(', ')}`)
+  }
+
+  if (filter.source.length > 0) {
+    summary.push(`Source: ${filter.source.map(toTitleLabel).join(', ')}`)
+  }
+
+  if (filter.tags.length > 0) {
+    summary.push(`Tags: ${filter.tags.join(', ')}`)
+  }
+
+  if (filter.minimumTagRank !== undefined) {
+    summary.push(`Tag rank: ${filter.minimumTagRank}+`)
+  }
+
+  return summary
 })
 
 const sortFieldPlaceholderLabel = computed(() => `Template: ${templateSortFieldLabel.value}`)
@@ -300,6 +373,29 @@ watch(pickerSort, (value, previousValue) => {
             </p>
             <p>
               {{ status === 'loading' ? 'Loading...' : `Page ${searchResponse?.pageInfo.currentPage ?? currentPage} · 15 per page` }}
+            </p>
+          </div>
+
+          <div
+            class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3 text-sm text-app-muted"
+          >
+            <p class="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+              Active filters
+            </p>
+            <div
+              v-if="activeFilterSummary.length > 0"
+              class="flex flex-wrap gap-2"
+            >
+              <span
+                v-for="item in activeFilterSummary"
+                :key="item"
+                class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
+              >
+                {{ item }}
+              </span>
+            </div>
+            <p v-else>
+              No category filters are active.
             </p>
           </div>
 
