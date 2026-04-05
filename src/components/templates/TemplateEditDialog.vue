@@ -12,7 +12,7 @@ import {
 import { computed, ref, watch } from 'vue'
 
 import FilterEditor from '@/components/filters/FilterEditor.vue'
-import { countConfiguredFilterFields, isNonBlankName } from '@/lib/filter-editor'
+import { isNonBlankName } from '@/lib/filter-editor'
 import type { FilterState, Template } from '@/types'
 
 const props = defineProps<{
@@ -30,7 +30,6 @@ const draftDescription = ref(props.template.description)
 const draftFilter = ref(cloneFilter(props.template.globalFilter))
 
 const hasValidName = computed(() => isNonBlankName(draftName.value))
-const configuredFilterCount = computed(() => countConfiguredFilterFields(draftFilter.value))
 const canDeleteTemplate = computed(() => props.template.origin !== 'predefined' && props.template.origin !== 'imported-url')
 
 function cloneFilter(filter: FilterState): FilterState {
@@ -100,9 +99,6 @@ const requestDelete = () => {
         :aria-label="`Open template editor for ${template.name}`"
       >
         Edit template
-        <span class="ml-2 rounded-full bg-app-accentSoft px-2 py-1 text-xs text-app-text">
-          {{ configuredFilterCount }} rule{{ configuredFilterCount === 1 ? '' : 's' }}
-        </span>
       </button>
     </DialogTrigger>
 
