@@ -386,6 +386,7 @@ watch(pickerSort, (value, previousValue) => {
                         </p>
 
                         <p class="line-clamp-3 text-sm leading-6 text-app-muted">
+                          <!-- eslint-disable-next-line vue/no-v-html -->
                           <span
                             v-if="result.description"
                             v-html="sanitizeAnimeDescriptionHtml(result.description)"
