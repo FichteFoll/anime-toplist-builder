@@ -74,10 +74,6 @@ const groupedTemplates = computed(() => [
   },
 ])
 
-const globalFilterRuleCount = computed(() =>
-  activeTemplate.value ? countConfiguredFilterFields(activeTemplate.value.globalFilter) : 0,
-)
-
 const loadAniListMetadata = async () => {
   metadataStatus.value = 'loading'
   metadataError.value = null
@@ -392,53 +388,6 @@ onMounted(async () => {
           />
 
           <main class="flex-1 py-8">
-            <section class="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-              <article class="rounded-3xl border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur">
-                <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                  Filter workspace
-                </p>
-                <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Current template
-                </h2>
-                <p class="mt-3 text-3xl font-semibold tracking-tight">
-                  {{ activeTemplate?.name ?? 'None' }}
-                </p>
-                <p class="mt-3 text-sm leading-6 text-app-muted">
-                  Shared filters apply to the selected template.
-                </p>
-              </article>
-
-              <article class="rounded-3xl border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur">
-                <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                  Filter workspace
-                </p>
-                <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Global Rules
-                </h2>
-                <p class="mt-3 text-3xl font-semibold tracking-tight">
-                  {{ globalFilterRuleCount }}
-                </p>
-                <p class="mt-3 text-sm leading-6 text-app-muted">
-                  Template-wide constraints disable matching category fields when they are already fixed.
-                </p>
-              </article>
-
-              <article class="rounded-3xl border border-app-border/70 bg-app-surface/90 p-5 shadow-shell backdrop-blur">
-                <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                  Filter workspace
-                </p>
-                <h2 class="mt-3 text-xl font-semibold tracking-tight">
-                  Selected slots
-                </h2>
-                <p class="mt-3 text-3xl font-semibold tracking-tight">
-                  {{ activeSelectionCount }}
-                </p>
-                <p class="mt-3 text-sm leading-6 text-app-muted">
-                  Fill categories with one anime each.
-                </p>
-              </article>
-            </section>
-
             <section class="mt-6 grid gap-4">
               <article class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
                 <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
