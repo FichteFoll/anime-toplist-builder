@@ -138,7 +138,7 @@ const save = () => {
         <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
           <div class="space-y-2">
             <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-              Category editor
+              Edit Category
             </p>
             <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
               {{ props.category.name }}

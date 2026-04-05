@@ -112,7 +112,7 @@ const requestDelete = () => {
         <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
           <div class="space-y-2">
             <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-              Template editor
+              Edit Template
             </p>
             <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
               {{ template.name }}
