@@ -22,5 +22,5 @@ export const sanitizeDownloadFilename = (value: string, fallback = 'anime-toplis
   return safeValue
 }
 
-export const createPngExportFilename = (templateName: string) =>
-  `${sanitizeDownloadFilename(`${templateName} toplist`) || 'anime-toplist'}.png`
+export const createPngExportFilename = (templateName: string, author: string) =>
+  `${sanitizeDownloadFilename(`${templateName} by ${author || 'Anonymous'}`) || 'anime-toplist'}.png`
