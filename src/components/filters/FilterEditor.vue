@@ -75,6 +75,7 @@ const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], 
 
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
 const sourceValue = computed(() => model.value.source[0] ?? '')
+const hasSourceValue = computed(() => sourceValue.value.length > 0)
 const countryOfOriginModel = computed({
   get: () => model.value.countryOfOrigin,
   set: (value: string[]) => updateFilter({ countryOfOrigin: value }),
@@ -273,12 +274,25 @@ const genreEmptyMessage = computed(() => {
         open-on-focus
         @update:model-value="updateSingleSelect('source', $event as string | undefined)"
       >
-        <ComboboxAnchor>
-          <ComboboxInput
-            class="shell-input"
-            :display-value="(value: string) => sourceLabelByValue.get(value) ?? ''"
-            placeholder="Choose a source type"
-          />
+        <ComboboxAnchor as-child>
+          <div class="relative">
+            <ComboboxInput
+              class="shell-input pr-10"
+              :display-value="(value: string) => sourceLabelByValue.get(value) ?? ''"
+              placeholder="Choose a source type"
+            />
+
+            <button
+              v-if="hasSourceValue"
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2 py-1 text-xs text-app-muted transition hover:bg-app-accentSoft hover:text-app-text"
+              :disabled="Boolean(disabledFields?.source)"
+              aria-label="Clear source material"
+              @click="updateSingleSelect('source', undefined)"
+            >
+              ×
+            </button>
+          </div>
         </ComboboxAnchor>
 
         <ComboboxPortal>
