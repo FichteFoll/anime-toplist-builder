@@ -11,6 +11,7 @@ import {
 } from 'reka-ui'
 
 import FilterField from '@/components/filters/FilterField.vue'
+import { useVisibleScrollbar } from '@/composables/useVisibleScrollbar'
 
 export interface FilterOption {
   value: string
@@ -33,6 +34,8 @@ const searchTerm = ref('')
 const optionLabelByValue = computed(() => new Map(props.options.map((option) => [option.value, option.label])))
 
 const displayValue = (value: string) => optionLabelByValue.value.get(value) ?? ''
+
+const { scrollbarState, viewportRef } = useVisibleScrollbar(() => props.options.length)
 
 watch(
   model,
@@ -86,17 +89,35 @@ const updateValue = (value: string | undefined) => {
           position="popper"
           class="z-[60] w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
         >
-          <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
-            <ComboboxItem
-              v-for="option in options"
-              :key="option.value"
-              :value="option.value"
-              :text-value="option.label"
-              class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[state=checked]:bg-app-accent/20 data-[highlighted]:bg-app-accentSoft"
+          <div class="relative max-h-64 w-full overflow-hidden pr-3">
+            <ComboboxViewport
+              ref="viewportRef"
+              class="max-h-64 w-full overflow-y-auto pr-2"
             >
-              {{ option.label }}
-            </ComboboxItem>
-          </ComboboxViewport>
+              <ComboboxItem
+                v-for="option in options"
+                :key="option.value"
+                :value="option.value"
+                :text-value="option.label"
+                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[state=checked]:bg-app-accent/20 data-[highlighted]:bg-app-accentSoft"
+              >
+                {{ option.label }}
+              </ComboboxItem>
+            </ComboboxViewport>
+
+            <div
+              v-if="scrollbarState.visible"
+              class="pointer-events-none absolute bottom-2 right-1 top-2 w-1.5 rounded-full bg-app-text/8"
+            >
+              <div
+                class="absolute left-0 right-0 rounded-full bg-app-muted/80"
+                :style="{
+                  height: `${scrollbarState.thumbHeight}px`,
+                  transform: `translateY(${scrollbarState.thumbTop}px)`,
+                }"
+              />
+            </div>
+          </div>
         </ComboboxContent>
       </ComboboxPortal>
     </ComboboxRoot>

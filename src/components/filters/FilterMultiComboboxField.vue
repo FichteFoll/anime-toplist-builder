@@ -12,6 +12,7 @@ import {
 } from 'reka-ui'
 
 import FilterField from '@/components/filters/FilterField.vue'
+import { useVisibleScrollbar } from '@/composables/useVisibleScrollbar'
 
 export interface FilterOption {
   value: string
@@ -141,6 +142,8 @@ const filteredOptions = computed(() => {
     return label.includes(term) || value.includes(term)
   })
 })
+
+const { scrollbarState, viewportRef } = useVisibleScrollbar(() => filteredOptions.value.length)
 
 const emptyStateMessage = computed(() => {
   if (normalizedOptions.value.length === 0) {
@@ -389,56 +392,74 @@ const toggleChipSelection = (value: string) => {
           position="popper"
           class="z-50 w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
         >
-          <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
-            <p
-              v-if="filteredOptions.length === 0"
-              class="px-3 py-2 text-sm text-app-muted"
+          <div class="relative max-h-64 w-full overflow-hidden pr-3">
+            <ComboboxViewport
+              ref="viewportRef"
+              class="max-h-64 w-full overflow-y-auto pr-2"
             >
-              {{ emptyStateMessage }}
-            </p>
+              <p
+                v-if="filteredOptions.length === 0"
+                class="px-3 py-2 text-sm text-app-muted"
+              >
+                {{ emptyStateMessage }}
+              </p>
 
-            <ComboboxVirtualizer
-              v-else-if="virtualized"
-              v-slot="{ option }"
-              :options="filteredOptions"
-              :text-content="(option) => option.label"
-              :estimate-size="40"
+              <ComboboxVirtualizer
+                v-else-if="virtualized"
+                v-slot="{ option }"
+                :options="filteredOptions"
+                :text-content="(option) => option.label"
+                :estimate-size="40"
+              >
+                <ComboboxItem
+                  :value="option.value"
+                  :text-value="option.label"
+                  :data-filter-popup-item="option.value"
+                  :class="popupItemClass(option.value)"
+                  @select.prevent="cyclePopupSelection(option.value)"
+                >
+                  <span class="flex w-full items-center justify-between gap-3">
+                    <span>{{ option.label }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
+                      {{ popupItemStatus(option.value) }}
+                    </span>
+                  </span>
+                </ComboboxItem>
+              </ComboboxVirtualizer>
+
+              <template v-else>
+                <ComboboxItem
+                  v-for="option in filteredOptions"
+                  :key="option.value"
+                  :value="option.value"
+                  :text-value="option.label"
+                  :data-filter-popup-item="option.value"
+                  :class="popupItemClass(option.value)"
+                  @select.prevent="cyclePopupSelection(option.value)"
+                >
+                  <span class="flex w-full items-center justify-between gap-3">
+                    <span>{{ option.label }}</span>
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
+                      {{ popupItemStatus(option.value) }}
+                    </span>
+                  </span>
+                </ComboboxItem>
+              </template>
+            </ComboboxViewport>
+
+            <div
+              v-if="scrollbarState.visible"
+              class="pointer-events-none absolute bottom-2 right-1 top-2 w-1.5 rounded-full bg-app-text/8"
             >
-              <ComboboxItem
-                :value="option.value"
-                :text-value="option.label"
-                :data-filter-popup-item="option.value"
-                :class="popupItemClass(option.value)"
-                @select.prevent="cyclePopupSelection(option.value)"
-              >
-                <span class="flex w-full items-center justify-between gap-3">
-                  <span>{{ option.label }}</span>
-                  <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
-                    {{ popupItemStatus(option.value) }}
-                  </span>
-                </span>
-              </ComboboxItem>
-            </ComboboxVirtualizer>
-
-            <template v-else>
-              <ComboboxItem
-                v-for="option in filteredOptions"
-                :key="option.value"
-                :value="option.value"
-                :text-value="option.label"
-                :data-filter-popup-item="option.value"
-                :class="popupItemClass(option.value)"
-                @select.prevent="cyclePopupSelection(option.value)"
-              >
-                <span class="flex w-full items-center justify-between gap-3">
-                  <span>{{ option.label }}</span>
-                  <span class="text-[10px] uppercase tracking-[0.2em] text-app-muted">
-                    {{ popupItemStatus(option.value) }}
-                  </span>
-                </span>
-              </ComboboxItem>
-            </template>
-          </ComboboxViewport>
+              <div
+                class="absolute left-0 right-0 rounded-full bg-app-muted/80"
+                :style="{
+                  height: `${scrollbarState.thumbHeight}px`,
+                  transform: `translateY(${scrollbarState.thumbTop}px)`,
+                }"
+              />
+            </div>
+          </div>
         </ComboboxContent>
       </ComboboxPortal>
     </ComboboxRoot>
