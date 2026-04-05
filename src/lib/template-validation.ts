@@ -74,6 +74,20 @@ const asOptionalStringArray = (value: unknown, path: string) => {
   return sortStrings(uniqueStrings(items))
 }
 
+const asOptionalSingleString = (value: unknown, path: string) => {
+  if (value === undefined) {
+    return undefined
+  }
+
+  if (Array.isArray(value)) {
+    const items = asOptionalStringArray(value, path)
+
+    return items[0]
+  }
+
+  return asTrimmedString(value, path)
+}
+
 const asEnumArray = <T extends string>(
   value: unknown,
   path: string,
@@ -207,7 +221,7 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
   const filterState: FilterState = {
     yearRange: asOptionalRange(value.yearRange, `${path}.yearRange`),
     seasons: asEnumArray<AnimeSeason>(value.seasons, `${path}.seasons`, animeSeasons),
-    countryOfOrigin: asOptionalStringArray(value.countryOfOrigin, `${path}.countryOfOrigin`),
+    countryOfOrigin: asOptionalSingleString(value.countryOfOrigin, `${path}.countryOfOrigin`),
     tags: asTagFilters(value.tags, `${path}.tags`),
     genres: asOptionalStringArray(value.genres, `${path}.genres`),
     formats: asEnumArray<AnimeFormat>(value.formats, `${path}.formats`, animeFormats),

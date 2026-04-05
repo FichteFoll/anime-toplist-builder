@@ -19,6 +19,7 @@ describe('template validation', () => {
       description: '  Template context  ',
       globalFilter: {
         genres: ['Drama', 'Action', 'Drama'],
+        countryOfOrigin: ['JP', 'CN'],
         tags: ['Cyberpunk', 'Cyberpunk'],
         minimumTagRank: 70,
       },
@@ -42,7 +43,7 @@ describe('template validation', () => {
       globalFilter: {
         yearRange: undefined,
         seasons: [],
-        countryOfOrigin: [],
+        countryOfOrigin: 'CN',
         tags: ['Cyberpunk'],
         minimumTagRank: 70,
         genres: ['Action', 'Drama'],
@@ -59,7 +60,7 @@ describe('template validation', () => {
           filter: {
             yearRange: undefined,
             seasons: ['SPRING', 'WINTER'],
-            countryOfOrigin: [],
+            countryOfOrigin: undefined,
             tags: [],
             minimumTagRank: undefined,
             genres: [],
@@ -161,7 +162,7 @@ describe('template validation', () => {
       globalFilter: {
         yearRange: undefined,
         seasons: [],
-        countryOfOrigin: [],
+        countryOfOrigin: undefined,
         tags: [],
         minimumTagRank: 40,
         genres: [],
@@ -178,7 +179,7 @@ describe('template validation', () => {
           filter: {
             yearRange: undefined,
             seasons: [],
-            countryOfOrigin: [],
+            countryOfOrigin: undefined,
             tags: [],
             minimumTagRank: undefined,
             genres: ['Mystery'],

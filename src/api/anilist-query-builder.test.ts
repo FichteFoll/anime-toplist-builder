@@ -10,7 +10,7 @@ describe('buildAniListMediaSearchVariables', () => {
       globalFilter: {
         ...createEmptyFilterState(),
         seasons: ['WINTER', 'SPRING'],
-        countryOfOrigin: ['JP', 'CN'],
+        countryOfOrigin: 'CN',
         tags: ['Action'],
         minimumTagRank: 40,
         genres: ['Action', 'Drama'],

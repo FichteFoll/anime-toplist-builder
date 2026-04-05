@@ -12,8 +12,7 @@ export const getCategoryFilterDisabledReasons = (
 ): FilterDisabledReasons => ({
   yearRange: hasRangeValue(globalFilter.yearRange) ? inheritedFieldReason : undefined,
   seasons: globalFilter.seasons.length > 0 ? inheritedFieldReason : undefined,
-  countryOfOrigin:
-    globalFilter.countryOfOrigin.length > 0 ? inheritedFieldReason : undefined,
+  countryOfOrigin: globalFilter.countryOfOrigin ? inheritedFieldReason : undefined,
   tags: globalFilter.tags.length > 0 ? inheritedFieldReason : undefined,
   genres: globalFilter.genres.length > 0 ? inheritedFieldReason : undefined,
   formats: globalFilter.formats.length > 0 ? inheritedFieldReason : undefined,
@@ -36,7 +35,7 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
     count += 1
   }
 
-  if (filter.countryOfOrigin.length > 0) {
+  if (filter.countryOfOrigin) {
     count += 1
   }
 

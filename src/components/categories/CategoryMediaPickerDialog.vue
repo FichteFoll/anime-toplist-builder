@@ -114,8 +114,8 @@ const activeFilterSummary = computed(() => {
     summary.push(`Season: ${filter.seasons.map(toTitleLabel).join(', ')}`)
   }
 
-  if (filter.countryOfOrigin.length > 0) {
-    summary.push(`Country: ${filter.countryOfOrigin.join(', ')}`)
+  if (filter.countryOfOrigin) {
+    summary.push(`Country: ${filter.countryOfOrigin}`)
   }
 
   if (filter.genres.length > 0) {

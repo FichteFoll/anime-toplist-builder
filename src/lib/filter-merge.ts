@@ -13,7 +13,6 @@ export interface MergeFilterStateResult {
 
 export const createEmptyFilterState = (): FilterState => ({
   seasons: [],
-  countryOfOrigin: [],
   tags: [],
   genres: [],
   formats: [],
@@ -53,6 +52,24 @@ const mergeRange = (
       normalizedMinimum !== undefined &&
       normalizedMaximum !== undefined &&
       normalizedMinimum > normalizedMaximum,
+  }
+}
+
+const mergeSingleValue = <T extends string>(
+  globalValue: T | undefined,
+  categoryValue: T | undefined,
+): { value?: T; hasConflict: boolean } => {
+  if (globalValue === undefined) {
+    return { value: categoryValue, hasConflict: false }
+  }
+
+  if (categoryValue === undefined) {
+    return { value: globalValue, hasConflict: false }
+  }
+
+  return {
+    value: globalValue === categoryValue ? globalValue : undefined,
+    hasConflict: globalValue !== categoryValue,
   }
 }
 
@@ -125,7 +142,7 @@ export const mergeFilterStates = (
   const yearRange = mergeRange(globalFilter.yearRange, categoryFilter.yearRange)
   const popularity = mergeRange(globalFilter.popularity, categoryFilter.popularity)
   const seasons = mergeStringArray<AnimeSeason>(globalFilter.seasons, categoryFilter.seasons)
-  const countryOfOrigin = mergeStringArray(globalFilter.countryOfOrigin, categoryFilter.countryOfOrigin)
+  const countryOfOrigin = mergeSingleValue(globalFilter.countryOfOrigin, categoryFilter.countryOfOrigin)
   const genres = mergeStringArray(globalFilter.genres, categoryFilter.genres)
   const formats = mergeStringArray<AnimeFormat>(globalFilter.formats, categoryFilter.formats)
   const source = mergeStringArray<AnimeSource>(globalFilter.source, categoryFilter.source)
@@ -135,7 +152,7 @@ export const mergeFilterStates = (
     filter: {
       yearRange: yearRange.range,
       seasons: seasons.values,
-      countryOfOrigin: countryOfOrigin.values,
+      countryOfOrigin: countryOfOrigin.value,
       tags: tags.tags,
       genres: genres.values,
       formats: formats.values,

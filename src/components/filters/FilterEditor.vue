@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  ComboboxAnchor,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxPortal,
-  ComboboxRoot,
-  ComboboxViewport,
-} from 'reka-ui'
 
 import FilterField from '@/components/filters/FilterField.vue'
-import FilterMultiComboboxField from '@/components/filters/FilterMultiComboboxField.vue'
 import FilterMultiSelectField from '@/components/filters/FilterMultiSelectField.vue'
+import FilterMultiComboboxField from '@/components/filters/FilterMultiComboboxField.vue'
+import FilterSingleComboboxField from '@/components/filters/FilterSingleComboboxField.vue'
 import FilterSortEditor from '@/components/filters/FilterSortEditor.vue'
 import FilterTagEditor from '@/components/filters/FilterTagEditor.vue'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
@@ -65,7 +57,7 @@ const formatOptions = createEnumOptions(animeFormats)
 const sourceOptions = createEnumOptions(animeSources)
 
 const countryOptions = computed(() =>
-  mergedOptions(staticCountryOptions, model.value.countryOfOrigin).map((option) => ({
+  mergedOptions(staticCountryOptions, model.value.countryOfOrigin ? [model.value.countryOfOrigin] : []).map((option) => ({
     ...option,
     label: countryDisplayNames.of(option.value) ?? option.value,
   })),
@@ -74,11 +66,13 @@ const countryOptions = computed(() =>
 const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], model.value.genres))
 
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
-const sourceValue = computed(() => model.value.source[0] ?? '')
-const hasSourceValue = computed(() => sourceValue.value.length > 0)
 const countryOfOriginModel = computed({
   get: () => model.value.countryOfOrigin,
-  set: (value: string[]) => updateFilter({ countryOfOrigin: value }),
+  set: (value: string | undefined) => updateFilter({ countryOfOrigin: value }),
+})
+const sourceValue = computed({
+  get: () => model.value.source[0] ?? undefined,
+  set: (value: string | undefined) => updateSingleSelect('source', value),
 })
 const genresModel = computed({
   get: () => model.value.genres,
@@ -96,8 +90,6 @@ const sortModel = computed<FilterSort | undefined>({
   get: () => model.value.sort,
   set: (value) => setSort(value),
 })
-
-const sourceLabelByValue = new Map(sourceOptions.map((option) => [option.value, option.label]))
 
 const updateFilter = (patch: Partial<FilterState>) => {
   model.value = {
@@ -236,13 +228,14 @@ const genreEmptyMessage = computed(() => {
       </div>
     </FilterField>
 
-    <FilterMultiComboboxField
-      v-model="countryOfOriginModel"
+    <FilterSingleComboboxField
       label="Country of origin"
       description="Pick the country where the anime was made."
       :options="countryOptions"
-      placeholder="Search or select countries"
+      placeholder="Choose a country of origin"
+      clear-label="Clear country of origin"
       :disabled-reason="disabledFields?.countryOfOrigin"
+      v-model="countryOfOriginModel"
     />
 
     <FilterMultiComboboxField
@@ -263,58 +256,15 @@ const genreEmptyMessage = computed(() => {
       :disabled-reason="disabledFields?.formats"
     />
 
-    <FilterField
+    <FilterSingleComboboxField
       label="Source material"
       description="Pick the type of source it was adapted from."
+      :options="sourceOptions"
+      placeholder="Choose a source type"
+      clear-label="Clear source material"
       :disabled-reason="disabledFields?.source"
-    >
-      <ComboboxRoot
-        :model-value="sourceValue"
-        :disabled="Boolean(disabledFields?.source)"
-        open-on-focus
-        @update:model-value="updateSingleSelect('source', $event as string | undefined)"
-      >
-        <ComboboxAnchor as-child>
-          <div class="relative">
-            <ComboboxInput
-              class="shell-input pr-10"
-              :display-value="(value: string) => sourceLabelByValue.get(value) ?? ''"
-              placeholder="Choose a source type"
-            />
-
-            <button
-              v-if="hasSourceValue"
-              type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2 py-1 text-xs text-app-muted transition hover:bg-app-accentSoft hover:text-app-text"
-              :disabled="Boolean(disabledFields?.source)"
-              aria-label="Clear source material"
-              @click="updateSingleSelect('source', undefined)"
-            >
-              ×
-            </button>
-          </div>
-        </ComboboxAnchor>
-
-        <ComboboxPortal>
-          <ComboboxContent
-            position="popper"
-            class="z-[60] w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
-          >
-            <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
-              <ComboboxItem
-                v-for="option in sourceOptions"
-                :key="option.value"
-                :value="option.value"
-                :text-value="option.label"
-                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
-              >
-                {{ option.label }}
-              </ComboboxItem>
-            </ComboboxViewport>
-          </ComboboxContent>
-        </ComboboxPortal>
-      </ComboboxRoot>
-    </FilterField>
+      v-model="sourceValue"
+    />
 
     <div class="lg:col-span-2">
       <FilterTagEditor
