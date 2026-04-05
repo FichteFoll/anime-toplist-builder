@@ -1,19 +1,8 @@
 <script setup lang="ts">
-import {
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogOverlay,
-  DialogPortal,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
-} from 'reka-ui'
 import Sortable from 'sortablejs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import CategoryCard from '@/components/categories/CategoryCard.vue'
-import { isNonBlankName } from '@/lib/filter-editor'
 import type {
   AniListMetadata,
   AnimeSelection,
@@ -43,8 +32,6 @@ const emit = defineEmits<{
 }>()
 
 const gridRef = ref<HTMLElement | null>(null)
-const isAddOpen = ref(false)
-const newCategoryName = ref('')
 
 let sortable: Sortable | null = null
 
@@ -54,10 +41,6 @@ const selectedCategoryCount = computed(
   () => props.categories.filter((category) => props.selectionByCategory[category.id]).length,
 )
 const openCategoryCount = computed(() => props.categories.length - selectedCategoryCount.value)
-
-const resetAddDraft = () => {
-  newCategoryName.value = `Category ${props.categories.length + 1}`
-}
 
 const forwardCategoryUpdate = (
   categoryId: string,
@@ -70,15 +53,8 @@ const forwardAnimeSelection = (categoryId: string, selection: AnimeSelection) =>
   emit('selectAnime', categoryId, selection)
 }
 
-const createCategory = () => {
-  const nextName = newCategoryName.value.trim()
-
-  if (!isNonBlankName(nextName)) {
-    return
-  }
-
-  emit('addCategory', nextName)
-  isAddOpen.value = false
+const addCategory = () => {
+  emit('addCategory', `Category ${props.categories.length + 1}`)
 }
 
 const shouldUseFallbackDrag = () =>
@@ -119,12 +95,6 @@ const mountSortable = async () => {
   })
 }
 
-watch(isAddOpen, (isOpen) => {
-  if (isOpen) {
-    resetAddDraft()
-  }
-})
-
 watch(
   () => props.categories.map((category) => category.id),
   () => {
@@ -163,80 +133,6 @@ onBeforeUnmount(() => {
       >
         Clear all selections
       </button>
-
-      <DialogRoot v-model:open="isAddOpen">
-        <DialogTrigger as-child>
-          <button
-            type="button"
-            class="shell-button shell-button-active self-start"
-            aria-label="Add category"
-          >
-            Add category
-          </button>
-        </DialogTrigger>
-
-        <DialogPortal>
-          <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
-          <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,28rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
-            <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
-              <div class="space-y-2">
-                <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                  New category
-                </p>
-                <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
-                  Add a category card
-                </DialogTitle>
-                <DialogDescription class="text-sm leading-6 text-app-muted">
-                  Start with a name here,
-                  then refine its category-specific filters from the card editor.
-                </DialogDescription>
-              </div>
-
-              <DialogClose as-child>
-                <button
-                  type="button"
-                  class="shell-button"
-                >
-                  Close
-                </button>
-              </DialogClose>
-            </div>
-
-            <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
-              <label class="block space-y-2">
-                <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-                  Category name
-                </span>
-                <input
-                  v-model="newCategoryName"
-                  type="text"
-                  required
-                  class="shell-input"
-                  placeholder="Best finale"
-                >
-              </label>
-
-              <div class="mt-5 flex justify-end gap-2">
-                <button
-                  type="button"
-                  class="shell-button"
-                  @click="resetAddDraft"
-                >
-                  Reset
-                </button>
-                <button
-                  type="button"
-                  class="shell-button shell-button-active"
-                  :disabled="!isNonBlankName(newCategoryName)"
-                  @click="createCategory"
-                >
-                  Create category
-                </button>
-              </div>
-            </div>
-          </DialogContent>
-        </DialogPortal>
-      </DialogRoot>
     </div>
 
     <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-2">
@@ -273,16 +169,16 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <div class="rounded-[1.5rem] border border-app-border/70 bg-app-surface/70 p-4">
-          <div class="grid grid-cols-[4.5rem_1fr] gap-4">
-            <div class="h-28 rounded-2xl bg-app-elevated/70" />
-            <div class="space-y-3 pt-1">
-              <div class="h-4 w-2/3 rounded-full bg-app-elevated/70" />
-              <div class="h-4 w-1/2 rounded-full bg-app-elevated/50" />
-              <div class="h-16 rounded-2xl border border-dashed border-app-border/70 bg-app-bg/50" />
-            </div>
-          </div>
-        </div>
+        <button
+          type="button"
+          class="group flex min-h-48 items-center justify-center rounded-[1.5rem] border border-dashed border-app-border/70 bg-app-surface/70 p-4 text-app-muted transition hover:border-app-accent/50 hover:text-app-text"
+          aria-label="Add category"
+          @click="addCategory"
+        >
+          <span class="inline-flex h-14 w-14 items-center justify-center rounded-full border border-current text-3xl font-light leading-none">
+            +
+          </span>
+        </button>
       </div>
     </div>
 
@@ -308,6 +204,20 @@ onBeforeUnmount(() => {
         @select-anime="forwardAnimeSelection(category.id, $event)"
         @clear-selection="emit('clearSelection', $event)"
       />
+
+      <button
+        type="button"
+        class="group flex min-h-80 w-full flex-col items-center justify-center rounded-[2rem] border border-dashed border-app-border/70 bg-app-surface/70 p-5 text-app-muted transition hover:border-app-accent/50 hover:text-app-text md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.889rem)]"
+        aria-label="Add category"
+        @click="addCategory"
+      >
+        <span class="inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-current text-4xl font-light leading-none">
+          +
+        </span>
+        <span class="mt-4 text-sm font-medium uppercase tracking-[0.25em]">
+          Add category
+        </span>
+      </button>
     </div>
   </section>
 </template>

@@ -127,14 +127,12 @@ const mountCategoryGrid = () =>
   })
 
 describe('CategoryGrid', () => {
-  it('emits addCategory from the add-category flow', async () => {
+  it('emits addCategory from the add card', async () => {
     const wrapper = mountCategoryGrid()
 
     await wrapper.get('button[aria-label="Add category"]').trigger('click')
-    await wrapper.get('input.shell-input').setValue('Best Ending')
-    await wrapper.findAll('button.shell-button.shell-button-active')[1]!.trigger('click')
 
-    expect(wrapper.emitted('addCategory')).toEqual([[ 'Best Ending' ]])
+    expect(wrapper.emitted('addCategory')).toEqual([[ 'Category 2' ]])
     expect(sortableCreate).toHaveBeenCalled()
   })
 
