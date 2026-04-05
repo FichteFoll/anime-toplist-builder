@@ -18,7 +18,8 @@ const model = defineModel<ThemePreference>({ required: true })
       type="button"
       class="shell-button border-transparent bg-transparent px-4 py-2 text-xs uppercase tracking-[0.2em] text-app-muted shadow-none"
       :class="{
-        'shell-button-active border-app-border/0 text-app-text': model === themeOption.value,
+        'shell-button-active border-app-accent/80 bg-app-accent text-white shadow-lg ring-1 ring-inset ring-white/20':
+          model === themeOption.value,
       }"
       :aria-pressed="model === themeOption.value"
       :aria-label="`Switch to ${themeOption.label.toLowerCase()} theme`"
