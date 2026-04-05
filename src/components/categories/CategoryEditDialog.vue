@@ -123,15 +123,18 @@ const save = () => {
 
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
-      <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,72rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
+      <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,80rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
         <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
-          <div class="space-y-2">
+          <div class="max-w-3xl space-y-2">
             <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
               Edit Category
             </p>
             <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
               {{ props.category.name }}
             </DialogTitle>
+            <p class="text-sm leading-6 text-app-muted">
+              Update the category name, description, and filters for this card.
+            </p>
           </div>
 
           <DialogClose as-child>
