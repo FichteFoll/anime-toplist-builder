@@ -21,6 +21,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   save: [value: { name: string, description: string, filter: FilterState }]
+  delete: []
 }>()
 
 const open = ref(false)
@@ -30,6 +31,7 @@ const draftFilter = ref(cloneFilter(props.template.globalFilter))
 
 const hasValidName = computed(() => isNonBlankName(draftName.value))
 const configuredFilterCount = computed(() => countConfiguredFilterFields(draftFilter.value))
+const canDeleteTemplate = computed(() => props.template.origin !== 'predefined' && props.template.origin !== 'imported-url')
 
 function cloneFilter(filter: FilterState): FilterState {
   if (typeof structuredClone === 'function') {
@@ -80,6 +82,11 @@ const save = () => {
     filter: cloneFilter(draftFilter.value),
   })
   open.value = false
+}
+
+const requestDelete = () => {
+  open.value = false
+  emit('delete')
 }
 </script>
 
@@ -161,6 +168,14 @@ const save = () => {
           />
 
           <div class="mt-6 flex flex-wrap justify-end gap-2">
+            <button
+              v-if="canDeleteTemplate"
+              type="button"
+              class="shell-button border-red-500/40 bg-red-500/10 text-red-100 hover:border-red-400/60 hover:bg-red-500/20"
+              @click="requestDelete"
+            >
+              Delete template
+            </button>
             <button
               type="button"
               class="shell-button"

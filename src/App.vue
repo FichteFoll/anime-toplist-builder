@@ -221,6 +221,31 @@ const updateTemplateDetails = (value: { name: string, description: string, filte
   })
 }
 
+const deleteActiveTemplate = () => {
+  if (!activeTemplate.value) {
+    toastStore.error('No active template to delete.')
+    return
+  }
+
+  const templateId = activeTemplate.value.id
+  const templateName = activeTemplate.value.name
+
+  requestConfirmation({
+    title: 'Delete template',
+    description: `Delete "${templateName}"? This removes the local template and its stored selections.`,
+    confirmLabel: 'Delete template',
+    onConfirm: () => {
+      if (!templateStore.removeLocalTemplate(templateId)) {
+        toastStore.error('Template delete failed.')
+        return
+      }
+
+      selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
+      toastStore.success('Deleted template.', templateName)
+    },
+  })
+}
+
 const updateCategory = (
   categoryId: string,
   value: {
@@ -531,6 +556,7 @@ onMounted(async () => {
                       v-if="activeTemplate"
                       :template="activeTemplate"
                       @save="updateTemplateDetails"
+                      @delete="deleteActiveTemplate"
                     />
                     <button
                       type="button"

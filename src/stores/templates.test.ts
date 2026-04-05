@@ -90,4 +90,18 @@ describe('template store fork-on-edit behavior', () => {
     expect(templateStore.activeTemplate?.name).toBe('Edited In Place')
     expect(templateStore.activeTemplate?.description).toBe('Edited context')
   })
+
+  it('removes user-owned templates', () => {
+    const templateStore = useTemplateStore()
+    const settingsStore = useSettingsStore()
+
+    settingsStore.initialize()
+    templateStore.initialize()
+
+    const createdTemplate = templateStore.createTemplate('Deletable Template')
+
+    expect(templateStore.removeLocalTemplate(createdTemplate.id)).toBe(true)
+    expect(templateStore.templates.some((template) => template.id === createdTemplate.id)).toBe(false)
+    expect(templateStore.activeTemplate?.id).not.toBe(createdTemplate.id)
+  })
 })
