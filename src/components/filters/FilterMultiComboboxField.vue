@@ -113,20 +113,19 @@ const removeValue = (value: string) => {
       :ignore-filter="true"
       @update:model-value="(value) => updateValuesFromCombobox(value as unknown as string[])"
     >
-      <div class="space-y-3">
+      <ComboboxAnchor as-child>
         <div
-          v-if="selectedOptions.length > 0"
-          class="flex flex-wrap gap-2"
+          class="flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-sm text-app-text outline-none transition focus-within:border-app-accent/60 focus-within:ring-2 focus-within:ring-app-accent/30"
         >
           <span
             v-for="option in selectedOptions"
             :key="option.value"
-            class="inline-flex items-center gap-2 rounded-full bg-app-accentSoft px-3 py-1.5 text-sm text-app-text"
+            class="inline-flex shrink-0 items-center gap-1 rounded-full bg-app-accentSoft px-2 py-0.5 text-xs leading-5 text-app-text"
           >
             {{ option.label }}
             <button
               type="button"
-              class="text-xs text-app-muted"
+              class="text-[10px] leading-none text-app-muted transition hover:text-app-text"
               :disabled="Boolean(disabledReason)"
               :aria-label="`Remove ${option.label}`"
               @click="removeValue(option.value)"
@@ -134,60 +133,58 @@ const removeValue = (value: string) => {
               ×
             </button>
           </span>
-        </div>
 
-        <ComboboxAnchor>
           <ComboboxInput
             v-model="searchTerm"
-            class="shell-input"
+            class="min-w-[6rem] flex-1 border-0 bg-transparent px-0 py-1 text-sm text-app-text outline-none placeholder:text-app-muted/70 focus:ring-0"
             :placeholder="placeholder ?? 'Search options'"
           />
-        </ComboboxAnchor>
+        </div>
+      </ComboboxAnchor>
 
-        <ComboboxPortal>
-          <ComboboxContent
-            position="popper"
-            class="z-50 w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
-          >
-            <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
-              <p
-                v-if="filteredOptions.length === 0"
-                class="px-3 py-2 text-sm text-app-muted"
+      <ComboboxPortal>
+        <ComboboxContent
+          position="popper"
+          class="z-50 w-[var(--reka-combobox-trigger-width)] min-w-[var(--reka-combobox-trigger-width)] border border-app-border/80 bg-app-surface p-2 shadow-shell"
+        >
+          <ComboboxViewport class="max-h-64 w-full overflow-y-auto">
+            <p
+              v-if="filteredOptions.length === 0"
+              class="px-3 py-2 text-sm text-app-muted"
+            >
+              {{ emptyStateMessage }}
+            </p>
+
+            <ComboboxVirtualizer
+              v-else-if="virtualized"
+              v-slot="{ option }"
+              :options="filteredOptions"
+              :text-content="(option) => option.label"
+              :estimate-size="40"
+            >
+              <ComboboxItem
+                :value="option.value"
+                :text-value="option.label"
+                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
               >
-                {{ emptyStateMessage }}
-              </p>
+                {{ option.label }}
+              </ComboboxItem>
+            </ComboboxVirtualizer>
 
-              <ComboboxVirtualizer
-                v-else-if="virtualized"
-                v-slot="{ option }"
-                :options="filteredOptions"
-                :text-content="(option) => option.label"
-                :estimate-size="40"
+            <template v-else>
+              <ComboboxItem
+                v-for="option in filteredOptions"
+                :key="option.value"
+                :value="option.value"
+                :text-value="option.label"
+                class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
               >
-                <ComboboxItem
-                  :value="option.value"
-                  :text-value="option.label"
-                  class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
-                >
-                  {{ option.label }}
-                </ComboboxItem>
-              </ComboboxVirtualizer>
-
-              <template v-else>
-                <ComboboxItem
-                  v-for="option in filteredOptions"
-                  :key="option.value"
-                  :value="option.value"
-                  :text-value="option.label"
-                  class="flex w-full cursor-pointer items-center rounded-xl px-3 py-2 text-sm text-app-text outline-none data-[highlighted]:bg-app-accentSoft"
-                >
-                  {{ option.label }}
-                </ComboboxItem>
-              </template>
-            </ComboboxViewport>
-          </ComboboxContent>
-        </ComboboxPortal>
-      </div>
+                {{ option.label }}
+              </ComboboxItem>
+            </template>
+          </ComboboxViewport>
+        </ComboboxContent>
+      </ComboboxPortal>
     </ComboboxRoot>
 
     <p
