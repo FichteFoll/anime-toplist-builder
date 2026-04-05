@@ -144,6 +144,7 @@ const importFromRemoteUrl = async (urlOverride?: string) => {
     const template = await templateStore.importTemplateFromRemoteUrl(remoteUrl)
 
     remoteUrlInput.value = remoteUrl
+    isRemoteImportOpen.value = false
     toastStore.success('Imported remote template.', template.name)
   } catch (error) {
     showError(error)
