@@ -114,11 +114,11 @@ onBeforeUnmount(() => {
 <template>
   <section class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
     <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 md:flex-row md:items-start md:justify-between">
-      <div>
+      <div class="max-w-4xl">
         <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
           Categories
         </h2>
-        <p class="mt-3 max-w-2xl text-sm leading-6 text-app-muted">
+        <p class="mt-3 max-w-none text-sm leading-6 text-app-muted">
           Edit category names and filters for each card,
           drag by the handle to reorder,
           and make your selections.
