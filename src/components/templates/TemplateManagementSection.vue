@@ -19,7 +19,7 @@ import {
 import { computed, onMounted, ref } from 'vue'
 
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
-import PngExportDialog from '@/components/export/PngExportDialog.vue'
+import ImageExportDialog from '@/components/export/ImageExportDialog.vue'
 import TemplateEditDialog from '@/components/templates/TemplateEditDialog.vue'
 import { sanitizeDownloadFilename } from '@/lib/export-filename'
 import { stringifyTemplateExportPayload, TemplateValidationError } from '@/lib/template-validation'
@@ -367,7 +367,7 @@ onMounted(async () => {
           >
             Export JSON
           </button>
-          <PngExportDialog
+          <ImageExportDialog
             :template="activeTemplate"
             :selection-by-category="activeTemplateSelections"
             :resolved-theme="props.resolvedTheme"
