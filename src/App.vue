@@ -210,7 +210,7 @@ onMounted(loadAniListMetadata)
   <ConfigProvider>
     <TooltipProvider :delay-duration="120">
       <div class="min-h-screen bg-app-bg text-app-text">
-        <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto flex min-h-screen max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
           <AppHeader
             v-model="theme"
             v-model:title-language="settingsStore.titleLanguage"
