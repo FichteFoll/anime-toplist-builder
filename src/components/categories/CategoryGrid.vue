@@ -39,6 +39,7 @@ const emit = defineEmits<{
   reorderCategories: [value: { fromIndex: number, toIndex: number }]
   selectAnime: [categoryId: string, selection: AnimeSelection]
   clearSelection: [categoryId: string]
+  clearAllSelections: []
 }>()
 
 const gridRef = ref<HTMLElement | null>(null)
@@ -157,6 +158,15 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
+      <button
+        type="button"
+        class="shell-button"
+        :disabled="selectedCategoryCount === 0"
+        @click="emit('clearAllSelections')"
+      >
+        Clear all selections
+      </button>
+
       <DialogRoot v-model:open="isAddOpen">
         <DialogTrigger as-child>
           <button
@@ -232,7 +242,7 @@ onBeforeUnmount(() => {
       </DialogRoot>
     </div>
 
-    <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-3">
+    <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-2">
       <div>
         <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
           Categories

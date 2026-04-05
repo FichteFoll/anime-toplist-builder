@@ -1,6 +1,26 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ConfigProvider, TooltipProvider } from 'reka-ui'
+import {
+  ConfigProvider,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogRoot,
+  DialogTitle,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  TooltipProvider,
+} from 'reka-ui'
 
 import { fetchAniListMetadata } from '@/api'
 import AppFooter from '@/components/AppFooter.vue'
@@ -37,6 +57,7 @@ const {
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const remoteUrlInput = ref(templateStore.pendingStartupTemplateUrl ?? '')
+const isRemoteImportOpen = ref(false)
 const isImportingRemote = ref(false)
 const metadata = ref<AniListMetadata | null>(null)
 const metadataStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
@@ -49,30 +70,6 @@ const activeTemplateSelections = computed(() =>
 const activeSelectionCount = computed(() =>
   selectionsStore.getSelectionCount(templateStore.activeTemplateId),
 )
-
-const activeOpenCategoryCount = computed(() => {
-  const categoryCount = activeTemplate.value?.categories.length ?? 0
-
-  return Math.max(categoryCount - activeSelectionCount.value, 0)
-})
-
-const groupedTemplates = computed(() => [
-  {
-    title: 'Predefined',
-    description: 'Built-in starter templates.',
-    templates: templateStore.predefinedTemplates,
-  },
-  {
-    title: 'My Templates',
-    description: 'Your templates and file imports.',
-    templates: templateStore.userTemplates,
-  },
-  {
-    title: 'Remote Imports',
-    description: 'Templates loaded from remote JSON URLs.',
-    templates: templateStore.remoteTemplates,
-  },
-])
 
 const loadAniListMetadata = async () => {
   metadataStatus.value = 'loading'
@@ -106,6 +103,10 @@ const createTemplate = () => {
   const template = templateStore.createTemplate()
 
   toastStore.success('Created local template.', template.name)
+}
+
+const openRemoteImport = () => {
+  isRemoteImportOpen.value = true
 }
 
 const openTemplate = (templateId: string) => {
@@ -309,7 +310,7 @@ const reorderCategories = ({ fromIndex, toIndex }: { fromIndex: number, toIndex:
   })
 }
 
-const clearActiveSelections = () => {
+const clearAllSelections = () => {
   if (!activeTemplate.value || activeSelectionCount.value === 0) {
     return
   }
@@ -317,12 +318,12 @@ const clearActiveSelections = () => {
   const templateId = activeTemplate.value.id
 
   requestConfirmation({
-    title: 'Clear selections',
+    title: 'Clear all selections',
     description: `Clear all selections for "${activeTemplate.value.name}"?`,
-    confirmLabel: 'Clear selections',
+    confirmLabel: 'Clear all selections',
     onConfirm: () => {
       selectionsStore.clearSelectionsForTemplate(templateId)
-      toastStore.success('Selections cleared for the active template.')
+      toastStore.success('All selections cleared for the active template.')
     },
   })
 }
@@ -393,7 +394,7 @@ onMounted(async () => {
                 <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                      Template Workspace
+                      Template
                     </p>
                     <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
                       {{ activeTemplate?.name ?? 'No active template' }}
@@ -404,6 +405,126 @@ onMounted(async () => {
                   </div>
 
                   <div class="flex flex-wrap gap-2">
+                    <DropdownMenuRoot>
+                      <DropdownMenuTrigger as-child>
+                        <button
+                          type="button"
+                          class="shell-button"
+                        >
+                          Load template
+                        </button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuPortal>
+                        <DropdownMenuContent class="z-50 min-w-72 rounded-2xl border border-app-border/80 bg-app-surface p-2 shadow-shell">
+                          <DropdownMenuLabel class="px-2 py-1 text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
+                            Load template
+                          </DropdownMenuLabel>
+
+                          <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
+
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger class="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70">
+                              <span>Predefined</span>
+                              <span class="text-xs text-app-muted">{{ templateStore.predefinedTemplates.length }}</span>
+                            </DropdownMenuSubTrigger>
+
+                            <DropdownMenuSubContent class="z-50 min-w-72 rounded-2xl border border-app-border/80 bg-app-surface p-2 shadow-shell">
+                              <DropdownMenuLabel class="px-2 py-1 text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
+                                Built-in templates
+                              </DropdownMenuLabel>
+
+                              <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
+
+                              <DropdownMenuItem
+                                v-for="template in templateStore.predefinedTemplates"
+                                :key="template.id"
+                                class="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                                @select="openTemplate(template.id)"
+                              >
+                                <span class="truncate">{{ template.name }}</span>
+                                <span class="ml-4 shrink-0 text-xs text-app-muted">
+                                  {{ selectionsStore.getSelectionCount(template.id) }}/{{ template.categories.length }}
+                                </span>
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger class="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70">
+                              <span>My templates</span>
+                              <span class="text-xs text-app-muted">{{ templateStore.userTemplates.length + templateStore.remoteTemplates.length }}</span>
+                            </DropdownMenuSubTrigger>
+
+                            <DropdownMenuSubContent class="z-50 min-w-72 rounded-2xl border border-app-border/80 bg-app-surface p-2 shadow-shell">
+                              <DropdownMenuLabel class="px-2 py-1 text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
+                                Local templates
+                              </DropdownMenuLabel>
+
+                              <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
+
+                              <DropdownMenuItem
+                                v-for="template in templateStore.userTemplates"
+                                :key="template.id"
+                                class="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                                @select="openTemplate(template.id)"
+                              >
+                                <span class="truncate">{{ template.name }}</span>
+                                <span class="ml-4 shrink-0 text-xs text-app-muted">
+                                  {{ selectionsStore.getSelectionCount(template.id) }}/{{ template.categories.length }}
+                                </span>
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator
+                                v-if="templateStore.userTemplates.length > 0 && templateStore.remoteTemplates.length > 0"
+                                class="my-2 h-px bg-app-border/70"
+                              />
+
+                              <DropdownMenuLabel
+                                v-if="templateStore.remoteTemplates.length > 0"
+                                class="px-2 py-1 text-xs font-medium uppercase tracking-[0.25em] text-app-muted"
+                              >
+                                Remote imports
+                              </DropdownMenuLabel>
+
+                              <DropdownMenuItem
+                                v-for="template in templateStore.remoteTemplates"
+                                :key="template.id"
+                                class="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                                @select="openTemplate(template.id)"
+                              >
+                                <span class="truncate">{{ template.name }}</span>
+                                <span class="ml-4 shrink-0 text-xs text-app-muted">
+                                  {{ selectionsStore.getSelectionCount(template.id) }}/{{ template.categories.length }}
+                                </span>
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+
+                          <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
+
+                          <DropdownMenuItem
+                            class="rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                            @select="createTemplate"
+                          >
+                            Create blank template
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            class="rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                            @select="triggerFileImport"
+                          >
+                            Import template from file
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            class="rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+                            @select="openRemoteImport"
+                          >
+                            Import template from URL
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuRoot>
+
                     <GlobalFilterDialog
                       v-if="activeTemplate"
                       :model-value="activeTemplate.globalFilter"
@@ -412,13 +533,6 @@ onMounted(async () => {
                       :metadata-error="metadataError"
                       @update:model-value="updateGlobalFilter"
                     />
-                    <button
-                      type="button"
-                      class="shell-button"
-                      @click="createTemplate"
-                    >
-                      Create
-                    </button>
                     <button
                       type="button"
                       class="shell-button"
@@ -433,13 +547,6 @@ onMounted(async () => {
                       :resolved-theme="resolvedTheme"
                       :title-language="settingsStore.titleLanguage"
                     />
-                    <button
-                      type="button"
-                      class="shell-button"
-                      @click="triggerFileImport"
-                    >
-                      Import File
-                    </button>
                     <button
                       type="button"
                       class="shell-button"
@@ -458,133 +565,6 @@ onMounted(async () => {
                   class="hidden"
                   @change="importFromFile"
                 >
-
-                <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-2 xl:grid-cols-4">
-                  <div>
-                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Categories
-                    </dt>
-                    <dd class="mt-2 text-sm text-app-text">
-                      {{ activeTemplate?.categories.length ?? 0 }}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Open categories
-                    </dt>
-                    <dd class="mt-2 text-sm text-app-text">
-                      {{ activeOpenCategoryCount }} not yet selected
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                      Status
-                    </dt>
-                    <dd class="mt-2 text-sm text-app-text">
-                      {{ activeTemplate ? 'Open for editing' : 'Choose a template to begin' }}
-                    </dd>
-                  </div>
-                </div>
-
-                <div class="mt-5 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    class="shell-button"
-                    :disabled="!activeTemplate || activeSelectionCount === 0"
-                    @click="clearActiveSelections"
-                  >
-                    Clear selections
-                  </button>
-                </div>
-
-                <div class="mt-6 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4 sm:p-5">
-                  <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
-                    Remote import
-                  </p>
-                  <h3 class="mt-3 text-lg font-semibold tracking-tight text-app-text">
-                    Load a template from a URL
-                  </h3>
-                  <p class="mt-2 text-sm leading-6 text-app-muted">
-                    Paste a remote template URL to load it.
-                  </p>
-
-                  <label class="mt-5 block text-sm font-medium text-app-text">
-                    Remote template URL
-                    <input
-                      v-model="remoteUrlInput"
-                      type="url"
-                      inputmode="url"
-                      placeholder="https://example.com/template.json"
-                      class="mt-2 w-full rounded-2xl border border-app-border/80 bg-app-bg/70 px-4 py-3 text-sm text-app-text outline-none transition focus:border-app-accent/60 focus:ring-2 focus:ring-app-accent/20"
-                    >
-                  </label>
-
-                  <div class="mt-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="shell-button"
-                      :disabled="isImportingRemote"
-                      @click="importFromRemoteUrl()"
-                    >
-                      {{ isImportingRemote ? 'Loading...' : 'Import remote template' }}
-                    </button>
-                  </div>
-                </div>
-
-                <div class="mt-6 space-y-4">
-                  <article
-                    v-for="group in groupedTemplates"
-                    :key="group.title"
-                    class="rounded-[1.5rem] border border-app-border/70 bg-app-surface/70 p-4"
-                  >
-                    <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                      <div>
-                        <h3 class="text-lg font-semibold tracking-tight">
-                          {{ group.title }}
-                        </h3>
-                        <p class="mt-1 text-sm text-app-muted">
-                          {{ group.description }}
-                        </p>
-                      </div>
-                      <span class="text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
-                        {{ group.templates.length }} templates
-                      </span>
-                    </div>
-
-                    <div
-                      v-if="group.templates.length > 0"
-                      class="mt-4 grid gap-3"
-                    >
-                      <button
-                        v-for="template in group.templates"
-                        :key="template.id"
-                        type="button"
-                        class="rounded-[1.25rem] border border-app-border/70 px-4 py-4 text-left transition hover:border-app-accent/50 hover:bg-app-elevated/60"
-                        :class="template.id === activeTemplate?.id ? 'border-app-accent/70 bg-app-accentSoft/60' : 'bg-app-bg/40'"
-                        @click="openTemplate(template.id)"
-                      >
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <p class="text-base font-semibold text-app-text">
-                              {{ template.name }}
-                            </p>
-                          </div>
-                          <div class="text-right text-sm text-app-muted">
-                            <p>{{ template.categories.length }} categories</p>
-                            <p>{{ selectionsStore.getSelectionCount(template.id) }} selections</p>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-
-                    <p
-                      v-else
-                      class="mt-4 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted"
-                    >
-                      No templates in this section yet.
-                    </p>
-                  </article>
-                </div>
               </article>
             </section>
 
@@ -611,6 +591,7 @@ onMounted(async () => {
                 @reorder-categories="reorderCategories"
                 @select-anime="selectCategoryAnime"
                 @clear-selection="clearCategorySelection"
+                @clear-all-selections="clearAllSelections"
               />
             </section>
           </main>
@@ -626,6 +607,62 @@ onMounted(async () => {
           :confirm-label="confirmationState?.confirmLabel ?? 'Confirm'"
           @confirm="confirmAction"
         />
+
+        <DialogRoot v-model:open="isRemoteImportOpen">
+          <DialogPortal>
+            <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
+            <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,38rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell">
+              <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
+                <div class="space-y-2">
+                  <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+                    Remote import
+                  </p>
+                  <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
+                    Load a template from a URL
+                  </DialogTitle>
+                  <DialogDescription class="text-sm leading-6 text-app-muted">
+                    Paste a remote template URL to load it.
+                  </DialogDescription>
+                </div>
+
+                <DialogClose as-child>
+                  <button
+                    type="button"
+                    class="shell-button"
+                  >
+                    Close
+                  </button>
+                </DialogClose>
+              </div>
+
+              <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
+                <label class="block space-y-2 text-sm font-medium text-app-text">
+                  <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+                    Remote template URL
+                  </span>
+                  <input
+                    v-model="remoteUrlInput"
+                    type="url"
+                    inputmode="url"
+                    placeholder="https://example.com/template.json"
+                    class="shell-input"
+                  >
+                </label>
+
+                <div class="mt-5 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="shell-button shell-button-active"
+                    :disabled="isImportingRemote"
+                    @click="importFromRemoteUrl()"
+                  >
+                    {{ isImportingRemote ? 'Loading...' : 'Import remote template' }}
+                  </button>
+                </div>
+              </div>
+            </DialogContent>
+          </DialogPortal>
+        </DialogRoot>
       </div>
     </TooltipProvider>
   </ConfigProvider>
