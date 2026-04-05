@@ -32,7 +32,7 @@ describe('buildAniListMediaSearchVariables', () => {
       season: 'SPRING',
       countryOfOrigin: 'CN',
       tagIn: ['Action'],
-      minimumTagRank: 40,
+      minimumTagRank: 60,
       genreIn: ['Action', 'Drama'],
       formatIn: ['MOVIE', 'TV'],
       source: 'MANGA',
