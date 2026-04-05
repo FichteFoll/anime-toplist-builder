@@ -184,6 +184,8 @@ const save = () => {
             </span>
           </label>
 
+          <div class="my-5 border-t border-app-border/70" />
+
           <FilterEditor
             mode="category"
             :model-value="draftFilter"

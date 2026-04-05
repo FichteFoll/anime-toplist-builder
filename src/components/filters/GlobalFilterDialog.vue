@@ -53,6 +53,7 @@ const model = defineModel<FilterState>({ required: true })
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
+          <div class="mb-5 border-t border-app-border/70" />
           <FilterEditor
             v-model="model"
             mode="global"
