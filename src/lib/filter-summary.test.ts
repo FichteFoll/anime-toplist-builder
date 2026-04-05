@@ -37,4 +37,12 @@ describe('buildActiveFilterSummary', () => {
       'Tag rank: 40+',
     ])
   })
+
+  it('skips the default tag rank and sort summary entries', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+    }
+
+    expect(buildActiveFilterSummary(filter)).toEqual([])
+  })
 })
