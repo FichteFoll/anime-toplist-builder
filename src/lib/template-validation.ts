@@ -13,6 +13,7 @@ import {
   type FilterState,
   type NumericRange,
   type Template,
+  type TemplateExportFilterStateV1,
   type TemplateExportPayloadV1,
   type TemplateImportCategoryPayloadV1,
   type TemplateImportPayloadV1,
@@ -267,6 +268,21 @@ const parseCategoryPayload = (
   }
 }
 
+const createTemplateExportFilterState = (filter: FilterState): TemplateExportFilterStateV1 => ({
+  ...(filter.yearRange === undefined ? {} : { yearRange: filter.yearRange }),
+  ...(filter.episodes === undefined ? {} : { episodes: filter.episodes }),
+  ...(filter.duration === undefined ? {} : { duration: filter.duration }),
+  ...(filter.seasons.length === 0 ? {} : { seasons: filter.seasons }),
+  ...(filter.countryOfOrigin === undefined ? {} : { countryOfOrigin: filter.countryOfOrigin }),
+  ...(filter.tags.length === 0 ? {} : { tags: filter.tags }),
+  ...(filter.genres.length === 0 ? {} : { genres: filter.genres }),
+  ...(filter.formats.length === 0 ? {} : { formats: filter.formats }),
+  ...(filter.popularity === undefined ? {} : { popularity: filter.popularity }),
+  ...(filter.source.length === 0 ? {} : { source: filter.source }),
+  ...(filter.minimumTagRank === undefined ? {} : { minimumTagRank: filter.minimumTagRank }),
+  ...(filter.sort === undefined ? {} : { sort: filter.sort }),
+})
+
 export class TemplateValidationError extends Error {
   constructor(message: string) {
     super(message)
@@ -381,7 +397,7 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
       id: category.id,
       name: asTrimmedString(category.name, `categories[${index}].name`),
       description: asTrimmedSearchString(category.description, `categories[${index}].description`),
-      filter: parseFilterState(category.filter, `categories[${index}].filter`),
+      filter: createTemplateExportFilterState(parseFilterState(category.filter, `categories[${index}].filter`)),
     }
   })
 
@@ -391,7 +407,7 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
     name: asTrimmedString(template.name, 'name'),
     description: asTrimmedSearchString(template.description, 'description'),
     categories,
-    globalFilter: parseFilterState(template.globalFilter, 'globalFilter'),
+    globalFilter: createTemplateExportFilterState(parseFilterState(template.globalFilter, 'globalFilter')),
   }
 }
 

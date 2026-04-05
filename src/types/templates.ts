@@ -54,7 +54,15 @@ export interface TemplateExportCategoryPayloadV1 {
   id: CategoryId
   name: string
   description: string
-  filter: FilterState
+  filter: TemplateExportFilterStateV1
+}
+
+export interface TemplateExportFilterStateV1 extends Omit<FilterState, 'seasons' | 'tags' | 'genres' | 'formats' | 'source'> {
+  seasons?: FilterState['seasons']
+  tags?: FilterState['tags']
+  genres?: FilterState['genres']
+  formats?: FilterState['formats']
+  source?: FilterState['source']
 }
 
 export interface TemplateExportPayloadV1 {
@@ -63,5 +71,5 @@ export interface TemplateExportPayloadV1 {
   name: string
   description: string
   categories: TemplateExportCategoryPayloadV1[]
-  globalFilter: FilterState
+  globalFilter: TemplateExportFilterStateV1
 }

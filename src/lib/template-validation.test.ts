@@ -7,6 +7,7 @@ import {
   normalizeImportedTemplate,
   parseTemplateImportJson,
   parseTemplateImportPayload,
+  stringifyTemplateExportPayload,
 } from '@/lib/template-validation'
 import { templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
 
@@ -160,16 +161,8 @@ describe('template validation', () => {
       name: 'Export me',
       description: 'Export context',
       globalFilter: {
-        yearRange: undefined,
-        seasons: [],
-        countryOfOrigin: undefined,
-        tags: [],
         minimumTagRank: 40,
-        genres: [],
         formats: ['MOVIE', 'TV'],
-        popularity: undefined,
-        source: [],
-        sort: undefined,
       },
       categories: [
         {
@@ -177,20 +170,49 @@ describe('template validation', () => {
           name: 'Pick',
           description: 'Nice pacing',
           filter: {
-            yearRange: undefined,
-            seasons: [],
-            countryOfOrigin: undefined,
-            tags: [],
-            minimumTagRank: undefined,
             genres: ['Mystery'],
-            formats: [],
-            popularity: undefined,
-            source: [],
-            sort: undefined,
           },
         },
       ],
     })
+  })
+
+  it('omits empty list filters from export JSON', () => {
+    const template = normalizeImportedTemplate(
+      {
+        version: templateSchemaVersion,
+        id: 'emptyfilters01',
+        name: 'Empty filters',
+        categories: [
+          {
+            id: 'emptycat01',
+            name: 'Empty Category',
+            description: '',
+            filter: {
+              tags: [],
+              genres: [],
+              formats: [],
+              source: [],
+              seasons: [],
+            },
+          },
+        ],
+        globalFilter: {
+          tags: [],
+          genres: [],
+          formats: [],
+          source: [],
+          seasons: [],
+        },
+      },
+      'user',
+    )
+
+    expect(stringifyTemplateExportPayload(template)).not.toContain('"seasons": []')
+    expect(stringifyTemplateExportPayload(template)).not.toContain('"tags": []')
+    expect(stringifyTemplateExportPayload(template)).not.toContain('"genres": []')
+    expect(stringifyTemplateExportPayload(template)).not.toContain('"formats": []')
+    expect(stringifyTemplateExportPayload(template)).not.toContain('"source": []')
   })
 
   it('rejects invalid JSON imports early', () => {
