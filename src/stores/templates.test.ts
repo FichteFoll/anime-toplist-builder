@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
@@ -29,6 +29,10 @@ const createSelection = (): AnimeSelection => ({
 describe('template store fork-on-edit behavior', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it('forks protected templates before updating them and duplicates selections', () => {
@@ -103,5 +107,44 @@ describe('template store fork-on-edit behavior', () => {
     expect(templateStore.removeLocalTemplate(createdTemplate.id)).toBe(true)
     expect(templateStore.templates.some((template) => template.id === createdTemplate.id)).toBe(false)
     expect(templateStore.activeTemplate?.id).not.toBe(createdTemplate.id)
+  })
+
+  it('keeps fragment remote templates from falling back to the default template', () => {
+    const settingsStore = useSettingsStore()
+    const templateStore = useTemplateStore()
+
+    settingsStore.initialize()
+
+    vi.stubGlobal('window', {
+      location: {
+        hash: '#template=https%3A%2F%2Fexample.com%2Ftemplate.json',
+      },
+    })
+
+    templateStore.initialize()
+    templateStore.registerTemplates(predefinedTemplates)
+
+    expect(templateStore.pendingStartupTemplateUrl).toBe('https://example.com/template.json')
+    expect(templateStore.activeTemplate).toBeNull()
+  })
+
+  it('resolves fragment template ids after predefined templates register', () => {
+    const settingsStore = useSettingsStore()
+    const templateStore = useTemplateStore()
+
+    settingsStore.initialize()
+    vi.stubGlobal('window', {
+      location: {
+        hash: `#template=${predefinedTemplates[0].id}`,
+      },
+    })
+
+    templateStore.initialize()
+    expect(templateStore.activeTemplate).toBeNull()
+
+    templateStore.registerTemplates(predefinedTemplates)
+
+    expect(templateStore.activeTemplateId).toBe(predefinedTemplates[0].id)
+    expect(templateStore.activeTemplate?.id).toBe(predefinedTemplates[0].id)
   })
 })

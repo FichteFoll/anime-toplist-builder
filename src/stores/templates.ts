@@ -144,8 +144,9 @@ export const useTemplateStore = defineStore('templates', () => {
 
       if (existingRemoteTemplateId && templatesById.value.has(existingRemoteTemplateId)) {
         setActiveTemplateId(existingRemoteTemplateId)
-        return
       }
+
+      return
     }
 
     const candidateTemplateIds = [
@@ -180,7 +181,6 @@ export const useTemplateStore = defineStore('templates', () => {
     ensureFallbackTemplate()
     isHydrated.value = true
     persistLocalTemplates()
-    resolveStartupTemplateId()
   }
 
   const registerTemplates = (templatesToRegister: Template[]) => {
