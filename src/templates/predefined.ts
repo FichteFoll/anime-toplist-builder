@@ -5,11 +5,11 @@ import { normalizeImportedTemplate } from '@/lib/template-validation'
 const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   {
     version: 1 as const,
-    id: 'cr_animeawards_202601',
-    name: 'Crunchyroll Anime Awards 2026',
+    id: 'cr_animeawards_202501',
+    name: 'Crunchyroll Anime Awards 2025',
     description: '',
     globalFilter: {
-      yearRange: { minimum: 2026, maximum: 2026 },
+      yearRange: { minimum: 2025, maximum: 2025 },
       sort: {
         field: 'SCORE' as const,
         direction: 'desc' as const,
