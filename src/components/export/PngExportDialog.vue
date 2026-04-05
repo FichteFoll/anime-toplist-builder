@@ -209,17 +209,6 @@ onBeforeUnmount(() => {
               </p>
             </article>
 
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="shell-button shell-button-active"
-                :disabled="!previewBlob || isRendering"
-                @click="downloadPreview"
-              >
-                Download image
-              </button>
-            </div>
-
             <p
               v-if="renderError"
               class="rounded-[1.25rem] border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
@@ -255,6 +244,17 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </article>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button
+            type="button"
+            class="shell-button shell-button-active"
+            :disabled="!previewBlob || isRendering"
+            @click="downloadPreview"
+          >
+            Download image
+          </button>
         </div>
       </DialogContent>
     </DialogPortal>
