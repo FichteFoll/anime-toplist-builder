@@ -82,6 +82,26 @@ export const buildAniListMediaSearchVariables = ({
           ? undefined
           : toAniListYearCeiling(mergedFilter.filter.yearRange.maximum),
       ),
+      episodeGreater: withValue(
+        mergedFilter.filter.episodes?.minimum === undefined
+          ? undefined
+          : toInclusiveLowerBound(mergedFilter.filter.episodes.minimum),
+      ),
+      episodeLesser: withValue(
+        mergedFilter.filter.episodes?.maximum === undefined
+          ? undefined
+          : toExclusiveUpperBound(mergedFilter.filter.episodes.maximum),
+      ),
+      durationGreater: withValue(
+        mergedFilter.filter.duration?.minimum === undefined
+          ? undefined
+          : toInclusiveLowerBound(mergedFilter.filter.duration.minimum),
+      ),
+      durationLesser: withValue(
+        mergedFilter.filter.duration?.maximum === undefined
+          ? undefined
+          : toExclusiveUpperBound(mergedFilter.filter.duration.maximum),
+      ),
       popularityGreater: withValue(
         mergedFilter.filter.popularity?.minimum === undefined
           ? undefined

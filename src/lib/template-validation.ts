@@ -159,6 +159,12 @@ const asOptionalRange = (value: unknown, path: string): NumericRange | undefined
   return { minimum, maximum }
 }
 
+const asOptionalCountRange = (value: unknown, path: string): NumericRange | undefined => {
+  const range = asOptionalRange(value, path)
+
+  return range
+}
+
 const asTagFilters = (value: unknown, path: string): string[] => {
   if (value === undefined) {
     return []
@@ -220,6 +226,8 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
 
   const filterState: FilterState = {
     yearRange: asOptionalRange(value.yearRange, `${path}.yearRange`),
+    episodes: asOptionalCountRange(value.episodes, `${path}.episodes`),
+    duration: asOptionalCountRange(value.duration, `${path}.duration`),
     seasons: asEnumArray<AnimeSeason>(value.seasons, `${path}.seasons`, animeSeasons),
     countryOfOrigin: asOptionalSingleString(value.countryOfOrigin, `${path}.countryOfOrigin`),
     tags: asTagFilters(value.tags, `${path}.tags`),

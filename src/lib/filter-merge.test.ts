@@ -33,6 +33,12 @@ describe('mergeFilterStates', () => {
         minimum: 2000,
         maximum: 2024,
       },
+      episodes: {
+        minimum: 12,
+      },
+      duration: {
+        maximum: 90,
+      },
       popularity: {
         minimum: 100,
       },
@@ -46,6 +52,12 @@ describe('mergeFilterStates', () => {
       formats: ['TV'],
       yearRange: {
         minimum: 2010,
+      },
+      episodes: {
+        maximum: 24,
+      },
+      duration: {
+        minimum: 20,
       },
       popularity: {
         maximum: 500,
@@ -62,6 +74,14 @@ describe('mergeFilterStates', () => {
     expect(result.filter.yearRange).toEqual({
       minimum: 2010,
       maximum: 2024,
+    })
+    expect(result.filter.episodes).toEqual({
+      minimum: 12,
+      maximum: 24,
+    })
+    expect(result.filter.duration).toEqual({
+      minimum: 20,
+      maximum: 90,
     })
     expect(result.filter.popularity).toEqual({
       minimum: 100,
@@ -103,6 +123,9 @@ describe('mergeFilterStates', () => {
       yearRange: {
         minimum: 2020,
       },
+      episodes: {
+        minimum: 12,
+      },
     }
 
     const categoryFilter: FilterState = {
@@ -110,6 +133,9 @@ describe('mergeFilterStates', () => {
       genres: ['Comedy'],
       yearRange: {
         maximum: 2010,
+      },
+      episodes: {
+        maximum: 6,
       },
     }
 
@@ -120,6 +146,10 @@ describe('mergeFilterStates', () => {
     expect(result.filter.yearRange).toEqual({
       minimum: 2020,
       maximum: 2010,
+    })
+    expect(result.filter.episodes).toEqual({
+      minimum: 12,
+      maximum: 6,
     })
   })
 

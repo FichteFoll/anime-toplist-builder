@@ -36,6 +36,10 @@ export interface AniListMediaSearchVariables {
   source?: AnimeSource
   startDateGreater?: number
   startDateLesser?: number
+  episodeGreater?: number
+  episodeLesser?: number
+  durationGreater?: number
+  durationLesser?: number
   popularityGreater?: number
   popularityLesser?: number
   sort?: AniListMediaSort[]

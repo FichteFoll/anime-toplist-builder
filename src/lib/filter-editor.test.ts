@@ -24,6 +24,17 @@ describe('filter editor helpers', () => {
     expect(countConfiguredFilterFields(filterWithTags)).toBe(2)
   })
 
+  it('counts advanced ranges as configured fields', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      episodes: { minimum: 1, maximum: 12 },
+      duration: { maximum: 30 },
+      popularity: { minimum: 100 },
+    }
+
+    expect(countConfiguredFilterFields(filter)).toBe(3)
+  })
+
   it('disables minimum tag rank when tags are inherited', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
@@ -34,5 +45,18 @@ describe('filter editor helpers', () => {
     expect(getCategoryFilterDisabledReasons(globalFilter).minimumTagRank).toBe(
       'This field is controlled by the template-wide filter.',
     )
+  })
+
+  it('disables episode and duration ranges when inherited', () => {
+    const globalFilter: FilterState = {
+      ...createEmptyFilterState(),
+      episodes: { minimum: 1 },
+      duration: { maximum: 10 },
+    }
+
+    const disabledReasons = getCategoryFilterDisabledReasons(globalFilter)
+
+    expect(disabledReasons.episodes).toBe('This field is controlled by the template-wide filter.')
+    expect(disabledReasons.duration).toBe('This field is controlled by the template-wide filter.')
   })
 })

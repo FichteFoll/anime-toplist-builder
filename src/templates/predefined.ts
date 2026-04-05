@@ -158,8 +158,23 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
     },
     categories: [
       { id: 'bestseries01', name: 'Best Series' },
-      { id: 'bestmovie01', name: 'Best Movie', filter: { formats: ['MOVIE' as const] } },
-      { id: 'bestshort01', name: 'Best Short', filter: { formats: ['TV_SHORT' as const, 'ONA' as const, 'MUSIC' as const] } },
+      {
+        id: 'bestmovie01',
+        name: 'Best Movie',
+        filter: {
+          formats: ['MOVIE' as const, 'ONA' as const],
+          episodes: { maximum: 1 },
+          duration: { minimum: 30 },
+        },
+      },
+      {
+        id: 'bestshort01',
+        name: 'Best Short',
+        filter: {
+          formats: ['TV_SHORT' as const, 'ONA' as const, 'MUSIC' as const],
+          duration: { maximum: 16 },
+        },
+      },
       { id: 'bestclassic01', name: 'Best Classic', filter: { yearRange: { maximum: 2009 } } },
       { id: 'bestrecent01', name: 'Best Recent', filter: { yearRange: { minimum: 2020 } } },
       { id: 'mostrewatchable01', name: 'Most Rewatchable' },

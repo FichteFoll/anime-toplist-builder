@@ -11,6 +11,8 @@ export const getCategoryFilterDisabledReasons = (
   globalFilter: FilterState,
 ): FilterDisabledReasons => ({
   yearRange: hasRangeValue(globalFilter.yearRange) ? inheritedFieldReason : undefined,
+  episodes: hasRangeValue(globalFilter.episodes) ? inheritedFieldReason : undefined,
+  duration: hasRangeValue(globalFilter.duration) ? inheritedFieldReason : undefined,
   seasons: globalFilter.seasons.length > 0 ? inheritedFieldReason : undefined,
   countryOfOrigin: globalFilter.countryOfOrigin ? inheritedFieldReason : undefined,
   tags: globalFilter.tags.length > 0 ? inheritedFieldReason : undefined,
@@ -28,6 +30,14 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
   let count = 0
 
   if (hasRangeValue(filter.yearRange)) {
+    count += 1
+  }
+
+  if (hasRangeValue(filter.episodes)) {
+    count += 1
+  }
+
+  if (hasRangeValue(filter.duration)) {
     count += 1
   }
 

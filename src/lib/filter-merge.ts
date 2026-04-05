@@ -140,6 +140,8 @@ export const mergeFilterStates = (
   categoryFilter: FilterState,
 ): MergeFilterStateResult => {
   const yearRange = mergeRange(globalFilter.yearRange, categoryFilter.yearRange)
+  const episodes = mergeRange(globalFilter.episodes, categoryFilter.episodes)
+  const duration = mergeRange(globalFilter.duration, categoryFilter.duration)
   const popularity = mergeRange(globalFilter.popularity, categoryFilter.popularity)
   const seasons = mergeStringArray<AnimeSeason>(globalFilter.seasons, categoryFilter.seasons)
   const countryOfOrigin = mergeSingleValue(globalFilter.countryOfOrigin, categoryFilter.countryOfOrigin)
@@ -151,6 +153,8 @@ export const mergeFilterStates = (
   return {
     filter: {
       yearRange: yearRange.range,
+      episodes: episodes.range,
+      duration: duration.range,
       seasons: seasons.values,
       countryOfOrigin: countryOfOrigin.value,
       tags: tags.tags,
@@ -163,6 +167,8 @@ export const mergeFilterStates = (
     },
     hasConflicts:
       yearRange.hasConflict ||
+      episodes.hasConflict ||
+      duration.hasConflict ||
       popularity.hasConflict ||
       seasons.hasConflict ||
       countryOfOrigin.hasConflict ||

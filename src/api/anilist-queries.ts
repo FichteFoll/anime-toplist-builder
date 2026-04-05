@@ -12,6 +12,10 @@ export const searchAnimeMediaQuery = `
     $source: MediaSource
     $startDateGreater: FuzzyDateInt
     $startDateLesser: FuzzyDateInt
+    $episodeGreater: Int
+    $episodeLesser: Int
+    $durationGreater: Int
+    $durationLesser: Int
     $popularityGreater: Int
     $popularityLesser: Int
     $sort: [MediaSort]
@@ -37,6 +41,10 @@ export const searchAnimeMediaQuery = `
         source: $source
         startDate_greater: $startDateGreater
         startDate_lesser: $startDateLesser
+        episode_greater: $episodeGreater
+        episode_lesser: $episodeLesser
+        duration_greater: $durationGreater
+        duration_lesser: $durationLesser
         popularity_greater: $popularityGreater
         popularity_lesser: $popularityLesser
         sort: $sort
