@@ -1,27 +1,27 @@
 import type { CategoryId, TemplateId } from '@/types'
 
-const templateIdPrefix = 'tpl'
-const categoryIdPrefix = 'cat'
-
 const fallbackIdSegment = () => Math.random().toString(36).slice(2, 10)
 
-const createStableId = (prefix: string) => {
+const createStableId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `${prefix}_${crypto.randomUUID()}`
+    return crypto.randomUUID()
   }
 
-  return `${prefix}_${Date.now().toString(36)}_${fallbackIdSegment()}`
+  return `${Date.now().toString(36)}-${fallbackIdSegment()}`
 }
 
-const matchesPrefixedId = (value: unknown, prefix: string): value is string =>
-  typeof value === 'string' && new RegExp(`^${prefix}_[A-Za-z0-9-]{6,}$`).test(value)
+const legacyPrefixedIdPattern = /^(?:tpl|cat)_[A-Za-z0-9-]{6,}$/
+const stableIdPattern = /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/
 
-export const createTemplateId = (): TemplateId => createStableId(templateIdPrefix)
+const matchesStableId = (value: unknown): value is string =>
+  typeof value === 'string' && (stableIdPattern.test(value) || legacyPrefixedIdPattern.test(value))
 
-export const createCategoryId = (): CategoryId => createStableId(categoryIdPrefix)
+export const createTemplateId = (): TemplateId => createStableId()
+
+export const createCategoryId = (): CategoryId => createStableId()
 
 export const isTemplateId = (value: unknown): value is TemplateId =>
-  matchesPrefixedId(value, templateIdPrefix)
+  matchesStableId(value)
 
 export const isCategoryId = (value: unknown): value is CategoryId =>
-  matchesPrefixedId(value, categoryIdPrefix)
+  matchesStableId(value)

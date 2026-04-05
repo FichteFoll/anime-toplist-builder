@@ -14,7 +14,7 @@ describe('template validation', () => {
   it('parses and normalizes imported payload fields', () => {
     const payload = parseTemplateImportPayload({
       version: templateSchemaVersion,
-      id: 'tpl_validationcase01',
+      id: 'validationcase01',
       name: '  Favorites  ',
       description: '  Template context  ',
       globalFilter: {
@@ -24,7 +24,7 @@ describe('template validation', () => {
       },
         categories: [
           {
-            id: 'cat_bestpick01',
+            id: 'bestpick01',
             name: '  Best Pick  ',
             description: '  A focused choice  ',
             filter: {
@@ -36,7 +36,7 @@ describe('template validation', () => {
 
     expect(payload).toEqual({
       version: templateSchemaVersion,
-      id: 'tpl_validationcase01',
+      id: 'validationcase01',
       name: 'Favorites',
       description: 'Template context',
       globalFilter: {
@@ -53,7 +53,7 @@ describe('template validation', () => {
       },
       categories: [
         {
-          id: 'cat_bestpick01',
+          id: 'bestpick01',
           name: 'Best Pick',
           description: 'A focused choice',
           filter: {
@@ -88,12 +88,12 @@ describe('template validation', () => {
         name: 'Duplicate ids',
         categories: [
           {
-            id: 'cat_duplicate01',
+            id: 'duplicate01',
             name: 'First',
             description: '',
           },
           {
-            id: 'cat_duplicate01',
+            id: 'duplicate01',
             name: 'Second',
             description: '',
           },
@@ -132,7 +132,7 @@ describe('template validation', () => {
     const template = normalizeImportedTemplate(
       {
         version: templateSchemaVersion,
-        id: 'tpl_exportcase01',
+        id: 'exportcase01',
         name: 'Export me',
         description: 'Export context',
         globalFilter: {
@@ -141,7 +141,7 @@ describe('template validation', () => {
         },
         categories: [
           {
-            id: 'cat_exportpick01',
+            id: 'exportpick01',
             name: 'Pick',
             description: 'Nice pacing',
             filter: {
@@ -155,7 +155,7 @@ describe('template validation', () => {
 
     expect(createTemplateExportPayload(template)).toEqual({
       version: templateSchemaVersion,
-      id: 'tpl_exportcase01',
+      id: 'exportcase01',
       name: 'Export me',
       description: 'Export context',
       globalFilter: {
@@ -172,7 +172,7 @@ describe('template validation', () => {
       },
       categories: [
         {
-          id: 'cat_exportpick01',
+          id: 'exportpick01',
           name: 'Pick',
           description: 'Nice pacing',
           filter: {
@@ -199,19 +199,19 @@ describe('template validation', () => {
   it('accepts the documented import payload shape', () => {
     const payload: TemplateImportPayloadV1 = {
       version: templateSchemaVersion,
-      id: 'tpl_documentedshape01',
+      id: 'documentedshape01',
       name: 'Documented Shape',
       description: 'Documented context',
       categories: [
         {
-          id: 'cat_documentedshape01',
+          id: 'documentedshape01',
           name: 'Documented Category',
           description: 'Context',
         },
       ],
     }
 
-    expect(parseTemplateImportPayload(payload).id).toBe('tpl_documentedshape01')
+    expect(parseTemplateImportPayload(payload).id).toBe('documentedshape01')
   })
 
   it('defaults template descriptions when omitted', () => {

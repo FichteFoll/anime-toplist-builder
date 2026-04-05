@@ -101,7 +101,7 @@ const categoryCardStub = defineComponent({
 
 const categories: Category[] = [
   {
-    id: 'cat_gridopening01',
+    id: 'gridopening01',
     name: 'Best Opening',
     description: '',
     filter: createEmptyFilterState(),
@@ -148,7 +148,7 @@ describe('CategoryGrid', () => {
 
     expect(wrapper.emitted('updateCategory')).toEqual([
       [
-        'cat_gridopening01',
+        'gridopening01',
         {
           name: 'Best Opening Updated',
           description: '',
@@ -156,15 +156,15 @@ describe('CategoryGrid', () => {
         },
       ],
     ])
-    expect(wrapper.emitted('deleteCategory')).toEqual([[ 'cat_gridopening01' ]])
+    expect(wrapper.emitted('deleteCategory')).toEqual([[ 'gridopening01' ]])
     expect(wrapper.emitted('selectAnime')?.[0]).toEqual([
-      'cat_gridopening01',
+      'gridopening01',
       expect.objectContaining({
         mediaId: 77,
         seasonYear: 2002,
       }),
     ])
-    expect(wrapper.emitted('clearSelection')).toEqual([[ 'cat_gridopening01' ]])
+    expect(wrapper.emitted('clearSelection')).toEqual([[ 'gridopening01' ]])
   })
 
   it('shows open category count in the workspace summary', () => {

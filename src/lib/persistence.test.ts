@@ -61,30 +61,30 @@ describe('persistence helpers', () => {
     const userTemplate = normalizeImportedTemplate(
       {
         version: templateSchemaVersion,
-        id: 'tpl_userlocal01',
+        id: 'userlocal01',
         name: 'Local Template',
         description: 'Local context',
-        categories: [{ id: 'cat_localpick01', name: 'Local Pick', description: '' }],
+        categories: [{ id: 'localpick01', name: 'Local Pick', description: '' }],
       },
       'user',
     )
     const remoteTemplate = normalizeImportedTemplate(
       {
         version: templateSchemaVersion,
-        id: 'tpl_remotelocal01',
+        id: 'remotelocal01',
         name: 'Remote Template',
         description: 'Remote context',
-        categories: [{ id: 'cat_remotepick01', name: 'Remote Pick', description: '' }],
+        categories: [{ id: 'remotepick01', name: 'Remote Pick', description: '' }],
       },
       'imported-url',
     )
     const predefinedTemplate = normalizeImportedTemplate(
       {
         version: templateSchemaVersion,
-        id: 'tpl_predefinedlocal01',
+        id: 'predefinedlocal01',
         name: 'Predefined Template',
         description: 'Predefined context',
-        categories: [{ id: 'cat_predefinedpick01', name: 'Predefined Pick', description: '' }],
+        categories: [{ id: 'predefinedpick01', name: 'Predefined Pick', description: '' }],
       },
       'predefined',
     )
@@ -143,21 +143,21 @@ describe('persistence helpers', () => {
     storage.write('anime-toplist.selections.v1', {
       schemaVersion: 1,
       selections: {
-        tpl_valid: {
-          cat_saved: validSelection,
-          cat_cleared: null,
-          cat_broken: {
+        valid: {
+          saved: validSelection,
+          cleared: null,
+          broken: {
             mediaId: 'bad',
           },
         },
-        tpl_invalid: 'nope',
+        invalid: 'nope',
       },
     })
 
     expect(loadStoredSelections(storage)).toEqual({
-      tpl_valid: {
-        cat_saved: validSelection,
-        cat_cleared: null,
+      valid: {
+        saved: validSelection,
+        cleared: null,
       },
     })
   })
