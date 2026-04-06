@@ -20,7 +20,7 @@ const connectionLabel = computed(() => {
     return aniListAuthStore.username
   }
 
-  return aniListAuthStore.isConfigured ? 'Optional login for My Anime filters' : 'AniList login unavailable'
+  return ''
 })
 </script>
 
@@ -40,12 +40,15 @@ const connectionLabel = computed(() => {
 
       <div class="flex flex-col gap-3 sm:items-end">
         <div class="flex flex-wrap gap-2 sm:justify-end">
-          <div class="inline-flex items-center gap-2 rounded-full border border-app-border/80 bg-app-bg/50 px-3 py-2 text-sm text-app-muted">
+          <div
+            v-if="aniListAuthStore.isAuthenticated"
+            class="inline-flex items-center gap-2 rounded-full border border-app-border/80 bg-app-bg/50 px-3 py-2 text-sm text-app-muted"
+          >
             <AniListIcon class="h-4 w-4 shrink-0" />
             <span class="max-w-48 truncate">{{ connectionLabel }}</span>
           </div>
           <button
-            v-if="!aniListAuthStore.isAuthenticated"
+            v-if="aniListAuthStore.isConfigured && !aniListAuthStore.isAuthenticated"
             type="button"
             class="shell-button"
             :disabled="aniListAuthStore.status === 'connecting'"
@@ -54,7 +57,7 @@ const connectionLabel = computed(() => {
             {{ aniListAuthStore.status === 'connecting' ? 'Connecting...' : 'Connect AniList' }}
           </button>
           <button
-            v-else
+            v-else-if="aniListAuthStore.isAuthenticated"
             type="button"
             class="shell-button"
             @click="aniListAuthStore.disconnect()"
