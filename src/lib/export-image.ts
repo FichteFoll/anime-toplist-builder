@@ -10,21 +10,21 @@ import type {
 
 type ExportTheme = 'light' | 'dark'
 
-export const EXPORT_IMAGE_SIDE_MARGIN = 56
-export const EXPORT_IMAGE_GRID_GAP = 24
-export const EXPORT_IMAGE_PORTRAIT_COLUMNS = 3
-export const EXPORT_IMAGE_LANDSCAPE_COLUMNS = 5
-export const EXPORT_IMAGE_CARD_WIDTH = 415
-export const EXPORT_IMAGE_CARD_PADDING = 20
-export const EXPORT_IMAGE_COVER_WIDTH = 126
-export const EXPORT_IMAGE_COVER_HEIGHT = 183
-export const EXPORT_CATEGORIES_PER_ROW_PORTRAIT = 3
-export const EXPORT_CATEGORIES_PER_ROW_LANDSCAPE = 5
-export const EXPORT_FONT_SIZE_TEMPLATE_TITLE = 44
-export const EXPORT_FONT_SIZE_HEADER_META = 22
-export const EXPORT_FONT_SIZE_CATEGORY_TITLE = 20
-export const EXPORT_FONT_SIZE_BODY = 18
-export const EXPORT_FONT_SIZE_META = 16
+export const SIDE_MARGIN = 56
+export const GRID_GAP = 24
+export const PORTRAIT_COLUMNS = 3
+export const LANDSCAPE_COLUMNS = 5
+export const CARD_WIDTH = 415
+export const CARD_PADDING = 20
+export const COVER_WIDTH = 126
+export const COVER_HEIGHT = 183
+export const CATEGORIES_PER_ROW_PORTRAIT = 3
+export const CATEGORIES_PER_ROW_LANDSCAPE = 5
+export const FONT_SIZE_TEMPLATE_TITLE = 44
+export const FONT_SIZE_HEADER_META = 22
+export const FONT_SIZE_CATEGORY_TITLE = 20
+export const FONT_SIZE_BODY = 18
+export const FONT_SIZE_META = 16
 
 interface ExportPalette {
   background: string
@@ -127,6 +127,43 @@ const fitTextToWidth = (
   return `${characters.slice(0, low).join('').trimEnd()}...`
 }
 
+export const countWrappedTextLines = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+) => {
+  const words = text.trim().split(/\s+/).filter(Boolean)
+
+  if (words.length === 0) {
+    return 0
+  }
+
+  let lines = 0
+  let currentLine = ''
+  let index = 0
+
+  while (index < words.length && lines < maxLines - 1) {
+    const word = words[index]
+    const candidate = currentLine.length > 0 ? `${currentLine} ${word}` : word
+
+    if (context.measureText(candidate).width <= maxWidth || currentLine.length === 0) {
+      currentLine = candidate
+      index += 1
+      continue
+    }
+
+    lines += 1
+    currentLine = ''
+  }
+
+  if (index >= words.length) {
+    return lines + (currentLine.length > 0 ? 1 : 0)
+  }
+
+  return lines + 1
+}
+
 const drawWrappedText = (
   context: CanvasRenderingContext2D,
   text: string,
@@ -137,12 +174,13 @@ const drawWrappedText = (
   maxLines: number,
   color: string,
 ) => {
-  const words = text.trim().split(/\s+/).filter(Boolean)
+  const lineCount = countWrappedTextLines(context, text, maxWidth, maxLines)
 
-  if (words.length === 0) {
+  if (lineCount === 0) {
     return y
   }
 
+  const words = text.trim().split(/\s+/).filter(Boolean)
   const lines: string[] = []
   let currentLine = ''
   let index = 0
@@ -187,11 +225,11 @@ const drawWrappedText = (
 }
 
 const createFontConfig = (): ExportFontConfig => ({
-  templateTitle: EXPORT_FONT_SIZE_TEMPLATE_TITLE,
-  headerMeta: EXPORT_FONT_SIZE_HEADER_META,
-  categoryTitle: EXPORT_FONT_SIZE_CATEGORY_TITLE,
-  body: EXPORT_FONT_SIZE_BODY,
-  meta: EXPORT_FONT_SIZE_META,
+  templateTitle: FONT_SIZE_TEMPLATE_TITLE,
+  headerMeta: FONT_SIZE_HEADER_META,
+  categoryTitle: FONT_SIZE_CATEGORY_TITLE,
+  body: FONT_SIZE_BODY,
+  meta: FONT_SIZE_META,
 })
 
 const setCanvasFont = (
@@ -473,6 +511,8 @@ const createCanvas = (width: number, height: number) => {
   }
 }
 
+const createMeasurementContext = () => createCanvas(1, 1).context
+
 const toBlob = (canvas: HTMLCanvasElement) =>
   new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -497,36 +537,54 @@ export const renderTemplatePng = async ({
 }: ExportRenderInput): Promise<ExportRenderResult> => {
   const palette = exportPaletteByTheme[theme]
   const fonts = createFontConfig()
-  const columns = layout === 'landscape' ? EXPORT_CATEGORIES_PER_ROW_LANDSCAPE : EXPORT_CATEGORIES_PER_ROW_PORTRAIT
-  const width = EXPORT_IMAGE_SIDE_MARGIN * 2 + EXPORT_IMAGE_CARD_WIDTH * columns + EXPORT_IMAGE_GRID_GAP * (columns - 1)
-  const outerPadding = EXPORT_IMAGE_SIDE_MARGIN
-  const headerHeight = Math.max(Math.round(EXPORT_IMAGE_CARD_WIDTH * 0.48), 200)
+  const measureContext = createMeasurementContext()
+  const generatedLabel = new Date().toISOString().slice(0, 10)
+  const columns = layout === 'landscape' ? CATEGORIES_PER_ROW_LANDSCAPE : CATEGORIES_PER_ROW_PORTRAIT
+  const width = SIDE_MARGIN * 2 + CARD_WIDTH * columns + GRID_GAP * (columns - 1)
   const footerHeight = 56
   const filledSelections = template.categories.filter((category) => selectionByCategory[category.id]).length
   const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
-  const cardWidth = EXPORT_IMAGE_CARD_WIDTH
-  const cardPadding = EXPORT_IMAGE_CARD_PADDING
-  const coverWidth = EXPORT_IMAGE_COVER_WIDTH
-  const coverHeight = EXPORT_IMAGE_COVER_HEIGHT
-  const cardHeight = coverHeight + cardPadding * 2
-  const gridHeight = rows * cardHeight + (rows - 1) * EXPORT_IMAGE_GRID_GAP
-  const height = outerPadding + headerHeight + 28 + gridHeight + footerHeight + outerPadding
-  const { canvas, context } = createCanvas(width, height)
+  const cardHeight = COVER_HEIGHT + CARD_PADDING * 2
+  const gridHeight = rows * cardHeight + (rows - 1) * GRID_GAP
+  const headerTextWidth = width - SIDE_MARGIN * 2 - 40
+  const headerTitleLineHeight = Math.round(fonts.templateTitle * 1.15)
+  const headerDescriptionLineHeight = Math.round(fonts.body * 1.35)
+  const headerMetaLineHeight = Math.round(fonts.headerMeta * 1.3)
+  const headerTitleLines = countWrappedTextLines(measureContext, template.name, headerTextWidth, 2)
+  const headerDescriptionLines =
+    template.description.trim().length > 0
+      ? countWrappedTextLines(measureContext, template.description, headerTextWidth, 2)
+      : 0
   const authorLabel = author.trim() || 'Anonymous'
-  const generatedLabel = new Date().toISOString().slice(0, 10)
+  const headerMetaText = hideAuthor
+    ? `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`
+    : `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`
+  const headerMetaTextWidth =
+    hideAuthor || !showAniListBadge
+      ? headerTextWidth
+      : headerTextWidth - (measureContext.measureText('Author: ').width + 26 + 10)
+  const headerMetaLines = countWrappedTextLines(measureContext, headerMetaText, headerMetaTextWidth, 2)
+  const headerTopPadding = 32
+  const headerBottomPadding = 24
+  const headerHeight =
+    headerTopPadding +
+    headerTitleLineHeight * headerTitleLines +
+    (headerDescriptionLines > 0 ? 10 + headerDescriptionLineHeight * headerDescriptionLines : 0) +
+    12 +
+    headerMetaLineHeight * headerMetaLines +
+    headerBottomPadding
+  const height = SIDE_MARGIN + headerHeight + 28 + gridHeight + footerHeight + SIDE_MARGIN
+  const { canvas, context } = createCanvas(width, height)
   const aniListBadgeIcon = showAniListBadge ? await loadImage(anilistBadgeSvgDataUri) : null
 
   context.fillStyle = palette.background
   context.fillRect(0, 0, width, height)
 
-  fillRoundedRect(context, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, 36, palette.surface)
-  strokeRoundedRect(context, outerPadding, outerPadding, width - outerPadding * 2, headerHeight, 36, palette.border, 2)
+  fillRoundedRect(context, SIDE_MARGIN, SIDE_MARGIN, width - SIDE_MARGIN * 2, headerHeight, 36, palette.surface)
+  strokeRoundedRect(context, SIDE_MARGIN, SIDE_MARGIN, width - SIDE_MARGIN * 2, headerHeight, 36, palette.border, 2)
 
-  const headerTextX = outerPadding + 24
-  const headerTitleY = outerPadding + 32
-  const headerTitleLineHeight = Math.round(fonts.templateTitle * 1.15)
-  const headerDescriptionLineHeight = Math.round(fonts.body * 1.35)
-  const headerMetaLineHeight = Math.round(fonts.headerMeta * 1.3)
+  const headerTextX = SIDE_MARGIN + 24
+  const headerTitleY = SIDE_MARGIN + 32
 
   context.textBaseline = 'top'
   setCanvasFont(context, 700, fonts.templateTitle)
@@ -536,7 +594,7 @@ export const renderTemplatePng = async ({
     template.name,
     headerTextX,
     headerTitleY,
-    width - outerPadding * 2 - 40,
+    headerTextWidth,
     headerTitleLineHeight,
     2,
     palette.text,
@@ -552,7 +610,7 @@ export const renderTemplatePng = async ({
       template.description,
       headerTextX,
       titleBottomY + 10,
-      width - outerPadding * 2 - 40,
+      headerTextWidth,
       headerDescriptionLineHeight,
       2,
       palette.muted,
@@ -569,7 +627,7 @@ export const renderTemplatePng = async ({
       `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
       headerTextX,
       metaTopY,
-      width - outerPadding * 2 - 40,
+      headerTextWidth,
       headerMetaLineHeight,
       2,
       palette.muted,
@@ -594,7 +652,7 @@ export const renderTemplatePng = async ({
       `${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
       textX,
       metaTopY,
-      width - outerPadding * 2 - 40 - (textX - headerTextX),
+      headerTextWidth - (textX - headerTextX),
       headerMetaLineHeight,
       2,
       palette.muted,
@@ -605,7 +663,7 @@ export const renderTemplatePng = async ({
       `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
       headerTextX,
       metaTopY,
-      width - outerPadding * 2 - 40,
+      headerTextWidth,
       headerMetaLineHeight,
       2,
       palette.muted,
@@ -627,21 +685,21 @@ export const renderTemplatePng = async ({
   const imagesByCategoryId = new Map(imageEntries)
 
   if (template.categories.length === 0) {
-    const emptyY = outerPadding + headerHeight + 28
+    const emptyY = SIDE_MARGIN + headerHeight + 28
 
-    fillRoundedRect(context, outerPadding, emptyY, width - outerPadding * 2, 220, 32, palette.surface)
-    strokeRoundedRect(context, outerPadding, emptyY, width - outerPadding * 2, 220, 32, palette.border, 2)
+    fillRoundedRect(context, SIDE_MARGIN, emptyY, width - SIDE_MARGIN * 2, 220, 32, palette.surface)
+    strokeRoundedRect(context, SIDE_MARGIN, emptyY, width - SIDE_MARGIN * 2, 220, 32, palette.border, 2)
     setCanvasFont(context, 700, fonts.categoryTitle)
     context.fillStyle = palette.text
-    context.fillText('No categories in this template yet.', outerPadding + 28, emptyY + 64)
+    context.fillText('No categories in this template yet.', SIDE_MARGIN + 28, emptyY + 64)
     setCanvasFont(context, 500, fonts.body)
     context.fillStyle = palette.muted
     drawWrappedText(
       context,
       'Add category cards in the app before exporting to generate a filled grid image.',
-      outerPadding + 28,
+      SIDE_MARGIN + 28,
       emptyY + 106,
-      width - outerPadding * 2 - 56,
+      width - SIDE_MARGIN * 2 - 56,
       Math.round(fonts.body * 1.45),
       3,
       palette.muted,
@@ -651,32 +709,32 @@ export const renderTemplatePng = async ({
   template.categories.forEach((category, index) => {
     const row = Math.floor(index / columns)
     const column = index % columns
-    const x = outerPadding + column * (cardWidth + EXPORT_IMAGE_GRID_GAP)
-    const y = outerPadding + headerHeight + 28 + row * (cardHeight + EXPORT_IMAGE_GRID_GAP)
+    const x = SIDE_MARGIN + column * (CARD_WIDTH + GRID_GAP)
+    const y = SIDE_MARGIN + headerHeight + 28 + row * (cardHeight + GRID_GAP)
     const selection = selectionByCategory[category.id] ?? null
     const image = imagesByCategoryId.get(category.id) ?? null
-    const coverX = x + cardPadding
-    const coverY = y + cardPadding
-    const textX = coverX + coverWidth + 14
-    const textWidth = cardWidth - (textX - x) - cardPadding
+    const coverX = x + CARD_PADDING
+    const coverY = y + CARD_PADDING
+    const textX = coverX + COVER_WIDTH + 14
+    const textWidth = CARD_WIDTH - (textX - x) - CARD_PADDING
     const selectionTitle = selection ? resolveAnimeTitle(selection.title, titleLanguage) : ''
     const metaParts = [selection?.seasonYear ?? null, selection?.format ?? null].filter(
       (value): value is number | AnimeFormat => value !== null,
     )
 
-    fillRoundedRect(context, x, y, cardWidth, cardHeight, 28, palette.surface)
-    strokeRoundedRect(context, x, y, cardWidth, cardHeight, 28, palette.border, 2)
+    fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
+    strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
 
     if (selection && image) {
-      drawCoverImage(context, image, coverX, coverY, coverWidth, coverHeight, 18)
-      strokeRoundedRect(context, coverX, coverY, coverWidth, coverHeight, 18, palette.border, 2)
+      drawCoverImage(context, image, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18)
+      strokeRoundedRect(context, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18, palette.border, 2)
     } else if (selection) {
       drawCoverPlaceholder(
         context,
         coverX,
         coverY,
-        coverWidth,
-        coverHeight,
+        COVER_WIDTH,
+        COVER_HEIGHT,
         18,
         palette,
         category.name,
@@ -687,8 +745,8 @@ export const renderTemplatePng = async ({
         context,
         coverX,
         coverY,
-        coverWidth,
-        coverHeight,
+        COVER_WIDTH,
+        COVER_HEIGHT,
         18,
         palette,
         palette.elevated,
@@ -701,7 +759,7 @@ export const renderTemplatePng = async ({
       context,
       category.name,
       textX,
-      y + cardPadding + 22,
+      y + CARD_PADDING + 22,
       textWidth,
       Math.round(fonts.categoryTitle * 1.15),
       3,
@@ -740,7 +798,7 @@ export const renderTemplatePng = async ({
 
   setCanvasFont(context, 500, fonts.meta)
   context.fillStyle = palette.muted
-  context.fillText(`Generated with ${appConfig.exportSiteUrl}`, outerPadding, height - outerPadding)
+  context.fillText(`Generated with ${appConfig.exportSiteUrl}`, SIDE_MARGIN, height - SIDE_MARGIN)
 
   return {
     blob: await toBlob(canvas),

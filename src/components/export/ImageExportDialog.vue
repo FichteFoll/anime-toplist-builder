@@ -13,8 +13,8 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { createPngExportFilename } from '@/lib/export-filename'
 import {
-  EXPORT_CATEGORIES_PER_ROW_LANDSCAPE,
-  EXPORT_CATEGORIES_PER_ROW_PORTRAIT,
+  CATEGORIES_PER_ROW_LANDSCAPE,
+  CATEGORIES_PER_ROW_PORTRAIT,
   renderTemplatePng,
 } from '@/lib/export-image'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
@@ -276,7 +276,7 @@ onBeforeUnmount(() => {
                     <div>
                       <p class="font-medium text-app-text">Portrait</p>
                       <p class="mt-1 text-sm leading-6 text-app-muted">
-                        {{ `${EXPORT_CATEGORIES_PER_ROW_PORTRAIT} columns, better for shorter templates.` }}
+                        {{ `${CATEGORIES_PER_ROW_PORTRAIT} columns, better for shorter templates.` }}
                       </p>
                     </div>
                   </label>
@@ -292,7 +292,7 @@ onBeforeUnmount(() => {
                     <div>
                       <p class="font-medium text-app-text">Landscape</p>
                       <p class="mt-1 text-sm leading-6 text-app-muted">
-                        {{ `${EXPORT_CATEGORIES_PER_ROW_LANDSCAPE} columns, better for larger templates.` }}
+                        {{ `${CATEGORIES_PER_ROW_LANDSCAPE} columns, better for larger templates.` }}
                       </p>
                     </div>
                   </label>
