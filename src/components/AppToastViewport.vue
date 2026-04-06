@@ -25,13 +25,12 @@ const toneClasses = {
     <ToastRoot
       v-for="toast in toastStore.items"
       :key="toast.id"
-      :open="toast.open"
+      v-model:open="toast.open"
       :duration="toast.duration"
       :class="[
         'pointer-events-auto rounded-[1.5rem] border p-4 shadow-shell backdrop-blur',
         toneClasses[toast.tone],
       ]"
-      @update:open="(open) => !open && toastStore.dismiss(toast.id)"
       @escape-key-down="toastStore.dismiss(toast.id)"
       @swipe-end="toastStore.dismiss(toast.id)"
       @pause="undefined"
