@@ -207,7 +207,7 @@ const updateMinimumTagRank = (rawValue: string) => {
           :key="option.value"
           type="button"
           class="shell-button"
-          :class="isSeasonSelected(option.value) ? 'shell-button-active' : ''"
+          :class="isSeasonSelected(option.value) ? 'border-app-accent/70 bg-app-accentSoft/70 text-app-text' : ''"
           :disabled="Boolean(disabledFields?.seasons)"
           :aria-pressed="isSeasonSelected(option.value)"
           :aria-label="`Use ${option.label} season`"

@@ -57,7 +57,7 @@ const toggleValue = (value: string) => {
         :key="option.value"
         type="button"
         class="shell-button"
-        :class="isSelected(option.value) ? 'shell-button-active' : ''"
+        :class="isSelected(option.value) ? 'border-app-accent/70 bg-app-accentSoft/70 text-app-text' : ''"
         :disabled="Boolean(disabledReason)"
         :aria-pressed="isSelected(option.value)"
         :aria-label="`${isSelected(option.value) ? 'Remove' : 'Add'} ${option.label}`"
