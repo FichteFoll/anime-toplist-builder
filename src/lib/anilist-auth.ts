@@ -1,5 +1,3 @@
-/// <reference types="node" />
-
 import { appConfig } from '@/config/app'
 import type { AniListAuthSession } from '@/types'
 
@@ -36,10 +34,6 @@ const decodeBase64Url = (value: string) => {
 
   if (typeof atob === 'function') {
     return atob(paddedValue)
-  }
-
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(paddedValue, 'base64').toString('binary')
   }
 
   return null
