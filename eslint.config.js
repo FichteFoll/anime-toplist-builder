@@ -16,7 +16,11 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        __BUILD_COMMIT__: 'readonly',
+        __BUILD_TIME__: 'readonly',
+      },
       parser: tseslint.parser,
     },
   },
@@ -25,7 +29,11 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        __BUILD_COMMIT__: 'readonly',
+        __BUILD_TIME__: 'readonly',
+      },
       parser: vueParser,
       parserOptions: {
         parser: tseslint.parser,

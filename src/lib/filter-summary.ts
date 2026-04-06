@@ -52,7 +52,7 @@ const filterSummaryFormatters = {
     minimumTagRank !== undefined && minimumTagRank !== defaultMinimumTagRank
       ? `Tag rank: ${minimumTagRank}+`
       : null,
-  sort: (_sort: FilterState['sort']) => null,
+  sort: () => null,
 } satisfies { [Key in keyof FilterState]: (value: FilterState[Key]) => FilterSummaryEntry }
 
 export const buildActiveFilterSummary = (filter: FilterState) => {
@@ -70,7 +70,7 @@ export const buildActiveFilterSummary = (filter: FilterState) => {
     filterSummaryFormatters.tags(filter.tags),
     filterSummaryFormatters.excludedTags(filter.excludedTags),
     filterSummaryFormatters.minimumTagRank(filter.minimumTagRank),
-    filterSummaryFormatters.sort(filter.sort),
+    filterSummaryFormatters.sort(),
   ]
     .filter((value): value is string => value !== null)
 }
