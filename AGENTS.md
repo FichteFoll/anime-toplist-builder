@@ -13,6 +13,14 @@
 - Vitest and Vue Test Utils for tests.
 - ESLint for linting.
 - `pnpm` for dependency and script management.
+- Use conventional commits for git commit messages.
+- Recommended scopes:
+  - `ui`: user-facing components and views.
+  - `anilist`: AniList API access and query building.
+  - `test`: test-only changes and coverage updates.
+  - `config`: app-wide constants, setup, and environment config.
+  - `export`: export payloads and download logic.
+  - `filter`: shared filter state and normalization.
 
 ## Source Of Truth Directories
 

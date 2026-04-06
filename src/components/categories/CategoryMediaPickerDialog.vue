@@ -19,6 +19,8 @@ import { mergeFilterStates } from '@/lib/filter-merge'
 import { buildActiveFilterSummary } from '@/lib/filter-summary'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
+import { useAniListAuthStore } from '@/stores/anilist-auth'
+import { usePickerFiltersStore } from '@/stores/picker-filters'
 import {
   filterSortFields,
   type AniListSearchResponse,
@@ -33,7 +35,6 @@ import {
 } from '@/types'
 
 const pageSize = 15
-
 const props = defineProps<{
   category: Category
   globalFilter: FilterState
@@ -55,6 +56,8 @@ const localSortField = ref<FilterSortField | ''>('')
 const localSortDirection = ref<FilterSortDirection>('desc')
 const debouncedSearch = useDebouncedValue(searchDraft, 250)
 const isResettingState = ref(false)
+const aniListAuthStore = useAniListAuthStore()
+const pickerFiltersStore = usePickerFiltersStore()
 
 let activeRequestId = 0
 
@@ -93,6 +96,8 @@ const pickerSort = computed<FilterSort | undefined>(() => {
 
 const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
 const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 0)
+const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
+const listVisibility = computed(() => (canUseListFilters.value ? pickerFiltersStore.listVisibility : null))
 
 const resetSearchState = () => {
   isResettingState.value = true
@@ -122,15 +127,18 @@ const loadResults = async (searchTerm: string, page: number) => {
   errorMessage.value = null
 
   try {
+    const accessToken = aniListAuthStore.resolveAccessTokenForRequest()
     const response = await searchAnimeMedia({
       globalFilter: props.globalFilter,
       categoryFilter: {
         ...props.category.filter,
         sort: pickerSort.value,
       },
+      listVisibility: listVisibility.value,
       search: searchTerm,
       page,
       perPage: pageSize,
+      accessToken,
     })
 
     if (requestId !== activeRequestId) {
@@ -144,8 +152,15 @@ const loadResults = async (searchTerm: string, page: number) => {
       return
     }
 
+    if (aniListAuthStore.handleRequestAuthFailure(error)) {
+      void loadResults(searchTerm, page)
+      return
+    }
+
+    const normalizedError = normalizeAniListError(error)
+
     status.value = 'error'
-    errorMessage.value = normalizeAniListError(error).message
+    errorMessage.value = normalizedError.message
   }
 }
 
@@ -191,6 +206,15 @@ watch(pickerSort, (value, previousValue) => {
     isResettingState.value ||
     (value?.field === previousValue?.field && value?.direction === previousValue?.direction)
   ) {
+    return
+  }
+
+  currentPage.value = 1
+  void loadResults(debouncedSearch.value, 1)
+})
+
+watch(listVisibility, (value, previousValue) => {
+  if (!open.value || value === previousValue) {
     return
   }
 
@@ -302,7 +326,58 @@ watch(pickerSort, (value, previousValue) => {
             </div>
           </div>
 
-          <div class="mt-5 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
+          <div class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3 text-sm text-app-muted">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div class="space-y-2">
+                <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+                  Active filters
+                </p>
+                <div
+                  v-if="activeFilterSummary.length > 0"
+                  class="flex flex-wrap gap-2"
+                >
+                  <span
+                    v-for="item in activeFilterSummary"
+                    :key="item"
+                    class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+                <p v-else>
+                  No picker filters are active.
+                </p>
+              </div>
+
+              <div
+                v-if="canUseListFilters"
+                class="flex flex-wrap gap-2 lg:justify-end"
+              >
+                <button
+                  type="button"
+                  class="rounded-full border px-3 py-1 text-xs font-medium transition"
+                  :class="pickerFiltersStore.onlyOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  :aria-pressed="pickerFiltersStore.onlyOnList"
+                  :aria-label="pickerFiltersStore.onlyOnList ? 'Turn off only my anime filter' : 'Show only my anime'"
+                  @click="pickerFiltersStore.toggleListVisibility('only')"
+                >
+                  Only my anime
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full border px-3 py-1 text-xs font-medium transition"
+                  :class="pickerFiltersStore.hideOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  :aria-pressed="pickerFiltersStore.hideOnList"
+                  :aria-label="pickerFiltersStore.hideOnList ? 'Turn off hide my anime filter' : 'Hide my anime'"
+                  @click="pickerFiltersStore.toggleListVisibility('hide')"
+                >
+                  Hide my anime
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
             <p>
               {{ totalResults > 0 ? `${totalResults} matches` : 'No total reported yet' }}
             </p>
@@ -311,27 +386,28 @@ watch(pickerSort, (value, previousValue) => {
             </p>
           </div>
 
-          <div
-            class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3 text-sm text-app-muted"
-          >
-            <p class="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-              Active filters
+          <div class="mt-4 flex items-center justify-between gap-3 text-sm text-app-muted">
+            <p>
+              Page {{ searchResponse?.pageInfo.currentPage ?? currentPage }} of {{ searchResponse?.pageInfo.lastPage ?? 1 }}
             </p>
-            <div
-              v-if="activeFilterSummary.length > 0"
-              class="flex flex-wrap gap-2"
-            >
-              <span
-                v-for="item in activeFilterSummary"
-                :key="item"
-                class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="shell-button"
+                :disabled="currentPage <= 1 || status === 'loading'"
+                @click="currentPage -= 1"
               >
-                {{ item }}
-              </span>
+                Previous
+              </button>
+              <button
+                type="button"
+                class="shell-button"
+                :disabled="!searchResponse?.pageInfo.hasNextPage || status === 'loading'"
+                @click="currentPage += 1"
+              >
+                Next
+              </button>
             </div>
-            <p v-else>
-              No category filters are active.
-            </p>
           </div>
 
           <div class="mt-5 flex min-h-0 flex-1 flex-col rounded-[1.5rem] border border-app-border/70 bg-app-bg/40 p-4">
@@ -444,31 +520,6 @@ watch(pickerSort, (value, previousValue) => {
                   </div>
                 </article>
               </div>
-            </div>
-          </div>
-
-          <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-app-muted">
-              Page {{ searchResponse?.pageInfo.currentPage ?? currentPage }} of {{ searchResponse?.pageInfo.lastPage ?? 1 }}
-            </p>
-
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="shell-button"
-                :disabled="currentPage <= 1 || status === 'loading'"
-                @click="currentPage -= 1"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                class="shell-button"
-                :disabled="!searchResponse?.pageInfo.hasNextPage || status === 'loading'"
-                @click="currentPage += 1"
-              >
-                Next
-              </button>
             </div>
           </div>
         </div>

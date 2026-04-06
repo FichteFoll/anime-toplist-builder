@@ -42,6 +42,8 @@ export interface ExportRenderInput {
   theme: ExportTheme
   titleLanguage: AnimeTitleLanguage
   author: string
+  hideAuthor: boolean
+  showAniListBadge: boolean
 }
 
 export interface ExportRenderResult {
@@ -74,6 +76,11 @@ const exportPaletteByTheme: Record<ExportTheme, ExportPalette> = {
 }
 
 const fontFamily = "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+
+const anilistBadgeSvg =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>AniList logo</title><desc>Anime and manga tracking website</desc><path fill="#1e2630" d="M0 0h512v512H0"/><path fill="#02a9ff" d="M321.92 323.27V136.6c0-10.698-5.887-16.602-16.558-16.602h-36.433c-10.672 0-16.561 5.904-16.561 16.602v88.651c0 2.497 23.996 14.089 24.623 16.541 18.282 71.61 3.972 128.92-13.359 131.6 28.337 1.405 31.455 15.064 10.348 5.731 3.229-38.209 15.828-38.134 52.049-1.406.31.317 7.427 15.282 7.87 15.282h85.545c10.672 0 16.558-5.9 16.558-16.6v-36.524c0-10.698-5.886-16.602-16.558-16.602z"/><path fill="#fefefe" d="M170.68 120 74.999 393h74.338l16.192-47.222h80.96L262.315 393h73.968l-95.314-273zm11.776 165.28 23.183-75.629 25.393 75.629z"/></svg>'
+
+const anilistBadgeSvgDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(anilistBadgeSvg)}`
 
 const imageCache = new Map<string, Promise<HTMLImageElement | null>>()
 
@@ -276,6 +283,18 @@ const loadImage = async (url: string | null | undefined) => {
   return imagePromise
 }
 
+const drawAniListBadgeIcon = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  image: HTMLImageElement,
+) => {
+  context.save()
+  context.drawImage(image, x, y, size, size)
+  context.restore()
+}
+
 const drawCoverImage = (
   context: CanvasRenderingContext2D,
   image: HTMLImageElement,
@@ -462,6 +481,8 @@ export const renderTemplatePng = async ({
   theme,
   titleLanguage,
   author,
+  hideAuthor,
+  showAniListBadge,
 }: ExportRenderInput): Promise<ExportRenderResult> => {
   const width = EXPORT_IMAGE_WIDTH
   const palette = exportPaletteByTheme[theme]
@@ -485,6 +506,7 @@ export const renderTemplatePng = async ({
   const { canvas, context } = createCanvas(width, height)
   const authorLabel = author.trim() || 'Anonymous'
   const generatedLabel = new Date().toISOString().slice(0, 10)
+  const aniListBadgeIcon = showAniListBadge ? await loadImage(anilistBadgeSvgDataUri) : null
 
   context.fillStyle = palette.background
   context.fillRect(0, 0, width, height)
@@ -531,16 +553,56 @@ export const renderTemplatePng = async ({
 
   setCanvasFont(context, 500, fonts.headerMeta)
   context.fillStyle = palette.muted
-  drawWrappedText(
-    context,
-    `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-    headerTextX,
-    descriptionBottomY + 12,
-    width - outerPadding * 2 - 40,
-    headerMetaLineHeight,
-    2,
-    palette.muted,
-  )
+  const metaTopY = descriptionBottomY + 12
+
+  if (hideAuthor) {
+    drawWrappedText(
+      context,
+      `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      headerTextX,
+      metaTopY,
+      width - outerPadding * 2 - 40,
+      headerMetaLineHeight,
+      2,
+      palette.muted,
+    )
+  } else if (showAniListBadge) {
+    const authorPrefix = 'Author: '
+    const iconSize = 26
+    const iconSpacing = 10
+    const iconY = metaTopY + Math.round((fonts.headerMeta - iconSize) / 2)
+
+    context.fillText(authorPrefix, headerTextX, metaTopY)
+
+    const prefixWidth = context.measureText(authorPrefix).width
+    const iconX = headerTextX + prefixWidth
+    const textX = iconX + iconSize + iconSpacing
+
+    if (aniListBadgeIcon) {
+      drawAniListBadgeIcon(context, iconX, iconY, iconSize, aniListBadgeIcon)
+    }
+    drawWrappedText(
+      context,
+      `${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      textX,
+      metaTopY,
+      width - outerPadding * 2 - 40 - (textX - headerTextX),
+      headerMetaLineHeight,
+      2,
+      palette.muted,
+    )
+  } else {
+    drawWrappedText(
+      context,
+      `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      headerTextX,
+      metaTopY,
+      width - outerPadding * 2 - 40,
+      headerMetaLineHeight,
+      2,
+      palette.muted,
+    )
+  }
 
   context.textBaseline = 'alphabetic'
 

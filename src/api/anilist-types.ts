@@ -27,6 +27,7 @@ export interface AniListMediaSearchVariables {
   page: number
   perPage: number
   search?: string
+  onList?: boolean
   season?: AnimeSeason
   countryOfOrigin?: string
   tagIn?: string[]
@@ -104,4 +105,10 @@ export interface AniListMediaSearchData {
 export interface AniListMetadataData {
   GenreCollection?: string[] | null
   MediaTagCollection?: AniListTagResponse[] | null
+}
+
+export interface AniListViewerData {
+  Viewer: {
+    name: string
+  }
 }

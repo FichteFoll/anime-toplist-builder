@@ -3,6 +3,7 @@ export const searchAnimeMediaQuery = `
     $page: Int!
     $perPage: Int!
     $search: String
+    $onList: Boolean
     $season: MediaSeason
     $countryOfOrigin: CountryCode
     $tagIn: [String]
@@ -34,6 +35,7 @@ export const searchAnimeMediaQuery = `
         type: ANIME
         isAdult: false
         search: $search
+        onList: $onList
         season: $season
         countryOfOrigin: $countryOfOrigin
         tag_in: $tagIn
@@ -96,6 +98,14 @@ export const fetchAniListMetadataQuery = `
       name
       description
       isAdult
+    }
+  }
+`
+
+export const fetchAniListViewerQuery = `
+  query FetchAniListViewer {
+    Viewer {
+      name
     }
   }
 `

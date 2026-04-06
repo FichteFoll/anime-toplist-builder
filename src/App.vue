@@ -14,6 +14,7 @@ import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import { createBlankCategory } from '@/lib/template-factories'
 import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
 import { useTheme } from '@/composables/useTheme'
+import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
@@ -24,6 +25,7 @@ const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
 const selectionsStore = useSelectionsStore()
 const toastStore = useToastStore()
+const aniListAuthStore = useAniListAuthStore()
 const { resolvedTheme, theme } = useTheme()
 const {
   isOpen: isConfirmationOpen,
@@ -203,7 +205,10 @@ const clearCategorySelection = (categoryId: string) => {
   )
 }
 
-onMounted(loadAniListMetadata)
+onMounted(async () => {
+  await aniListAuthStore.completeOAuthCallback()
+  await loadAniListMetadata()
+})
 </script>
 
 <template>

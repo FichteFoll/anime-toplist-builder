@@ -14,6 +14,10 @@ export class AniListRequestError extends Error {
   }
 }
 
+export interface AniListRequestOptions {
+  accessToken?: string | null
+}
+
 const createAniListError = (error: AniListError) => new AniListRequestError(error)
 
 const isAniListErrorResponse = (value: unknown): value is { message: string } =>
@@ -76,18 +80,25 @@ const parseResponseJson = async <TData>(response: Response) => {
 }
 
 const normalizeGraphQlErrors = (messages: string[], status?: number): AniListError => ({
-  kind: status && status >= 400 ? 'http' : 'graphql',
+  kind: status === 401 || status === 403 ? 'auth' : status && status >= 400 ? 'http' : 'graphql',
   message: messages[0] ?? 'AniList returned an unexpected error.',
   details: messages.slice(1),
   retryable: status === undefined || status >= 500 || status === 429,
   status,
 })
 
+export const isAniListAuthenticationFailure = (error: unknown) => {
+  const normalizedError = normalizeUnknownError(error)
+
+  return normalizedError.status === 401 || normalizedError.status === 403
+}
+
 export const normalizeAniListError = (error: unknown): AniListError => normalizeUnknownError(error)
 
 export async function requestAniList<TData, TVariables extends object>(
   query: string,
   variables: TVariables,
+  options: AniListRequestOptions = {},
 ): Promise<TData> {
   let response: Response
 
@@ -97,6 +108,11 @@ export async function requestAniList<TData, TVariables extends object>(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(options.accessToken
+          ? {
+              Authorization: `Bearer ${options.accessToken}`,
+            }
+          : {}),
       },
       body: JSON.stringify({
         query,
@@ -120,7 +136,7 @@ export async function requestAniList<TData, TVariables extends object>(
 
   if (!response.ok) {
     throw createAniListError({
-      kind: 'http',
+      kind: response.status === 401 || response.status === 403 ? 'auth' : 'http',
       message: `AniList request failed with status ${response.status}.`,
       details: [],
       retryable: response.status >= 500 || response.status === 429,

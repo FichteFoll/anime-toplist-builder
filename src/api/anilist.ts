@@ -1,20 +1,30 @@
-import type { FilterState, AniListMetadata, AniListSearchResponse, AniListSearchResult } from '@/types'
+import type {
+  AniListListVisibility,
+  AniListMetadata,
+  AniListSearchResponse,
+  AniListSearchResult,
+  AniListViewer,
+  FilterState,
+} from '@/types'
 
 import { buildAniListMediaSearchVariables } from './anilist-query-builder'
-import { requestAniList } from './anilist-client'
-import { fetchAniListMetadataQuery, searchAnimeMediaQuery } from './anilist-queries'
+import { isAniListAuthenticationFailure, requestAniList } from './anilist-client'
+import { fetchAniListMetadataQuery, fetchAniListViewerQuery, searchAnimeMediaQuery } from './anilist-queries'
 import type {
   AniListMediaResponse,
   AniListMediaSearchData,
   AniListMetadataData,
+  AniListViewerData,
 } from './anilist-types'
 
 export interface SearchAnimeMediaOptions {
   globalFilter: FilterState
   categoryFilter: FilterState
+  listVisibility?: AniListListVisibility | null
   search?: string
   page?: number
   perPage?: number
+  accessToken?: string | null
 }
 
 const defaultPerPage = 15
@@ -61,13 +71,16 @@ const createEmptySearchResponse = (page: number, perPage: number): AniListSearch
 export const searchAnimeMedia = async ({
   globalFilter,
   categoryFilter,
+  listVisibility,
   search,
   page = 1,
   perPage = defaultPerPage,
+  accessToken,
 }: SearchAnimeMediaOptions): Promise<AniListSearchResponse> => {
   const searchVariables = buildAniListMediaSearchVariables({
     globalFilter,
     categoryFilter,
+    listVisibility,
     search,
     page,
     perPage,
@@ -80,6 +93,9 @@ export const searchAnimeMedia = async ({
   const data = await requestAniList<AniListMediaSearchData, typeof searchVariables.variables>(
     searchAnimeMediaQuery,
     searchVariables.variables,
+    {
+      accessToken,
+    },
   )
 
   return {
@@ -106,3 +122,19 @@ export const fetchAniListMetadata = async (): Promise<AniListMetadata> => {
       .sort((left, right) => left.name.localeCompare(right.name)),
   }
 }
+
+export const fetchAuthenticatedAniListViewer = async (accessToken: string): Promise<AniListViewer> => {
+  const data = await requestAniList<AniListViewerData, Record<string, never>>(
+    fetchAniListViewerQuery,
+    {},
+    {
+      accessToken,
+    },
+  )
+
+  return {
+    name: data.Viewer.name,
+  }
+}
+
+export { isAniListAuthenticationFailure }

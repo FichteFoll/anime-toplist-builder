@@ -24,6 +24,7 @@ import TemplateEditDialog from '@/components/templates/TemplateEditDialog.vue'
 import { sanitizeDownloadFilename } from '@/lib/export-filename'
 import { stringifyTemplateExportPayload, TemplateValidationError } from '@/lib/template-validation'
 import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
+import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSelectionsStore } from '@/stores/selections'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
@@ -35,6 +36,7 @@ const props = defineProps<{
   titleLanguage: AnimeTitleLanguage
 }>()
 
+const aniListAuthStore = useAniListAuthStore()
 const templateStore = useTemplateStore()
 const selectionsStore = useSelectionsStore()
 const toastStore = useToastStore()
@@ -352,6 +354,8 @@ onMounted(async () => {
             :selection-by-category="activeTemplateSelections"
             :resolved-theme="props.resolvedTheme"
             :title-language="props.titleLanguage"
+            :default-author="aniListAuthStore.username ?? undefined"
+            :default-author-source="aniListAuthStore.isAuthenticated ? 'anilist' : 'manual'"
           />
         </div>
       </div>
