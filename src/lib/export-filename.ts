@@ -6,28 +6,26 @@ const reservedWindowsNames = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i
 const stripControlCharacters = (value: string) =>
   [...value].filter((character) => character.charCodeAt(0) >= 32).join('')
 
-export const sanitizeDownloadFilename = (value: string, fallback = 'anime-toplist') => {
+export const sanitizeDownloadFilename = (value: string, fallback: string) => {
   const normalizedValue = stripControlCharacters(value)
     .replace(windowsInvalidCharacters, '-')
     .replace(repeatedWhitespace, ' ')
     .trim()
     .replace(trailingWindowsCharacters, '')
 
-  const safeValue = normalizedValue.length > 0 ? normalizedValue : fallback
+  const safeValue = normalizedValue || fallback
 
   if (reservedWindowsNames.test(safeValue)) {
     return `${fallback}-${safeValue}`
   }
-
-  return safeValue
+  return safeValue || fallback
 }
 
 export const createPngExportFilename = (templateName: string, author?: string | null) => {
-  const safeTemplateName = sanitizeDownloadFilename(templateName)
-
-  if (!author?.trim()) {
-    return `${safeTemplateName}.png`
+  let fileName = templateName
+  if (author?.trim()) {
+    fileName = `${templateName} by ${author}`
   }
-
-  return `${sanitizeDownloadFilename(`${templateName} by ${author}`) || 'anime-toplist'}.png`
+  const safeFileName = sanitizeDownloadFilename(fileName, 'anime-toplist')
+  return `${safeFileName}.png`
 }
