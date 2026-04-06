@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
 import AniListIcon from '@/components/icons/AniListIcon.vue'
 import SettingsDialog from '@/components/SettingsDialog.vue'
@@ -47,15 +48,32 @@ const connectionLabel = computed(() => {
             <AniListIcon class="h-4 w-4 shrink-0" />
             <span class="max-w-48 truncate">{{ connectionLabel }}</span>
           </div>
-          <button
-            v-if="aniListAuthStore.isConfigured && !aniListAuthStore.isAuthenticated"
-            type="button"
-            class="shell-button"
-            :disabled="aniListAuthStore.status === 'connecting'"
-            @click="aniListAuthStore.connect()"
-          >
-            {{ aniListAuthStore.status === 'connecting' ? 'Connecting...' : 'Connect AniList' }}
-          </button>
+          <TooltipRoot v-if="aniListAuthStore.isConfigured && !aniListAuthStore.isAuthenticated">
+            <TooltipTrigger as-child>
+              <span class="inline-flex">
+                <button
+                  type="button"
+                  class="shell-button"
+                  :disabled="aniListAuthStore.status === 'connecting'"
+                  @click="aniListAuthStore.connect()"
+                >
+                  {{ aniListAuthStore.status === 'connecting' ? 'Connecting...' : 'Connect AniList' }}
+                </button>
+              </span>
+            </TooltipTrigger>
+
+            <TooltipPortal>
+              <TooltipContent
+                class="max-w-xs rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+                :side-offset="8"
+              >
+                Connect your AniList account
+                to narrow search results to your anime list
+                and show your verified account name in image exports.
+                <TooltipArrow class="fill-app-surface" />
+              </TooltipContent>
+            </TooltipPortal>
+          </TooltipRoot>
           <button
             v-else-if="aniListAuthStore.isAuthenticated"
             type="button"
