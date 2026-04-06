@@ -50,7 +50,9 @@ const showAniListBadge = computed(
 )
 
 const filename = computed(() =>
-  props.template ? createPngExportFilename(props.template.name, hideAuthor.value ? '' : author.value) : 'anime-toplist.png',
+  props.template
+    ? createPngExportFilename(props.template.name, hideAuthor.value ? undefined : author.value)
+    : 'anime-toplist.png',
 )
 
 const resetExportForm = () => {
