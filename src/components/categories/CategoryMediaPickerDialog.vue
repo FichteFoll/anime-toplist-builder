@@ -468,13 +468,13 @@ watch(listVisibility, (value, previousValue) => {
                   class="flex h-full flex-col rounded-[1.25rem] border bg-app-surface/85 p-3"
                   :class="result.id === selectedMediaId ? 'border-app-accent/80' : 'border-app-border/70'"
                 >
-                  <div class="flex flex-1 flex-col gap-4">
-                    <button
-                      type="button"
-                      class="grid cursor-pointer grid-cols-[5rem_1fr] gap-4 text-left"
-                      :aria-label="`Select ${resolveAnimeTitle(result.title, titleLanguage)}`"
-                      @click="selectResult(result)"
-                    >
+                  <button
+                    type="button"
+                    class="flex flex-1 cursor-pointer flex-col gap-4 text-left"
+                    :aria-label="`Select ${resolveAnimeTitle(result.title, titleLanguage)}`"
+                    @click="selectResult(result)"
+                  >
+                    <div class="grid grid-cols-[5rem_1fr] gap-4">
                       <img
                         :src="result.coverImage.large"
                         :alt="resolveAnimeTitle(result.title, titleLanguage)"
@@ -492,17 +492,17 @@ watch(listVisibility, (value, previousValue) => {
                           {{ result.seasonYear ?? 'Unknown year' }}
                           <span v-if="result.format"> · {{ result.format }}</span>
                         </p>
-
-                        <p class="line-clamp-3 text-sm leading-6 text-app-muted">
-                          <span
-                            v-if="result.description"
-                            v-html="sanitizeAnimeDescriptionHtml(result.description)"
-                          />
-                          <span v-else>No synopsis available from AniList.</span>
-                        </p>
                       </div>
-                    </button>
-                  </div>
+                    </div>
+
+                    <p class="line-clamp-3 text-sm leading-6 text-app-muted">
+                      <span
+                        v-if="result.description"
+                        v-html="sanitizeAnimeDescriptionHtml(result.description)"
+                      />
+                      <span v-else>No synopsis available from AniList.</span>
+                    </p>
+                  </button>
 
                   <div class="mt-auto flex items-center justify-between gap-3 pt-4">
                     <a
