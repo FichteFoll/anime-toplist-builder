@@ -360,6 +360,8 @@ watch(listVisibility, (value, previousValue) => {
                   type="button"
                   class="rounded-full border px-3 py-1 text-xs font-medium transition"
                   :class="pickerFiltersStore.onlyOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  :aria-pressed="pickerFiltersStore.onlyOnList"
+                  :aria-label="pickerFiltersStore.onlyOnList ? 'Turn off only my anime filter' : 'Show only my anime'"
                   @click="pickerFiltersStore.toggleListVisibility('only')"
                 >
                   Only my anime
@@ -368,6 +370,8 @@ watch(listVisibility, (value, previousValue) => {
                   type="button"
                   class="rounded-full border px-3 py-1 text-xs font-medium transition"
                   :class="pickerFiltersStore.hideOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  :aria-pressed="pickerFiltersStore.hideOnList"
+                  :aria-label="pickerFiltersStore.hideOnList ? 'Turn off hide my anime filter' : 'Hide my anime'"
                   @click="pickerFiltersStore.toggleListVisibility('hide')"
                 >
                   Hide my anime
