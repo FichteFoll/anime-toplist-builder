@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   clearAniListOAuthCallbackFragment,
+  createAniListAuthorizationUrl,
   getAniListTokenExpiresAt,
   isAniListTokenExpired,
   parseAniListOAuthCallback,
@@ -51,6 +52,13 @@ describe('anilist auth helpers', () => {
     clearAniListOAuthCallbackFragment()
 
     expect(replaceState).toHaveBeenCalledWith(null, '', '/anime-toplist/?view=picker')
+  })
+
+  it('includes required parameters authorization query', () => {
+    const authorizationUrl = new URL(createAniListAuthorizationUrl('client-id'))
+
+    expect(authorizationUrl.searchParams.get('client_id')).toBe('client-id')
+    expect(authorizationUrl.searchParams.get('response_type')).toBe('token')
   })
 
   it('treats near-expired tokens as expired', () => {

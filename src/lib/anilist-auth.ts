@@ -203,20 +203,11 @@ export const clearAniListOAuthCallbackFragment = () => {
   window.history.replaceState(null, '', nextUrl)
 }
 
-export const resolveAniListRedirectUri = () => {
-  if (typeof window === 'undefined') {
-    return appConfig.baseUrl
-  }
-
-  return new URL(appConfig.baseUrl, window.location.origin).toString()
-}
-
 export const createAniListAuthorizationUrl = (clientId: string) => {
   const url = new URL('/api/v2/oauth/authorize', appConfig.anilistUrl)
 
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('response_type', 'token')
-  url.searchParams.set('redirect_uri', resolveAniListRedirectUri())
 
   return url.toString()
 }
