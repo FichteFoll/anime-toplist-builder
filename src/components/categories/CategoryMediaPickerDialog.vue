@@ -98,9 +98,6 @@ const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
 const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 0)
 const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
 const listVisibility = computed(() => (canUseListFilters.value ? pickerFiltersStore.listVisibility : null))
-const activePickerFilterSummary = computed(() => {
-  return activeFilterSummary.value
-})
 
 const resetSearchState = () => {
   isResettingState.value = true
@@ -336,11 +333,11 @@ watch(listVisibility, (value, previousValue) => {
                   Active filters
                 </p>
                 <div
-                  v-if="activePickerFilterSummary.length > 0"
+                  v-if="activeFilterSummary.length > 0"
                   class="flex flex-wrap gap-2"
                 >
                   <span
-                    v-for="item in activePickerFilterSummary"
+                    v-for="item in activeFilterSummary"
                     :key="item"
                     class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
                   >
