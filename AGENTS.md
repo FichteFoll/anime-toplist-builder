@@ -13,6 +13,7 @@
 - Vitest and Vue Test Utils for tests.
 - ESLint for linting.
 - `pnpm` for dependency and script management.
+- Use conventional commits for git commit messages.
 
 ## Source Of Truth Directories
 

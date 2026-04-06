@@ -1,0 +1,14 @@
+---
+convention:
+  commitTypes:
+    - feat
+    - fix
+    - perf
+    - refactor
+    - style
+    - test
+    - build
+    - chore
+    - docs
+  commitScopes: []
+  releaseTagGlobPattern: v[0-9]*.[0-9]*.[0-9]*
