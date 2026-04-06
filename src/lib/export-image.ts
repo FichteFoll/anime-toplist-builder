@@ -42,6 +42,8 @@ export interface ExportRenderInput {
   theme: ExportTheme
   titleLanguage: AnimeTitleLanguage
   author: string
+  hideAuthor: boolean
+  showAniListBadge: boolean
 }
 
 export interface ExportRenderResult {
@@ -226,6 +228,29 @@ const fillRoundedRect = (
   context.save()
   context.fillStyle = color
   drawRoundedRect(context, x, y, width, height, radius)
+  context.fill()
+  context.restore()
+}
+
+const drawAniListBadgeIcon = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  palette: ExportPalette,
+) => {
+  fillRoundedRect(context, x, y, size, size, Math.round(size * 0.28), palette.accentSoft)
+
+  context.save()
+  context.fillStyle = palette.accent
+  context.beginPath()
+  context.moveTo(x + size * 0.72, y + size * 0.16)
+  context.lineTo(x + size * 0.38, y + size * 0.16)
+  context.lineTo(x + size * 0.22, y + size * 0.84)
+  context.lineTo(x + size * 0.47, y + size * 0.84)
+  context.lineTo(x + size * 0.53, y + size * 0.58)
+  context.lineTo(x + size * 0.78, y + size * 0.58)
+  context.closePath()
   context.fill()
   context.restore()
 }
@@ -462,6 +487,8 @@ export const renderTemplatePng = async ({
   theme,
   titleLanguage,
   author,
+  hideAuthor,
+  showAniListBadge,
 }: ExportRenderInput): Promise<ExportRenderResult> => {
   const width = EXPORT_IMAGE_WIDTH
   const palette = exportPaletteByTheme[theme]
@@ -531,16 +558,47 @@ export const renderTemplatePng = async ({
 
   setCanvasFont(context, 500, fonts.headerMeta)
   context.fillStyle = palette.muted
-  drawWrappedText(
-    context,
-    `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-    headerTextX,
-    descriptionBottomY + 12,
-    width - outerPadding * 2 - 40,
-    headerMetaLineHeight,
-    2,
-    palette.muted,
-  )
+  const metaTopY = descriptionBottomY + 12
+
+  if (hideAuthor) {
+    drawWrappedText(
+      context,
+      `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      headerTextX,
+      metaTopY,
+      width - outerPadding * 2 - 40,
+      headerMetaLineHeight,
+      2,
+      palette.muted,
+    )
+  } else if (showAniListBadge) {
+    const authorPrefix = 'Author: '
+    const iconSize = 26
+    const iconY = metaTopY + Math.round((fonts.headerMeta - iconSize) / 2)
+
+    context.fillText(authorPrefix, headerTextX, metaTopY)
+
+    const prefixWidth = context.measureText(authorPrefix).width
+    const iconX = headerTextX + prefixWidth
+
+    drawAniListBadgeIcon(context, iconX, iconY, iconSize, palette)
+    context.fillText(
+      `${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      iconX + iconSize + 10,
+      metaTopY,
+    )
+  } else {
+    drawWrappedText(
+      context,
+      `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
+      headerTextX,
+      metaTopY,
+      width - outerPadding * 2 - 40,
+      headerMetaLineHeight,
+      2,
+      palette.muted,
+    )
+  }
 
   context.textBaseline = 'alphabetic'
 

@@ -1,11 +1,12 @@
 import { mergeFilterStates } from '@/lib/filter-merge'
-import type { FilterSort, FilterState } from '@/types'
+import type { AniListListVisibility, FilterSort, FilterState } from '@/types'
 
 import type { AniListMediaSearchVariables, AniListMediaSort } from './anilist-types'
 
 export interface BuildAniListMediaSearchVariablesOptions {
   globalFilter: FilterState
   categoryFilter: FilterState
+  listVisibility?: AniListListVisibility | null
   search?: string
   page: number
   perPage: number
@@ -54,6 +55,7 @@ export const buildAniListMediaSort = (sort: FilterSort | undefined): AniListMedi
 export const buildAniListMediaSearchVariables = ({
   globalFilter,
   categoryFilter,
+  listVisibility,
   search,
   page,
   perPage,
@@ -65,6 +67,7 @@ export const buildAniListMediaSearchVariables = ({
       page,
       perPage,
       search: search?.trim() || undefined,
+      onList: listVisibility === 'only' ? true : listVisibility === 'hide' ? false : undefined,
       season: pickSingleValue(mergedFilter.filter.seasons),
       countryOfOrigin: mergedFilter.filter.countryOfOrigin,
       tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags : undefined,

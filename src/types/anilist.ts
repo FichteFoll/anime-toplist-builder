@@ -1,7 +1,9 @@
 import type { AnimeFormat, AnimeSeason, AnimeSource } from './filters'
 import type { AnimeCoverImage, AnimeTitle } from './selections'
 
-export type AniListErrorKind = 'network' | 'http' | 'graphql' | 'parse' | 'unknown'
+export type AniListErrorKind = 'auth' | 'network' | 'http' | 'graphql' | 'parse' | 'unknown'
+
+export type AniListListVisibility = 'only' | 'hide'
 
 export interface AniListError {
   kind: AniListErrorKind
@@ -22,6 +24,16 @@ export interface AniListTag {
 export interface AniListMetadata {
   genres: string[]
   tags: AniListTag[]
+}
+
+export interface AniListViewer {
+  name: string
+}
+
+export interface AniListAuthSession {
+  accessToken: string
+  username: string
+  expiresAt: number
 }
 
 export interface AniListSearchResult {

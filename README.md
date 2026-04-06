@@ -26,6 +26,8 @@ and export the current list as a themed PNG image.
   with deterministic merge rules and strict validation.
 - Persistent anime selections keyed by stable template and category ids.
 - Client-side AniList metadata loading and search.
+- Optional AniList login
+  that allows usage of `Hide My Anime` and `Only Show My Anime` filters.
 - Remote template startup hydration via `#template=<id-or-url>`,
   plus last-opened template persistence.
 - Theme toggle,
@@ -81,12 +83,24 @@ Useful optional environment variables:
   repository link shown in the footer.
 - `VITE_ANILIST_URL`:
   AniList link shown in the footer.
+- `VITE_ANILIST_CLIENT_ID`:
+  AniList OAuth application client id used for optional login.
 - `VITE_BASE_PATH`:
   base path for GitHub Pages or other subpath hosting.
 - `VITE_DEFAULT_TEMPLATE_ID`:
   default template id used when there is no URL hash and no persisted last-opened template.
 - `VITE_EXPORT_SITE_URL`:
   link embedded into PNG exports.
+
+AniList login uses the browser-side implicit grant flow.
+Create a client at <https://anilist.co/settings/developer>
+and use the deployed app root as the redirect URI,
+including the trailing slash and any GitHub Pages subpath,
+for example `https://<host>/<base-path>/`.
+AniList returns the access token in the URL fragment,
+the app parses it client-side,
+stores only the token session in `sessionStorage`,
+and clears the callback fragment immediately.
 
 ## Development Notes
 
@@ -101,6 +115,8 @@ Useful optional environment variables:
   for example `#template=https%3A%2F%2Fexample.com%2Ftemplate.json`.
 - PNG export runs in the browser canvas.
   Remote image hosts without suitable CORS headers may fall back to placeholders.
+- AniList-authenticated picker filters are shared UI state only.
+  They do not persist into templates or category filters.
 
 ## Build And Deployment
 

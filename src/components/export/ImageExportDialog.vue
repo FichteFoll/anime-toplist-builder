@@ -13,6 +13,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { createPngExportFilename } from '@/lib/export-filename'
 import { renderTemplatePng } from '@/lib/export-image'
+import { useAniListAuthStore } from '@/stores/anilist-auth'
 import type {
   AnimeTitleLanguage,
   CategorySelectionMap,
@@ -24,10 +25,14 @@ const props = defineProps<{
   selectionByCategory: CategorySelectionMap
   resolvedTheme: 'light' | 'dark'
   titleLanguage: AnimeTitleLanguage
+  defaultAuthor?: string
+  defaultAuthorSource?: 'anilist' | 'manual'
 }>()
 
+const aniListAuthStore = useAniListAuthStore()
 const isOpen = ref(false)
 const author = ref('Anonymous')
+const hideAuthor = ref(false)
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
 const isRendering = ref(false)
@@ -35,9 +40,23 @@ const renderError = ref<string | null>(null)
 
 let renderRequestId = 0
 
-const filename = computed(() =>
-  props.template ? createPngExportFilename(props.template.name, author.value) : 'anime-toplist.png',
+const defaultAuthor = computed(() => props.defaultAuthor?.trim() || 'Anonymous')
+const showAniListBadge = computed(
+  () =>
+    !hideAuthor.value &&
+    props.defaultAuthorSource === 'anilist' &&
+    aniListAuthStore.isAuthenticated &&
+    author.value.trim() === defaultAuthor.value,
 )
+
+const filename = computed(() =>
+  props.template ? createPngExportFilename(props.template.name, hideAuthor.value ? '' : author.value) : 'anime-toplist.png',
+)
+
+const resetExportForm = () => {
+  author.value = defaultAuthor.value
+  hideAuthor.value = false
+}
 
 const revokePreviewUrl = () => {
   if (!previewUrl.value) {
@@ -64,7 +83,9 @@ const generatePreview = async () => {
       selectionByCategory: props.selectionByCategory,
       theme: props.resolvedTheme,
       titleLanguage: props.titleLanguage,
-      author: author.value,
+      author: hideAuthor.value ? '' : author.value,
+      hideAuthor: hideAuthor.value,
+      showAniListBadge: showAniListBadge.value,
     })
 
     if (currentRequestId !== renderRequestId) {
@@ -104,16 +125,31 @@ const downloadPreview = () => {
   URL.revokeObjectURL(downloadUrl)
 }
 
+watch(defaultAuthor, (value) => {
+  if (!isOpen.value) {
+    author.value = value
+  }
+})
+
 watch(isOpen, (open) => {
   if (!open) {
     return
   }
 
+  resetExportForm()
   void generatePreview()
 })
 
 watch(
-  () => [props.template, props.selectionByCategory, props.resolvedTheme, props.titleLanguage, author.value],
+  () => [
+    props.template,
+    props.selectionByCategory,
+    props.resolvedTheme,
+    props.titleLanguage,
+    author.value,
+    hideAuthor.value,
+    showAniListBadge.value,
+  ],
   () => {
     if (!isOpen.value) {
       return
@@ -185,8 +221,25 @@ onBeforeUnmount(() => {
                   maxlength="80"
                   class="shell-input"
                   placeholder="Anonymous"
+                  :disabled="hideAuthor"
                 >
               </label>
+
+              <label class="mt-4 flex items-center gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 px-3 py-3 text-sm text-app-text">
+                <input
+                  v-model="hideAuthor"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-app-border bg-app-bg"
+                >
+                <span>Hide author in exported image</span>
+              </label>
+
+              <p
+                v-if="showAniListBadge"
+                class="mt-3 text-sm leading-6 text-app-muted"
+              >
+                The export will mark this author as your connected AniList account.
+              </p>
 
               <dl class="mt-4 space-y-3 text-sm text-app-muted">
                 <div>

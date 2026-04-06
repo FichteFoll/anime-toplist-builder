@@ -24,6 +24,7 @@ describe('buildAniListMediaSearchVariables', () => {
         popularity: { minimum: 100 },
       },
       categoryFilter: createEmptyFilterState(),
+      listVisibility: 'hide',
       search: '  mecha  ',
       page: 2,
       perPage: 20,
@@ -33,6 +34,7 @@ describe('buildAniListMediaSearchVariables', () => {
     expect(result.variables).toEqual({
       page: 2,
       perPage: 20,
+      onList: false,
       season: 'SPRING',
       countryOfOrigin: 'CN',
       tagIn: ['Action'],

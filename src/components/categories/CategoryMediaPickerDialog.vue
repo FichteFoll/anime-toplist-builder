@@ -19,6 +19,8 @@ import { mergeFilterStates } from '@/lib/filter-merge'
 import { buildActiveFilterSummary } from '@/lib/filter-summary'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
+import { useAniListAuthStore } from '@/stores/anilist-auth'
+import { usePickerFiltersStore } from '@/stores/picker-filters'
 import {
   filterSortFields,
   type AniListSearchResponse,
@@ -33,7 +35,6 @@ import {
 } from '@/types'
 
 const pageSize = 15
-
 const props = defineProps<{
   category: Category
   globalFilter: FilterState
@@ -55,6 +56,8 @@ const localSortField = ref<FilterSortField | ''>('')
 const localSortDirection = ref<FilterSortDirection>('desc')
 const debouncedSearch = useDebouncedValue(searchDraft, 250)
 const isResettingState = ref(false)
+const aniListAuthStore = useAniListAuthStore()
+const pickerFiltersStore = usePickerFiltersStore()
 
 let activeRequestId = 0
 
@@ -93,6 +96,19 @@ const pickerSort = computed<FilterSort | undefined>(() => {
 
 const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
 const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 0)
+const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
+const listVisibility = computed(() => (canUseListFilters.value ? pickerFiltersStore.listVisibility : null))
+const activePickerFilterSummary = computed(() => {
+  if (listVisibility.value === 'only') {
+    return [...activeFilterSummary.value, 'Only Show My Anime']
+  }
+
+  if (listVisibility.value === 'hide') {
+    return [...activeFilterSummary.value, 'Hide My Anime']
+  }
+
+  return activeFilterSummary.value
+})
 
 const resetSearchState = () => {
   isResettingState.value = true
@@ -122,15 +138,18 @@ const loadResults = async (searchTerm: string, page: number) => {
   errorMessage.value = null
 
   try {
+    const accessToken = aniListAuthStore.resolveAccessTokenForRequest()
     const response = await searchAnimeMedia({
       globalFilter: props.globalFilter,
       categoryFilter: {
         ...props.category.filter,
         sort: pickerSort.value,
       },
+      listVisibility: listVisibility.value,
       search: searchTerm,
       page,
       perPage: pageSize,
+      accessToken,
     })
 
     if (requestId !== activeRequestId) {
@@ -144,8 +163,15 @@ const loadResults = async (searchTerm: string, page: number) => {
       return
     }
 
+    if (aniListAuthStore.handleRequestAuthFailure(error)) {
+      void loadResults(searchTerm, page)
+      return
+    }
+
+    const normalizedError = normalizeAniListError(error)
+
     status.value = 'error'
-    errorMessage.value = normalizeAniListError(error).message
+    errorMessage.value = normalizedError.message
   }
 }
 
@@ -191,6 +217,15 @@ watch(pickerSort, (value, previousValue) => {
     isResettingState.value ||
     (value?.field === previousValue?.field && value?.direction === previousValue?.direction)
   ) {
+    return
+  }
+
+  currentPage.value = 1
+  void loadResults(debouncedSearch.value, 1)
+})
+
+watch(listVisibility, (value, previousValue) => {
+  if (!open.value || value === previousValue) {
     return
   }
 
@@ -302,6 +337,28 @@ watch(pickerSort, (value, previousValue) => {
             </div>
           </div>
 
+          <div
+            v-if="canUseListFilters"
+            class="mt-4 flex flex-wrap gap-2 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3"
+          >
+            <button
+              type="button"
+              class="shell-button"
+              :class="pickerFiltersStore.onlyOnList ? 'shell-button-active' : ''"
+              @click="pickerFiltersStore.toggleListVisibility('only')"
+            >
+              Only Show My Anime
+            </button>
+            <button
+              type="button"
+              class="shell-button"
+              :class="pickerFiltersStore.hideOnList ? 'shell-button-active' : ''"
+              @click="pickerFiltersStore.toggleListVisibility('hide')"
+            >
+              Hide My Anime
+            </button>
+          </div>
+
           <div class="mt-5 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
             <p>
               {{ totalResults > 0 ? `${totalResults} matches` : 'No total reported yet' }}
@@ -318,11 +375,11 @@ watch(pickerSort, (value, previousValue) => {
               Active filters
             </p>
             <div
-              v-if="activeFilterSummary.length > 0"
+              v-if="activePickerFilterSummary.length > 0"
               class="flex flex-wrap gap-2"
             >
               <span
-                v-for="item in activeFilterSummary"
+                v-for="item in activePickerFilterSummary"
                 :key="item"
                 class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
               >
@@ -330,7 +387,7 @@ watch(pickerSort, (value, previousValue) => {
               </span>
             </div>
             <p v-else>
-              No category filters are active.
+              No picker filters are active.
             </p>
           </div>
 
