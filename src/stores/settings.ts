@@ -14,6 +14,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const themePreference = ref<ThemePreference>(defaultThemePreference)
   const titleLanguage = ref<AnimeTitleLanguage>(defaultAnimeTitleLanguage)
   const lastOpenedTemplateId = ref<string | null>(null)
+  const exportImageAuthor = ref('')
+  const exportImageHideAuthor = ref(false)
   const isHydrated = ref(false)
 
   const persist = () => {
@@ -25,6 +27,8 @@ export const useSettingsStore = defineStore('settings', () => {
       themePreference: themePreference.value,
       titleLanguage: titleLanguage.value,
       lastOpenedTemplateId: lastOpenedTemplateId.value ?? undefined,
+      exportImageAuthor: exportImageAuthor.value,
+      exportImageHideAuthor: exportImageHideAuthor.value,
     })
   }
 
@@ -38,6 +42,8 @@ export const useSettingsStore = defineStore('settings', () => {
     themePreference.value = storedSettings.themePreference
     titleLanguage.value = storedSettings.titleLanguage
     lastOpenedTemplateId.value = storedSettings.lastOpenedTemplateId ?? null
+    exportImageAuthor.value = storedSettings.exportImageAuthor ?? ''
+    exportImageHideAuthor.value = storedSettings.exportImageHideAuthor ?? false
     isHydrated.value = true
   }
 
@@ -56,14 +62,28 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  const setExportImageAuthor = (value: string) => {
+    exportImageAuthor.value = value
+    persist()
+  }
+
+  const setExportImageHideAuthor = (value: boolean) => {
+    exportImageHideAuthor.value = value
+    persist()
+  }
+
   return {
     themePreference,
     titleLanguage,
     lastOpenedTemplateId,
+    exportImageAuthor,
+    exportImageHideAuthor,
     isHydrated,
     initialize,
     setThemePreference,
     setTitleLanguage,
     setLastOpenedTemplateId,
+    setExportImageAuthor,
+    setExportImageHideAuthor,
   }
 })

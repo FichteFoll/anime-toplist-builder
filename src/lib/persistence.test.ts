@@ -138,6 +138,8 @@ describe('persistence helpers', () => {
       themePreference: defaultThemePreference,
       titleLanguage: defaultAnimeTitleLanguage,
       lastOpenedTemplateId: undefined,
+      exportImageAuthor: '',
+      exportImageHideAuthor: false,
     })
   })
 

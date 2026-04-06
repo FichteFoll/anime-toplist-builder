@@ -51,6 +51,8 @@ interface StoredSettingsRecordV1 {
   themePreference: ThemePreference
   titleLanguage: AnimeTitleLanguage
   lastOpenedTemplateId?: string
+  exportImageAuthor?: string
+  exportImageHideAuthor?: boolean
 }
 
 interface StoredSelectionsRecordV1 {
@@ -100,6 +102,8 @@ const createDefaultSettingsRecord = (): StoredSettingsRecordV1 => ({
   schemaVersion: settingsStorageSchemaVersion,
   themePreference: defaultThemePreference,
   titleLanguage: defaultAnimeTitleLanguage,
+  exportImageAuthor: '',
+  exportImageHideAuthor: false,
 })
 
 export const getBrowserStorage = (): BrowserStorage | null => {
@@ -281,6 +285,8 @@ export const loadStoredSettings = (storage = getBrowserStorage()): StoredSetting
       ? (value.titleLanguage as AnimeTitleLanguage)
       : defaultAnimeTitleLanguage,
     lastOpenedTemplateId: isString(value.lastOpenedTemplateId) ? value.lastOpenedTemplateId : undefined,
+    exportImageAuthor: isString(value.exportImageAuthor) ? value.exportImageAuthor : '',
+    exportImageHideAuthor: typeof value.exportImageHideAuthor === 'boolean' ? value.exportImageHideAuthor : false,
   }
 }
 

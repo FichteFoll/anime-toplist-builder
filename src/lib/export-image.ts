@@ -4,13 +4,22 @@ import type {
   AnimeFormat,
   AnimeTitleLanguage,
   CategorySelectionMap,
+  ExportImageLayout,
   Template,
 } from '@/types'
 
 type ExportTheme = 'light' | 'dark'
 
-export const EXPORT_IMAGE_WIDTH = 1400
-export const EXPORT_CATEGORIES_PER_ROW = 3
+export const EXPORT_IMAGE_SIDE_MARGIN = 56
+export const EXPORT_IMAGE_GRID_GAP = 24
+export const EXPORT_IMAGE_PORTRAIT_COLUMNS = 3
+export const EXPORT_IMAGE_LANDSCAPE_COLUMNS = 5
+export const EXPORT_IMAGE_CARD_WIDTH = 415
+export const EXPORT_IMAGE_CARD_PADDING = 20
+export const EXPORT_IMAGE_COVER_WIDTH = 126
+export const EXPORT_IMAGE_COVER_HEIGHT = 183
+export const EXPORT_CATEGORIES_PER_ROW_PORTRAIT = 3
+export const EXPORT_CATEGORIES_PER_ROW_LANDSCAPE = 5
 export const EXPORT_FONT_SIZE_TEMPLATE_TITLE = 44
 export const EXPORT_FONT_SIZE_HEADER_META = 22
 export const EXPORT_FONT_SIZE_CATEGORY_TITLE = 20
@@ -41,6 +50,7 @@ export interface ExportRenderInput {
   selectionByCategory: CategorySelectionMap
   theme: ExportTheme
   titleLanguage: AnimeTitleLanguage
+  layout: ExportImageLayout
   author: string
   hideAuthor: boolean
   showAniListBadge: boolean
@@ -480,28 +490,26 @@ export const renderTemplatePng = async ({
   selectionByCategory,
   theme,
   titleLanguage,
+  layout,
   author,
   hideAuthor,
   showAniListBadge,
 }: ExportRenderInput): Promise<ExportRenderResult> => {
-  const width = EXPORT_IMAGE_WIDTH
   const palette = exportPaletteByTheme[theme]
   const fonts = createFontConfig()
-  const outerPadding = Math.round(width * 0.04)
-  const headerHeight = Math.round(width * 0.135)
+  const columns = layout === 'landscape' ? EXPORT_CATEGORIES_PER_ROW_LANDSCAPE : EXPORT_CATEGORIES_PER_ROW_PORTRAIT
+  const width = EXPORT_IMAGE_SIDE_MARGIN * 2 + EXPORT_IMAGE_CARD_WIDTH * columns + EXPORT_IMAGE_GRID_GAP * (columns - 1)
+  const outerPadding = EXPORT_IMAGE_SIDE_MARGIN
+  const headerHeight = Math.max(Math.round(EXPORT_IMAGE_CARD_WIDTH * 0.48), 200)
   const footerHeight = 56
-  const gridGap = 24
-  const columns = EXPORT_CATEGORIES_PER_ROW
   const filledSelections = template.categories.filter((category) => selectionByCategory[category.id]).length
   const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
-  const cardWidth = Math.floor(
-    (width - outerPadding * 2 - gridGap * (columns - 1)) / columns,
-  )
-  const cardPadding = 20
-  const coverWidth = clamp(Math.round(cardWidth * 0.31), 88, 126)
-  const coverHeight = Math.round(coverWidth * 1.45)
+  const cardWidth = EXPORT_IMAGE_CARD_WIDTH
+  const cardPadding = EXPORT_IMAGE_CARD_PADDING
+  const coverWidth = EXPORT_IMAGE_COVER_WIDTH
+  const coverHeight = EXPORT_IMAGE_COVER_HEIGHT
   const cardHeight = coverHeight + cardPadding * 2
-  const gridHeight = rows * cardHeight + (rows - 1) * gridGap
+  const gridHeight = rows * cardHeight + (rows - 1) * EXPORT_IMAGE_GRID_GAP
   const height = outerPadding + headerHeight + 28 + gridHeight + footerHeight + outerPadding
   const { canvas, context } = createCanvas(width, height)
   const authorLabel = author.trim() || 'Anonymous'
@@ -643,8 +651,8 @@ export const renderTemplatePng = async ({
   template.categories.forEach((category, index) => {
     const row = Math.floor(index / columns)
     const column = index % columns
-    const x = outerPadding + column * (cardWidth + gridGap)
-    const y = outerPadding + headerHeight + 28 + row * (cardHeight + gridGap)
+    const x = outerPadding + column * (cardWidth + EXPORT_IMAGE_GRID_GAP)
+    const y = outerPadding + headerHeight + 28 + row * (cardHeight + EXPORT_IMAGE_GRID_GAP)
     const selection = selectionByCategory[category.id] ?? null
     const image = imagesByCategoryId.get(category.id) ?? null
     const coverX = x + cardPadding

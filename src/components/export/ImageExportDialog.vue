@@ -12,11 +12,17 @@ import {
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { createPngExportFilename } from '@/lib/export-filename'
-import { renderTemplatePng } from '@/lib/export-image'
+import {
+  EXPORT_CATEGORIES_PER_ROW_LANDSCAPE,
+  EXPORT_CATEGORIES_PER_ROW_PORTRAIT,
+  renderTemplatePng,
+} from '@/lib/export-image'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
+import { useSettingsStore } from '@/stores/settings'
 import type {
   AnimeTitleLanguage,
   CategorySelectionMap,
+  ExportImageLayout,
   Template,
 } from '@/types'
 
@@ -30,9 +36,11 @@ const props = defineProps<{
 }>()
 
 const aniListAuthStore = useAniListAuthStore()
+const settingsStore = useSettingsStore()
 const isOpen = ref(false)
 const author = ref('')
 const hideAuthor = ref(false)
+const layout = ref<ExportImageLayout>('portrait')
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
 const isRendering = ref(false)
@@ -42,6 +50,9 @@ let renderRequestId = 0
 
 const defaultAuthor = computed(() => props.defaultAuthor?.trim() || 'Anonymous')
 const resolvedAuthor = computed(() => author.value.trim() || defaultAuthor.value)
+const defaultLayout = computed<ExportImageLayout>(() =>
+  props.template && props.template.categories.length >= 12 ? 'landscape' : 'portrait',
+)
 const showAniListBadge = computed(
   () =>
     !hideAuthor.value &&
@@ -57,8 +68,9 @@ const filename = computed(() =>
 )
 
 const resetExportForm = () => {
-  author.value = ''
-  hideAuthor.value = false
+  author.value = settingsStore.exportImageAuthor || ''
+  hideAuthor.value = settingsStore.exportImageHideAuthor
+  layout.value = defaultLayout.value
 }
 
 const revokePreviewUrl = () => {
@@ -86,6 +98,7 @@ const generatePreview = async () => {
       selectionByCategory: props.selectionByCategory,
       theme: props.resolvedTheme,
       titleLanguage: props.titleLanguage,
+      layout: layout.value,
       author: hideAuthor.value ? '' : resolvedAuthor.value,
       hideAuthor: hideAuthor.value,
       showAniListBadge: showAniListBadge.value,
@@ -137,12 +150,21 @@ watch(isOpen, (open) => {
   void generatePreview()
 })
 
+watch(author, (value) => {
+  settingsStore.setExportImageAuthor(value)
+})
+
+watch(hideAuthor, (value) => {
+  settingsStore.setExportImageHideAuthor(value)
+})
+
 watch(
   () => [
     props.template,
     props.selectionByCategory,
     props.resolvedTheme,
     props.titleLanguage,
+    layout.value,
     author.value,
     hideAuthor.value,
     showAniListBadge.value,
@@ -188,7 +210,7 @@ onBeforeUnmount(() => {
               Generate toplist selection image
             </DialogTitle>
             <DialogDescription class="mt-2 text-sm leading-6 text-app-muted">
-              Set the author name, preview the rendered image, and download the final export.
+              Set the author name, choose a layout, preview the rendered image, and download the final export.
             </DialogDescription>
           </div>
 
@@ -237,6 +259,45 @@ onBeforeUnmount(() => {
               >
                 The export will mark this author as your connected AniList account.
               </p>
+
+              <div class="mt-4 space-y-2">
+                <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+                  Image layout
+                </span>
+                <div class="grid gap-2 sm:grid-cols-2">
+                  <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40 hover:bg-app-elevated/40">
+                    <input
+                      v-model="layout"
+                      value="portrait"
+                      type="radio"
+                      name="image-layout"
+                      class="mt-1 h-4 w-4 border-app-border text-app-accent focus:ring-app-accent"
+                    >
+                    <div>
+                      <p class="font-medium text-app-text">Portrait</p>
+                      <p class="mt-1 text-sm leading-6 text-app-muted">
+                        {{ `${EXPORT_CATEGORIES_PER_ROW_PORTRAIT} columns, better for shorter templates.` }}
+                      </p>
+                    </div>
+                  </label>
+
+                  <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40 hover:bg-app-elevated/40">
+                    <input
+                      v-model="layout"
+                      value="landscape"
+                      type="radio"
+                      name="image-layout"
+                      class="mt-1 h-4 w-4 border-app-border text-app-accent focus:ring-app-accent"
+                    >
+                    <div>
+                      <p class="font-medium text-app-text">Landscape</p>
+                      <p class="mt-1 text-sm leading-6 text-app-muted">
+                        {{ `${EXPORT_CATEGORIES_PER_ROW_LANDSCAPE} columns, better for larger templates.` }}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
 
               <dl class="mt-4 space-y-3 text-sm text-app-muted">
                 <div>
