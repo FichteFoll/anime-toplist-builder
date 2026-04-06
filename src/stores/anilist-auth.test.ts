@@ -24,9 +24,6 @@ vi.mock('@/config/app', () => ({
   },
 }))
 
-const errorSpy = vi.fn()
-const infoSpy = vi.fn()
-const successSpy = vi.fn()
 vi.mock('@/stores/toasts', () => ({
   useToastStore: () => ({
     error: mocks.errorSpy,
