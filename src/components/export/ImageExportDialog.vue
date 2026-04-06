@@ -31,7 +31,7 @@ const props = defineProps<{
 
 const aniListAuthStore = useAniListAuthStore()
 const isOpen = ref(false)
-const author = ref('Anonymous')
+const author = ref('')
 const hideAuthor = ref(false)
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
@@ -41,22 +41,23 @@ const renderError = ref<string | null>(null)
 let renderRequestId = 0
 
 const defaultAuthor = computed(() => props.defaultAuthor?.trim() || 'Anonymous')
+const resolvedAuthor = computed(() => author.value.trim() || defaultAuthor.value)
 const showAniListBadge = computed(
   () =>
     !hideAuthor.value &&
     props.defaultAuthorSource === 'anilist' &&
     aniListAuthStore.isAuthenticated &&
-    author.value.trim() === defaultAuthor.value,
+    resolvedAuthor.value === defaultAuthor.value,
 )
 
 const filename = computed(() =>
   props.template
-    ? createPngExportFilename(props.template.name, hideAuthor.value ? undefined : author.value)
+    ? createPngExportFilename(props.template.name, hideAuthor.value ? undefined : resolvedAuthor.value)
     : 'anime-toplist.png',
 )
 
 const resetExportForm = () => {
-  author.value = defaultAuthor.value
+  author.value = ''
   hideAuthor.value = false
 }
 
@@ -85,7 +86,7 @@ const generatePreview = async () => {
       selectionByCategory: props.selectionByCategory,
       theme: props.resolvedTheme,
       titleLanguage: props.titleLanguage,
-      author: hideAuthor.value ? '' : author.value,
+      author: hideAuthor.value ? '' : resolvedAuthor.value,
       hideAuthor: hideAuthor.value,
       showAniListBadge: showAniListBadge.value,
     })
@@ -126,12 +127,6 @@ const downloadPreview = () => {
 
   URL.revokeObjectURL(downloadUrl)
 }
-
-watch(defaultAuthor, (value) => {
-  if (!isOpen.value) {
-    author.value = value
-  }
-})
 
 watch(isOpen, (open) => {
   if (!open) {
@@ -222,7 +217,7 @@ onBeforeUnmount(() => {
                   type="text"
                   maxlength="80"
                   class="shell-input"
-                  placeholder="Anonymous"
+                  :placeholder="defaultAuthor"
                   :disabled="hideAuthor"
                 >
               </label>
