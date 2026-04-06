@@ -99,14 +99,6 @@ const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 
 const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
 const listVisibility = computed(() => (canUseListFilters.value ? pickerFiltersStore.listVisibility : null))
 const activePickerFilterSummary = computed(() => {
-  if (listVisibility.value === 'only') {
-    return [...activeFilterSummary.value, 'Only Show My Anime']
-  }
-
-  if (listVisibility.value === 'hide') {
-    return [...activeFilterSummary.value, 'Hide My Anime']
-  }
-
   return activeFilterSummary.value
 })
 
@@ -337,29 +329,54 @@ watch(listVisibility, (value, previousValue) => {
             </div>
           </div>
 
-          <div
-            v-if="canUseListFilters"
-            class="mt-4 flex flex-wrap gap-2 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3"
-          >
-            <button
-              type="button"
-              class="shell-button"
-              :class="pickerFiltersStore.onlyOnList ? 'shell-button-active' : ''"
-              @click="pickerFiltersStore.toggleListVisibility('only')"
-            >
-              Only Show My Anime
-            </button>
-            <button
-              type="button"
-              class="shell-button"
-              :class="pickerFiltersStore.hideOnList ? 'shell-button-active' : ''"
-              @click="pickerFiltersStore.toggleListVisibility('hide')"
-            >
-              Hide My Anime
-            </button>
+          <div class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3 text-sm text-app-muted">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div class="space-y-2">
+                <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+                  Active filters
+                </p>
+                <div
+                  v-if="activePickerFilterSummary.length > 0"
+                  class="flex flex-wrap gap-2"
+                >
+                  <span
+                    v-for="item in activePickerFilterSummary"
+                    :key="item"
+                    class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+                <p v-else>
+                  No picker filters are active.
+                </p>
+              </div>
+
+              <div
+                v-if="canUseListFilters"
+                class="flex flex-wrap gap-2 lg:justify-end"
+              >
+                <button
+                  type="button"
+                  class="rounded-full border px-3 py-1 text-xs font-medium transition"
+                  :class="pickerFiltersStore.onlyOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  @click="pickerFiltersStore.toggleListVisibility('only')"
+                >
+                  Only my anime
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full border px-3 py-1 text-xs font-medium transition"
+                  :class="pickerFiltersStore.hideOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
+                  @click="pickerFiltersStore.toggleListVisibility('hide')"
+                >
+                  Hide my anime
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="mt-5 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
+          <div class="mt-3 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
             <p>
               {{ totalResults > 0 ? `${totalResults} matches` : 'No total reported yet' }}
             </p>
@@ -368,27 +385,28 @@ watch(listVisibility, (value, previousValue) => {
             </p>
           </div>
 
-          <div
-            class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 px-4 py-3 text-sm text-app-muted"
-          >
-            <p class="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-              Active filters
+          <div class="mt-4 flex items-center justify-between gap-3 text-sm text-app-muted">
+            <p>
+              Page {{ searchResponse?.pageInfo.currentPage ?? currentPage }} of {{ searchResponse?.pageInfo.lastPage ?? 1 }}
             </p>
-            <div
-              v-if="activePickerFilterSummary.length > 0"
-              class="flex flex-wrap gap-2"
-            >
-              <span
-                v-for="item in activePickerFilterSummary"
-                :key="item"
-                class="max-w-full rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-1 leading-5"
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="shell-button"
+                :disabled="currentPage <= 1 || status === 'loading'"
+                @click="currentPage -= 1"
               >
-                {{ item }}
-              </span>
+                Previous
+              </button>
+              <button
+                type="button"
+                class="shell-button"
+                :disabled="!searchResponse?.pageInfo.hasNextPage || status === 'loading'"
+                @click="currentPage += 1"
+              >
+                Next
+              </button>
             </div>
-            <p v-else>
-              No picker filters are active.
-            </p>
           </div>
 
           <div class="mt-5 flex min-h-0 flex-1 flex-col rounded-[1.5rem] border border-app-border/70 bg-app-bg/40 p-4">
@@ -501,31 +519,6 @@ watch(listVisibility, (value, previousValue) => {
                   </div>
                 </article>
               </div>
-            </div>
-          </div>
-
-          <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-app-muted">
-              Page {{ searchResponse?.pageInfo.currentPage ?? currentPage }} of {{ searchResponse?.pageInfo.lastPage ?? 1 }}
-            </p>
-
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="shell-button"
-                :disabled="currentPage <= 1 || status === 'loading'"
-                @click="currentPage -= 1"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                class="shell-button"
-                :disabled="!searchResponse?.pageInfo.hasNextPage || status === 'loading'"
-                @click="currentPage += 1"
-              >
-                Next
-              </button>
             </div>
           </div>
         </div>
