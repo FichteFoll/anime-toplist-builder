@@ -10,5 +10,11 @@ convention:
     - build
     - chore
     - docs
-  commitScopes: []
+  commitScopes:
+    - ui  # user-facing components, views, and interaction updates
+    - anilist  # AniList API access, query building, and remote data flow
+    - test  # test-only changes or test coverage updates
+    - config  # app-wide constants, setup, and environment configuration
+    - export  # export features, payloads, and download logic
+    - filter  # shared filter state, normalization, and query refinement
   releaseTagGlobPattern: v[0-9]*.[0-9]*.[0-9]*
