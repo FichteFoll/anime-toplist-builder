@@ -335,24 +335,22 @@ onBeforeUnmount(() => {
               </h3>
             </div>
 
-            <div class="mt-4 rounded-[1.25rem] border border-app-border/70 bg-app-surface/80 p-3">
-              <div
-                v-if="previewUrl"
-                class="overflow-hidden rounded-[1rem] border border-app-border/70 bg-app-bg/60"
+            <div
+              v-if="previewUrl"
+              class="mt-4 overflow-hidden rounded-[1rem] border border-app-border/70 bg-app-bg/60"
+            >
+              <img
+                :src="previewUrl"
+                :alt="template ? `${template.name} image preview` : 'Image preview'"
+                class="block h-auto w-full"
               >
-                <img
-                  :src="previewUrl"
-                  :alt="template ? `${template.name} image preview` : 'Image preview'"
-                  class="block h-auto w-full"
-                >
-              </div>
+            </div>
 
-              <div
-                v-else
-                class="flex min-h-72 items-center justify-center rounded-[1rem] border border-dashed border-app-border/70 bg-app-bg/40 px-6 py-12 text-center text-sm leading-6 text-app-muted"
-              >
-                {{ isRendering ? 'Rendering the image preview...' : 'The image preview updates automatically.' }}
-              </div>
+            <div
+              v-else
+              class="mt-4 flex min-h-72 items-center justify-center rounded-[1rem] border border-dashed border-app-border/70 bg-app-bg/40 px-6 py-12 text-center text-sm leading-6 text-app-muted"
+            >
+              {{ isRendering ? 'Rendering the image preview...' : 'The image preview updates automatically.' }}
             </div>
           </article>
         </div>
