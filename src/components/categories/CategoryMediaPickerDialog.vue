@@ -44,6 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [selection: AnimeSelection]
+  clear: []
 }>()
 
 const open = ref(false)
@@ -465,8 +466,8 @@ watch(listVisibility, (value, previousValue) => {
                 <article
                   v-for="result in searchResponse?.results ?? []"
                   :key="result.id"
-                  class="flex h-full flex-col rounded-[1.25rem] border bg-app-surface/85 p-3"
-                  :class="result.id === selectedMediaId ? 'border-app-accent/80' : 'border-app-border/70'"
+                  class="flex h-full flex-col rounded-[1.25rem] border bg-app-surface/85 p-3 transition"
+                  :class="result.id === selectedMediaId ? 'border-app-accent/80 hover:border-app-accent' : 'border-app-border/70 hover:border-app-accent/60'"
                 >
                   <button
                     type="button"
@@ -515,12 +516,12 @@ watch(listVisibility, (value, previousValue) => {
                       <ExternalLinkIcon class="h-3.5 w-3.5" />
                     </a>
                     <button
+                      v-if="result.id === selectedMediaId"
                       type="button"
                       class="shell-button"
-                      :class="result.id === selectedMediaId ? 'shell-button-active' : ''"
-                      @click="selectResult(result)"
+                      @click="emit('clear')"
                     >
-                      {{ result.id === selectedMediaId ? 'Keep selected' : 'Select anime' }}
+                      Unselect
                     </button>
                   </div>
                 </article>

@@ -41,7 +41,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
 
 <template>
   <article
-    class="group flex flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition"
+    class="group flex flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition hover:border-app-accent/60"
     :class="selection ? 'border-app-accent/70' : 'border-app-border/70'"
     :data-category-id="category.id"
   >
@@ -114,6 +114,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         :selected-media-id="selection?.mediaId ?? null"
         :title-language="titleLanguage"
         @select="emit('selectAnime', $event)"
+        @clear="emit('clearSelection', category.id)"
       />
       <button
         type="button"
