@@ -70,9 +70,12 @@ describe('anilist auth helpers', () => {
   })
 
   it('persists oauth state in session storage', () => {
+    const store = new Map<string, string>()
     const storage = {
-      getItem: vi.fn(),
-      setItem: vi.fn(),
+      getItem: vi.fn((key: string) => store.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => {
+        store.set(key, value)
+      }),
       removeItem: vi.fn(),
     }
 
@@ -81,7 +84,7 @@ describe('anilist auth helpers', () => {
     saveAniListOAuthState(state, storage)
 
     expect(storage.setItem).toHaveBeenCalledWith(expect.any(String), state)
-    expect(loadAniListOAuthState(storage)).toBeNull()
+    expect(loadAniListOAuthState(storage)).toBe(state)
 
     clearAniListOAuthState(storage)
     expect(storage.removeItem).toHaveBeenCalledWith(expect.any(String))
