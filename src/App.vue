@@ -180,10 +180,6 @@ const selectCategoryAnime = (categoryId: string, selection: AnimeSelection) => {
   }
 
   selectionsStore.setCategorySelection(activeTemplate.value.id, categoryId, selection)
-  toastStore.success(
-    'Anime saved to category.',
-    `${resolveAnimeTitle(selection.title, settingsStore.titleLanguage)} -> ${category.name}`,
-  )
 }
 
 const clearCategorySelection = (categoryId: string) => {
@@ -199,10 +195,6 @@ const clearCategorySelection = (categoryId: string) => {
   }
 
   selectionsStore.setCategorySelection(activeTemplate.value.id, categoryId, null)
-  toastStore.success(
-    'Cleared category selection.',
-    `${resolveAnimeTitle(selection.title, settingsStore.titleLanguage)} <- ${category.name}`,
-  )
 }
 
 onMounted(async () => {
