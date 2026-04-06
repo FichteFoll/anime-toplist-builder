@@ -469,7 +469,12 @@ watch(listVisibility, (value, previousValue) => {
                   :class="result.id === selectedMediaId ? 'border-app-accent/80' : 'border-app-border/70'"
                 >
                   <div class="flex flex-1 flex-col gap-4">
-                    <div class="grid grid-cols-[5rem_1fr] gap-4">
+                    <button
+                      type="button"
+                      class="grid cursor-pointer grid-cols-[5rem_1fr] gap-4 text-left"
+                      :aria-label="`Select ${resolveAnimeTitle(result.title, titleLanguage)}`"
+                      @click="selectResult(result)"
+                    >
                       <img
                         :src="result.coverImage.large"
                         :alt="resolveAnimeTitle(result.title, titleLanguage)"
@@ -496,7 +501,7 @@ watch(listVisibility, (value, previousValue) => {
                           <span v-else>No synopsis available from AniList.</span>
                         </p>
                       </div>
-                    </div>
+                    </button>
                   </div>
 
                   <div class="mt-auto flex items-center justify-between gap-3 pt-4">
