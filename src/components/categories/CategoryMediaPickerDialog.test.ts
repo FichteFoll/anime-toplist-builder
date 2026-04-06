@@ -123,7 +123,7 @@ describe('CategoryMediaPickerDialog', () => {
       },
     });
 
-    (wrapper.vm as { open: boolean }).open = true
+    (wrapper.vm as unknown as { open: boolean }).open = true
     await nextTick()
     await nextTick()
 
