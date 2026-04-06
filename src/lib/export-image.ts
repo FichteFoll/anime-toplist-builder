@@ -569,20 +569,27 @@ export const renderTemplatePng = async ({
   } else if (showAniListBadge) {
     const authorPrefix = 'Author: '
     const iconSize = 26
+    const iconSpacing = 10
     const iconY = metaTopY + Math.round((fonts.headerMeta - iconSize) / 2)
 
     context.fillText(authorPrefix, headerTextX, metaTopY)
 
     const prefixWidth = context.measureText(authorPrefix).width
     const iconX = headerTextX + prefixWidth
+    const textX = iconX + iconSize + iconSpacing
 
     if (aniListBadgeIcon) {
       drawAniListBadgeIcon(context, iconX, iconY, iconSize, aniListBadgeIcon)
     }
-    context.fillText(
+    drawWrappedText(
+      context,
       `${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-      iconX + iconSize + 10,
+      textX,
       metaTopY,
+      width - outerPadding * 2 - 40 - (textX - headerTextX),
+      headerMetaLineHeight,
+      2,
+      palette.muted,
     )
   } else {
     drawWrappedText(
