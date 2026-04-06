@@ -1,11 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  clearAniListOAuthState,
   clearAniListOAuthCallbackFragment,
   createAniListAuthorizationUrl,
+  createAniListOAuthState,
   getAniListTokenExpiresAt,
   isAniListTokenExpired,
+  loadAniListOAuthState,
   parseAniListOAuthCallback,
+  saveAniListOAuthState,
 } from './anilist-auth'
 
 const createJwt = (payload: Record<string, unknown>) => {
@@ -27,12 +31,15 @@ describe('anilist auth helpers', () => {
 
   it('parses anilist oauth fragments without preserving the full url', () => {
     const accessToken = createJwt({ exp: 1_900_000_000 })
-    const payload = parseAniListOAuthCallback(`#access_token=${accessToken}&token_type=Bearer`)
+    const payload = parseAniListOAuthCallback(
+      `#access_token=${accessToken}&token_type=Bearer&state=abc123`,
+    )
 
     expect(payload).toEqual({
       accessToken,
       expiresAt: 1_900_000_000_000,
       error: undefined,
+      state: 'abc123',
     })
   })
 
@@ -55,10 +62,29 @@ describe('anilist auth helpers', () => {
   })
 
   it('includes required parameters authorization query', () => {
-    const authorizationUrl = new URL(createAniListAuthorizationUrl('client-id'))
+    const authorizationUrl = new URL(createAniListAuthorizationUrl('client-id', 'state-token'))
 
     expect(authorizationUrl.searchParams.get('client_id')).toBe('client-id')
     expect(authorizationUrl.searchParams.get('response_type')).toBe('token')
+    expect(authorizationUrl.searchParams.get('state')).toBe('state-token')
+  })
+
+  it('persists oauth state in session storage', () => {
+    const storage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    }
+
+    const state = createAniListOAuthState()
+
+    saveAniListOAuthState(state, storage)
+
+    expect(storage.setItem).toHaveBeenCalledWith(expect.any(String), state)
+    expect(loadAniListOAuthState(storage)).toBeNull()
+
+    clearAniListOAuthState(storage)
+    expect(storage.removeItem).toHaveBeenCalledWith(expect.any(String))
   })
 
   it('treats near-expired tokens as expired', () => {

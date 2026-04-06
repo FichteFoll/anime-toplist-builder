@@ -2,6 +2,7 @@ import { appConfig } from '@/config/app'
 import type { AniListAuthSession } from '@/types'
 
 const anilistAuthStorageKey = 'anime-toplist-builder.anilist-auth.v1'
+const anilistOAuthStateStorageKey = 'anime-toplist-builder.anilist-oauth-state.v1'
 const anilistAuthStorageSchemaVersion = 1 as const
 const expClaimToMilliseconds = 1000
 const expiryGracePeriodMs = 30_000
@@ -19,6 +20,7 @@ export interface AniListOAuthCallbackPayload {
   accessToken?: string
   expiresAt?: number | null
   error?: string
+  state?: string
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -156,6 +158,30 @@ export const clearStoredAniListAuthSession = (storage = getBrowserSessionStorage
   storage?.removeItem(anilistAuthStorageKey)
 }
 
+const generateOAuthState = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = new Uint8Array(16)
+    crypto.getRandomValues(bytes)
+
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  }
+
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+}
+
+export const createAniListOAuthState = () => generateOAuthState()
+
+export const saveAniListOAuthState = (state: string, storage = getBrowserSessionStorage()) => {
+  storage?.setItem(anilistOAuthStateStorageKey, state)
+}
+
+export const loadAniListOAuthState = (storage = getBrowserSessionStorage()) =>
+  storage?.getItem(anilistOAuthStateStorageKey) ?? null
+
+export const clearAniListOAuthState = (storage = getBrowserSessionStorage()) => {
+  storage?.removeItem(anilistOAuthStateStorageKey)
+}
+
 export const parseAniListOAuthCallback = (
   hash = typeof window === 'undefined' ? '' : window.location.hash,
 ): AniListOAuthCallbackPayload | null => {
@@ -175,6 +201,7 @@ export const parseAniListOAuthCallback = (
   const expiresInValue = params.get('expires_in')
   const expiresInSeconds = expiresInValue ? Number.parseInt(expiresInValue, 10) : null
   const error = sanitizeOAuthError(params.get('error'), params.get('error_description'))
+  const state = params.get('state')?.trim() || undefined
 
   return {
     accessToken,
@@ -185,6 +212,7 @@ export const parseAniListOAuthCallback = (
         )
       : null,
     error: error ?? undefined,
+    state,
   }
 }
 
@@ -197,11 +225,12 @@ export const clearAniListOAuthCallbackFragment = () => {
   window.history.replaceState(null, '', nextUrl)
 }
 
-export const createAniListAuthorizationUrl = (clientId: string) => {
+export const createAniListAuthorizationUrl = (clientId: string, state: string) => {
   const url = new URL('/api/v2/oauth/authorize', appConfig.anilistUrl)
 
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('response_type', 'token')
+  url.searchParams.set('state', state)
 
   return url.toString()
 }

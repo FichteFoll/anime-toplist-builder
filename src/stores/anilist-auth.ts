@@ -9,12 +9,16 @@ import {
 import { appConfig } from '@/config/app'
 import {
   type AniListOAuthCallbackPayload,
+  clearAniListOAuthState,
   clearAniListOAuthCallbackFragment,
   clearStoredAniListAuthSession,
+  createAniListOAuthState,
   createAniListAuthorizationUrl,
+  loadAniListOAuthState,
   isAniListTokenExpired,
   loadStoredAniListAuthSession,
   parseAniListOAuthCallback,
+  saveAniListOAuthState,
   saveStoredAniListAuthSession,
 } from '@/lib/anilist-auth'
 import type { AniListAuthSession } from '@/types'
@@ -99,8 +103,11 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
       return false
     }
 
+    const state = createAniListOAuthState()
+
+    saveAniListOAuthState(state)
     status.value = 'connecting'
-    window.location.assign(createAniListAuthorizationUrl(appConfig.anilistClientId))
+    window.location.assign(createAniListAuthorizationUrl(appConfig.anilistClientId, state))
     return true
   }
 
@@ -119,6 +126,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
   const completeOAuthCallback = async () => {
     const toastStore = useToastStore()
     const callback = pendingOAuthCallback.value
+    const expectedState = loadAniListOAuthState()
 
     if (!callback) {
       return false
@@ -126,6 +134,14 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
 
     pendingOAuthCallback.value = null
     clearAniListOAuthCallbackFragment()
+    clearAniListOAuthState()
+
+    if (!expectedState || callback.state !== expectedState) {
+      clearSessionState()
+      clearStoredAniListAuthSession()
+      toastStore.error('AniList login failed.', 'AniList login state was invalid.')
+      return true
+    }
 
     if (callback.error) {
       clearSessionState()
