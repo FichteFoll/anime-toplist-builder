@@ -147,4 +147,23 @@ describe('template store fork-on-edit behavior', () => {
     expect(templateStore.activeTemplateId).toBe(predefinedTemplates[0].id)
     expect(templateStore.activeTemplate?.id).toBe(predefinedTemplates[0].id)
   })
+
+  it('keeps the series preset limited to long-form entries', () => {
+    const allTimeFavorites = predefinedTemplates.find((template) => template.id === 'all-time-favorites')
+
+    expect(allTimeFavorites?.categories.find((category) => category.id === 'bestseries01')?.filter).toMatchObject({
+      episodes: { minimum: 4 },
+    })
+  })
+
+  it('keeps the anime awards series categories limited to long-form entries', () => {
+    const animeAwards = predefinedTemplates.find((template) => template.id === 'cr-anime-awards-2025')
+
+    expect(animeAwards?.categories.find((category) => category.id === 'bestcontinuingseries01')?.filter).toMatchObject(
+      { episodes: { minimum: 4 } },
+    )
+    expect(animeAwards?.categories.find((category) => category.id === 'bestnewseries01')?.filter).toMatchObject({
+      episodes: { minimum: 4 },
+    })
+  })
 })

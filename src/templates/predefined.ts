@@ -35,11 +35,13 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'bestcontinuingseries01',
         name: 'Best Continuing Series',
         description: 'The strongest series that continued into the awards year',
+        filter: { episodes: { minimum: 4 } },
       },
       {
         id: 'bestnewseries01',
         name: 'Best New Series',
         description: 'The strongest new series of the year',
+        filter: { episodes: { minimum: 4 } },
       },
       {
         id: 'bestoriginalanime01',
@@ -162,7 +164,12 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
       },
     },
     categories: [
-      { id: 'bestseries01', name: 'Best Series', description: 'Your strongest long-form series picks.' },
+      {
+        id: 'bestseries01',
+        name: 'Best Series',
+        description: 'Your strongest long-form series picks.',
+        filter: { episodes: { minimum: 4 } },
+      },
       {
         id: 'bestmovie01',
         name: 'Best Movie',
