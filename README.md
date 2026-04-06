@@ -27,7 +27,7 @@ and export the current list as a themed PNG image.
 - Persistent anime selections keyed by stable template and category ids.
 - Client-side AniList metadata loading and search.
 - Optional AniList login
-  that allows usage of `Hide My Anime` and `Only Show My Anime` filters.
+  that allows usage of `Hide my anime` and `Only my anime` filters.
 - Remote template startup hydration via `#template=<id-or-url>`,
   plus last-opened template persistence.
 - Theme toggle,
