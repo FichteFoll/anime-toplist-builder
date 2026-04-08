@@ -287,8 +287,10 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
             :disabled-fields="disabledFields"
             @update:model-value="draftFilter = $event"
           />
+        </div>
 
-          <div class="mt-6 flex flex-wrap justify-end gap-2">
+        <div class="shrink-0 border-t border-app-border/70 bg-app-surface/95 pt-4">
+          <div class="flex flex-wrap justify-end gap-2">
             <button
               type="button"
               class="shell-button"
