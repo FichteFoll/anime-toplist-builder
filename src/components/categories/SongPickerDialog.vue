@@ -70,11 +70,12 @@ const localSortDirection = ref<FilterSortDirection>('desc')
 const expandedAnimeId = ref<number | null>(null)
 const songStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const songErrorMessage = ref<string | null>(null)
-const songPreview = ref<{ open: boolean, title: string, description: string, videoUrl: string }>({
+const songPreview = ref<{ open: boolean, title: string, description: string, videoUrl: string, videoHeight: number | null }>({
   open: false,
   title: '',
   description: '',
   videoUrl: '',
+  videoHeight: null,
 })
 const songsByAnimeId = ref<Record<number, AnimeThemesSong[]>>({})
 const pinnedResult = ref<AniListSearchResult | null>(null)
@@ -302,6 +303,7 @@ const openPreview = (result: AniListSearchResult, song: AnimeThemesSong) => {
     title,
     description: getSongContextLabel(songSelection, props.titleLanguage),
     videoUrl: song.videoLink,
+    videoHeight: song.videoHeight ?? null,
   }
 }
 
@@ -533,6 +535,7 @@ watch(pickerSort, (value, previousValue) => {
       :title="songPreview.title"
       :description="songPreview.description"
       :video-url="songPreview.videoUrl"
+      :video-height="songPreview.videoHeight"
     />
   </DialogRoot>
 </template>

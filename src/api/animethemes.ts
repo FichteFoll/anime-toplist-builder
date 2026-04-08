@@ -22,6 +22,7 @@ const themesQuery = `
           videos {
             nodes {
               link
+              resolution
               audio {
                 path
               }
@@ -52,6 +53,7 @@ export interface AnimeThemesSong {
   artist: string
   performances?: SongPerformance[]
   videoLink?: string | null
+  videoHeight?: number | null
   episodes?: string | null
 }
 
@@ -78,8 +80,16 @@ const createFallbackAnimeTitle = (name: string): AnimeTitle => ({
   native: null,
 })
 
-const pickPreviewVideoLink = (videos: AnimeThemesVideoNodeResponse[]) =>
-  videos.find((video) => normalizeText(video.link))?.link ?? null
+const pickPreviewVideo = (videos: AnimeThemesVideoNodeResponse[]) => {
+  const video = videos.find((item) => normalizeText(item.link))
+
+  return {
+    link: video?.link ?? null,
+    height: typeof video?.resolution === 'number' && Number.isInteger(video.resolution)
+      ? video.resolution
+      : null,
+  }
+}
 
 const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
   const id = typeof theme.id === 'number' && Number.isInteger(theme.id) ? theme.id : null
@@ -106,6 +116,7 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
 
   const entries = theme.animethemeentries ?? []
   const videos = entries.flatMap((entry) => entry.videos?.nodes ?? [])
+  const previewVideo = pickPreviewVideo(videos)
   const firstEpisodeHint = entries.map((entry) => normalizeSongEpisodes(entry.episodes)).find(Boolean) ?? null
 
   return {
@@ -116,7 +127,8 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
     titleNative: normalizeText(theme.song?.titleNative),
     artist: formatSongArtist(performances),
     performances: performances.length > 0 ? performances : undefined,
-    videoLink: pickPreviewVideoLink(videos),
+    videoLink: previewVideo.link,
+    videoHeight: previewVideo.height,
     episodes: firstEpisodeHint,
   }
 }
