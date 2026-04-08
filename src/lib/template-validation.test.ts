@@ -78,6 +78,10 @@ describe('template validation', () => {
             source: [],
             sort: undefined,
           },
+          entityKind: 'anime',
+          songFilter: {
+            types: [],
+          },
         },
       ],
     })
@@ -180,6 +184,10 @@ describe('template validation', () => {
           filter: {
             genres: ['Mystery'],
           },
+          entityKind: 'anime',
+          songFilter: {
+            types: [],
+          },
         },
       ],
     })
@@ -253,5 +261,39 @@ describe('template validation', () => {
     })
 
     expect(payload.description).toBe('')
+  })
+
+  it('parses song category fields and exports them', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'songtemplate01',
+      name: 'Song Template',
+      categories: [
+        {
+          id: 'songpick0001',
+          name: 'Best Opening',
+          entityKind: 'song',
+          songFilter: {
+            types: ['ED', 'OP'],
+          },
+        },
+      ],
+    })
+
+    expect(payload.categories[0]).toMatchObject({
+      entityKind: 'song',
+      songFilter: {
+        types: ['ED', 'OP'],
+      },
+    })
+
+    const normalized = normalizeImportedTemplate(payload, 'user')
+
+    expect(createTemplateExportPayload(normalized).categories[0]).toMatchObject({
+      entityKind: 'song',
+      songFilter: {
+        types: ['ED', 'OP'],
+      },
+    })
   })
 })

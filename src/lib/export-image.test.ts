@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { countWrappedTextLines } from '@/lib/export-image'
+import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 
 const createContext = (measureWidth: (text: string) => number) =>
   ({
@@ -24,5 +25,37 @@ describe('countWrappedTextLines', () => {
     const context = createContext((text) => text.length * 10)
 
     expect(countWrappedTextLines(context, 'One two three four five six', 70, 2)).toBe(2)
+  })
+})
+
+describe('song title helpers', () => {
+  it('swaps primary and tooltip text in native mode', () => {
+    const songSelection = createSongSelection({
+      animeId: 1,
+      animeTitle: {
+        userPreferred: 'Test Anime',
+        romaji: 'Test Anime',
+        english: null,
+        native: null,
+      },
+      animeCoverImage: {
+        large: 'https://img.example/test.jpg',
+        medium: null,
+        extraLarge: null,
+        color: null,
+      },
+      song: {
+        type: 'OP',
+        slug: 'op1',
+        title: 'My Song',
+        titleNative: '私の歌',
+        artist: 'Artist',
+      },
+    })
+
+    expect(resolveSongTitle(songSelection.song, 'native')).toEqual({
+      primary: '私の歌',
+      tooltip: 'My Song',
+    })
   })
 })

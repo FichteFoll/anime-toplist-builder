@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
 import type { AnimeSelection, Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
@@ -56,9 +57,9 @@ const categoryCardStub = defineComponent({
       required: true,
     },
   },
-  emits: ['save', 'delete', 'selectAnime', 'clearSelection'],
+  emits: ['save', 'delete', 'selectSelection', 'clearSelection'],
   setup(props, { emit }) {
-    const selection: AnimeSelection = {
+    const selection: AnimeSelection = createAnimeSelection({
       mediaId: 77,
       title: {
         userPreferred: 'Haibane Renmei',
@@ -75,7 +76,7 @@ const categoryCardStub = defineComponent({
       season: 'FALL',
       seasonYear: 2002,
       format: 'TV',
-    }
+    })
 
     return {
       emitSave: () =>
@@ -83,9 +84,11 @@ const categoryCardStub = defineComponent({
           name: `${(props.category as Category).name} Updated`,
           description: (props.category as Category).description,
           filter: createEmptyFilterState(),
+          entityKind: (props.category as Category).entityKind,
+          songFilter: (props.category as Category).songFilter,
         }),
       emitDelete: () => emit('delete', (props.category as Category).id),
-      emitSelect: () => emit('selectAnime', selection),
+      emitSelect: () => emit('selectSelection', selection),
       emitClear: () => emit('clearSelection', (props.category as Category).id),
     }
   },
@@ -105,6 +108,8 @@ const categories: Category[] = [
     name: 'Best Opening',
     description: '',
     filter: createEmptyFilterState(),
+    entityKind: 'anime',
+    songFilter: createEmptySongFilterState(),
   },
 ]
 
@@ -151,11 +156,13 @@ describe('CategoryGrid', () => {
           name: 'Best Opening Updated',
           description: '',
           filter: createEmptyFilterState(),
+          entityKind: 'anime',
+          songFilter: { types: [] },
         },
       ],
     ])
     expect(wrapper.emitted('deleteCategory')).toEqual([[ 'gridopening01' ]])
-    expect(wrapper.emitted('selectAnime')?.[0]).toEqual([
+    expect(wrapper.emitted('selectSelection')?.[0]).toEqual([
       'gridopening01',
       expect.objectContaining({
         mediaId: 77,

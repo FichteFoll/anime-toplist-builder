@@ -1,5 +1,6 @@
 import { appConfig } from '@/config/app'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
 import type {
   AnimeFormat,
   AnimeTitleLanguage,
@@ -25,6 +26,27 @@ export const FONT_SIZE_HEADER_META = 22
 export const FONT_SIZE_CATEGORY_TITLE = 20
 export const FONT_SIZE_BODY = 18
 export const FONT_SIZE_META = 16
+
+const truncateSongMeta = (
+  context: CanvasRenderingContext2D,
+  animeName: string,
+  slug: string,
+  episodes: string | null,
+  maxWidth: number,
+) => {
+  const buildLine = (name: string) =>
+    episodes ? `from ${name} (${slug}, ${episodes})` : `from ${name} (${slug})`
+
+  const fullLine = buildLine(animeName)
+
+  if (context.measureText(fullLine).width <= maxWidth) {
+    return fullLine
+  }
+
+  const fallbackWidth = Math.max(90, maxWidth - context.measureText(`from  (${slug})`).width)
+
+  return buildLine(fitTextToWidth(context, animeName, fallbackWidth))
+}
 
 interface ExportPalette {
   background: string
@@ -678,7 +700,9 @@ export const renderTemplatePng = async ({
 
       return [
         category.id,
-        selection ? await loadImage(selection.coverImage.extraLarge ?? selection.coverImage.large) : null,
+        selection
+          ? await loadImage(getSelectionCoverImage(selection).extraLarge ?? getSelectionCoverImage(selection).large)
+          : null,
       ] as const
     }),
   )
@@ -717,10 +741,24 @@ export const renderTemplatePng = async ({
     const coverY = y + CARD_PADDING
     const textX = coverX + COVER_WIDTH + 14
     const textWidth = CARD_WIDTH - (textX - x) - CARD_PADDING
-    const selectionTitle = selection ? resolveAnimeTitle(selection.title, titleLanguage) : ''
-    const metaParts = [selection?.seasonYear ?? null, selection?.format ?? null].filter(
-      (value): value is number | AnimeFormat => value !== null,
-    )
+    const selectionTitle = selection
+      ? selection.kind === 'song'
+        ? resolveSongTitle(selection.song, titleLanguage).primary
+        : resolveAnimeTitle(selection.title, titleLanguage)
+      : ''
+    const metaText = selection
+      ? selection.kind === 'song'
+        ? truncateSongMeta(
+            context,
+            resolveAnimeTitle(selection.animeTitle, titleLanguage),
+            selection.song.slug,
+            selection.song.episodes ?? null,
+            textWidth,
+          )
+        : [selection.seasonYear ?? null, selection.format ?? null]
+            .filter((value): value is number | AnimeFormat => value !== null)
+            .join(' • ')
+      : ''
 
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
@@ -738,7 +776,7 @@ export const renderTemplatePng = async ({
         18,
         palette,
         category.name,
-        selection?.coverImage.color ?? palette.elevated,
+        getSelectionCoverImage(selection).color ?? palette.elevated,
       )
     } else {
       drawMissingSelectionPlaceholder(
@@ -775,22 +813,45 @@ export const renderTemplatePng = async ({
       categoryBottomY + 14,
       textWidth,
       Math.round(fonts.body * 1.28),
-      3,
+      selection?.kind === 'song' ? 2 : 3,
       palette.text,
     )
 
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted
-    drawWrappedText(
-      context,
-      metaParts.join(' • '),
-      textX,
-      titleBottomY + 16,
-      textWidth,
-      Math.round(fonts.meta * 1.3),
-      2,
-      palette.muted,
-    )
+    if (selection?.kind === 'song') {
+      drawWrappedText(
+        context,
+        `by ${selection.song.artist}`,
+        textX,
+        titleBottomY + 12,
+        textWidth,
+        Math.round(fonts.meta * 1.3),
+        2,
+        palette.muted,
+      )
+      drawWrappedText(
+        context,
+        metaText,
+        textX,
+        titleBottomY + 38,
+        textWidth,
+        Math.round(fonts.meta * 1.3),
+        2,
+        palette.muted,
+      )
+    } else {
+      drawWrappedText(
+        context,
+        metaText,
+        textX,
+        titleBottomY + 16,
+        textWidth,
+        Math.round(fonts.meta * 1.3),
+        2,
+        palette.muted,
+      )
+    }
 
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted

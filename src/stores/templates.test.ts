@@ -5,9 +5,10 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { predefinedTemplates } from '@/templates/predefined'
+import { createAnimeSelection } from '@/lib/song-selection'
 import { templateSchemaVersion, type AnimeSelection } from '@/types'
 
-const createSelection = (): AnimeSelection => ({
+const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 5114,
   title: {
     userPreferred: 'Fullmetal Alchemist: Brotherhood',

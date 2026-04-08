@@ -7,6 +7,7 @@ import {
   saveStoredSelections,
   saveStoredTemplates,
 } from '@/lib/persistence'
+import { createAnimeSelection, createSongSelection } from '@/lib/song-selection'
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 import {
   defaultAnimeTitleLanguage,
@@ -41,7 +42,7 @@ const createMockStorage = (): MockStorage => {
   }
 }
 
-const createSelection = (): AnimeSelection => ({
+const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 123,
   title: {
     userPreferred: 'Serial Experiments Lain',
@@ -175,5 +176,38 @@ describe('persistence helpers', () => {
     saveStoredSelections({}, storage)
 
     expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist-builder.selections.v1')
+  })
+
+  it('loads stored song selections', () => {
+    const storage = createMockStorage()
+    const songSelection = createSongSelection({
+      animeId: 123,
+      animeTitle: createSelection().title,
+      animeCoverImage: createSelection().coverImage,
+      song: {
+        type: 'OP',
+        slug: 'op1-test',
+        title: 'Duvet',
+        titleNative: null,
+        artist: 'Boa',
+        videoLink: 'https://video.example/op.mp4',
+        episodes: '2-12, 14',
+      },
+    })
+
+    storage.write('anime-toplist-builder.selections.v1', {
+      schemaVersion: 1,
+      selections: {
+        valid: {
+          saved: songSelection,
+        },
+      },
+    })
+
+    expect(loadStoredSelections(storage)).toEqual({
+      valid: {
+        saved: songSelection,
+      },
+    })
   })
 })

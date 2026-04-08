@@ -8,6 +8,18 @@ export type TemplateId = string
 
 export type CategoryId = string
 
+export const categoryEntityKinds = ['anime', 'song'] as const
+
+export type CategoryEntityKind = (typeof categoryEntityKinds)[number]
+
+export const themeTypes = ['OP', 'IN', 'ED'] as const
+
+export type ThemeType = (typeof themeTypes)[number]
+
+export interface SongFilterState {
+  types: ThemeType[]
+}
+
 export const templateOrigins = [
   'predefined',
   'user',
@@ -22,6 +34,8 @@ export interface Category {
   name: string
   description: string
   filter: FilterState
+  entityKind: CategoryEntityKind
+  songFilter: SongFilterState
 }
 
 export interface Template {
@@ -39,6 +53,10 @@ export interface TemplateImportCategoryPayloadV1 {
   name: string
   description?: string
   filter?: Partial<FilterState>
+  entityKind?: CategoryEntityKind
+  songFilter?: {
+    types?: ThemeType[]
+  }
 }
 
 export interface TemplateImportPayloadV1 {
@@ -55,6 +73,8 @@ export interface TemplateExportCategoryPayloadV1 {
   name: string
   description: string
   filter: TemplateExportFilterStateV1
+  entityKind: CategoryEntityKind
+  songFilter: SongFilterState
 }
 
 export interface TemplateExportFilterStateV1
