@@ -2,6 +2,7 @@ import { templateSchemaVersion, type Template, type TemplateOrigin } from '@/typ
 
 import { createCategoryId, createTemplateId } from '@/lib/ids'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { createEmptySongFilterState } from '@/lib/song-selection'
 
 const cloneWithFallback = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
@@ -34,6 +35,8 @@ export const createBlankCategory = (name: string) => ({
   name,
   description: '',
   filter: createEmptyFilterState(),
+  entityKind: 'anime' as const,
+  songFilter: createEmptySongFilterState(),
 })
 
 export const cloneTemplate = (template: Template): Template => cloneWithFallback(template)

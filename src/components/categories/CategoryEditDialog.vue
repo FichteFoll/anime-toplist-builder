@@ -21,7 +21,7 @@ import {
   getCategoryFilterDisabledReasons,
   isNonBlankName,
 } from '@/lib/filter-editor'
-import type { AniListMetadata, Category, FilterState } from '@/types'
+import type { AniListMetadata, Category, CategoryEntityKind, FilterState, SongFilterState } from '@/types'
 
 const props = defineProps<{
   category: Category
@@ -32,13 +32,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string, filter: FilterState }]
+  save: [value: { name: string, description: string, filter: FilterState, entityKind: CategoryEntityKind, songFilter: SongFilterState }]
 }>()
 
 const open = ref(false)
 const draftName = ref(props.category.name)
 const draftDescription = ref(props.category.description)
 const draftFilter = ref<FilterState>(cloneFilter(props.category.filter))
+const draftEntityKind = ref<CategoryEntityKind>(props.category.entityKind)
+const draftSongFilter = ref<SongFilterState>(cloneSongFilter(props.category.songFilter))
 
 function cloneFilter(filter: FilterState): FilterState {
   if (typeof structuredClone === 'function') {
@@ -53,6 +55,18 @@ function cloneFilter(filter: FilterState): FilterState {
   return JSON.parse(JSON.stringify(filter)) as FilterState
 }
 
+function cloneSongFilter(songFilter: SongFilterState): SongFilterState {
+  if (typeof structuredClone === 'function') {
+    try {
+      return structuredClone(songFilter)
+    } catch {
+      // Same JSON-compatible fallback as the filter clone helper.
+    }
+  }
+
+  return JSON.parse(JSON.stringify(songFilter)) as SongFilterState
+}
+
 const disabledFields = computed(() => getCategoryFilterDisabledReasons(props.globalFilter))
 const hasValidName = computed(() => isNonBlankName(draftName.value))
 
@@ -60,6 +74,8 @@ const resetDraft = () => {
   draftName.value = props.category.name
   draftDescription.value = props.category.description
   draftFilter.value = cloneFilter(props.category.filter)
+  draftEntityKind.value = props.category.entityKind
+  draftSongFilter.value = cloneSongFilter(props.category.songFilter)
 }
 
 watch(open, (isOpen) => {
@@ -90,6 +106,8 @@ const save = () => {
     name: nextName,
     description: nextDescription,
     filter: cloneFilter(draftFilter.value),
+    entityKind: draftEntityKind.value,
+    songFilter: cloneSongFilter(draftSongFilter.value),
   })
   open.value = false
 }
@@ -177,6 +195,75 @@ const save = () => {
           </label>
 
           <div class="my-5 border-t border-app-border/70" />
+
+          <div class="mb-5 space-y-3">
+            <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+              Category type
+            </span>
+            <div class="grid gap-2 sm:grid-cols-2">
+              <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
+                <input
+                  v-model="draftEntityKind"
+                  value="anime"
+                  type="radio"
+                  class="mt-1 h-4 w-4"
+                >
+                <div>
+                  <p class="font-medium text-app-text">Anime</p>
+                  <p class="mt-1 text-xs leading-5 text-app-muted">
+                    Pick one anime directly from AniList results.
+                  </p>
+                </div>
+              </label>
+              <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
+                <input
+                  v-model="draftEntityKind"
+                  value="song"
+                  type="radio"
+                  class="mt-1 h-4 w-4"
+                >
+                <div>
+                  <p class="font-medium text-app-text">Song</p>
+                  <p class="mt-1 text-xs leading-5 text-app-muted">
+                    Pick an anime first, then choose a song tied to it.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div
+            v-if="draftEntityKind === 'song'"
+            class="mb-5 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 p-4"
+          >
+            <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+              Song types
+            </p>
+            <p class="mt-2 text-sm leading-6 text-app-muted">
+              Leave all unchecked to allow every supported song type.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <label
+                v-for="type in ['OP', 'IN', 'ED']"
+                :key="type"
+                class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-2 text-sm text-app-text"
+              >
+                <input
+                  :checked="draftSongFilter.types.includes(type as SongFilterState['types'][number])"
+                  type="checkbox"
+                  @change="($event) => {
+                    const checked = ($event.target as HTMLInputElement).checked
+                    draftSongFilter = {
+                      types: checked
+                        ? [...draftSongFilter.types, type as SongFilterState['types'][number]].sort()
+                        : draftSongFilter.types.filter((entry) => entry !== type),
+                    }
+                  }"
+                >
+                <span>{{ type }}</span>
+              </label>
+            </div>
+          </div>
 
           <FilterEditor
             mode="category"

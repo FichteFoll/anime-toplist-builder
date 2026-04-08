@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
 import type { AnimeSelection, Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
@@ -18,14 +19,22 @@ const categoryMediaPickerStub = defineComponent({
   `,
 })
 
+const songPickerStub = defineComponent({
+  name: 'SongPickerDialog',
+  emits: ['clear', 'select'],
+  template: '<div class="song-picker-stub" />',
+})
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
   description: '',
   filter: createEmptyFilterState(),
+  entityKind: 'anime',
+  songFilter: createEmptySongFilterState(),
 }
 
-const selection: AnimeSelection = {
+const selection: AnimeSelection = createAnimeSelection({
   mediaId: 42,
   title: {
     userPreferred: 'Haibane Renmei',
@@ -42,7 +51,7 @@ const selection: AnimeSelection = {
   season: 'FALL',
   seasonYear: 2002,
   format: 'TV',
-}
+})
 
 describe('CategoryCard', () => {
   it('forwards unselect from the picker dialog', async () => {
@@ -61,6 +70,7 @@ describe('CategoryCard', () => {
         stubs: {
           CategoryEditDialog: true,
           CategoryMediaPickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
           DeleteIcon: true,
           DragHandleIcon: true,
           TooltipArrow: true,
@@ -75,5 +85,52 @@ describe('CategoryCard', () => {
     await wrapper.get('button.emit-clear').trigger('click')
 
     expect(wrapper.emitted('clearSelection')).toEqual([[ 'category-1' ]])
+  })
+
+  it('renders song selection details', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: 'song',
+        },
+        selection: createSongSelection({
+          animeId: 42,
+          animeTitle: selection.title,
+          animeCoverImage: selection.coverImage,
+          song: {
+            type: 'OP',
+            slug: 'op1',
+            title: 'Free Bird',
+            artist: 'Ayaka',
+            episodes: '2-12, 14',
+          },
+        }),
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+        titleLanguage: 'english',
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          CategoryMediaPickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain('Free Bird')
+    expect(wrapper.text()).toContain('by Ayaka')
+    expect(wrapper.text()).toContain('from Haibane Renmei (op1, 2-12, 14)')
   })
 })

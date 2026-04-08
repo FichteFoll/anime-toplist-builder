@@ -9,8 +9,8 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import TemplateManagementSection from '@/components/templates/TemplateManagementSection.vue'
-import { resolveAnimeTitle } from '@/lib/anime-title'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
+import { getSelectionDisplayLabel } from '@/lib/song-selection'
 import { createBlankCategory } from '@/lib/template-factories'
 import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
 import { useTheme } from '@/composables/useTheme'
@@ -19,7 +19,7 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import type { AniListMetadata, AnimeSelection, FilterState } from '@/types'
+import type { AniListMetadata, CategorySelection, FilterState } from '@/types'
 
 const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
@@ -65,6 +65,8 @@ const updateCategory = (
     name: string
     description: string
     filter: FilterState
+    entityKind: 'anime' | 'song'
+    songFilter: { types: Array<'OP' | 'IN' | 'ED'> }
   },
 ) => {
   templateStore.updateActiveTemplate((template) => {
@@ -77,7 +79,11 @@ const updateCategory = (
     category.name = value.name
     category.description = value.description
     category.filter = value.filter
+    category.entityKind = value.entityKind
+    category.songFilter = value.songFilter
   })
+
+  selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
 }
 
 const addCategory = (name: string) => {
@@ -109,7 +115,7 @@ const deleteCategory = (categoryId: string) => {
         ? `${customRuleCount} custom rule${customRuleCount === 1 ? '' : 's'}`
         : null,
       selection
-        ? `the saved selection "${resolveAnimeTitle(selection.title, settingsStore.titleLanguage)}"`
+        ? `the saved selection "${getSelectionDisplayLabel(selection, settingsStore.titleLanguage)}"`
         : null,
     ].filter((value): value is string => value !== null)
 
@@ -168,7 +174,7 @@ const clearAllSelections = () => {
   })
 }
 
-const selectCategoryAnime = (categoryId: string, selection: AnimeSelection) => {
+const selectCategorySelection = (categoryId: string, selection: CategorySelection) => {
   if (!activeTemplate.value) {
     return
   }
@@ -241,7 +247,7 @@ onMounted(async () => {
                 @update-category="updateCategory"
                 @delete-category="deleteCategory"
                 @reorder-categories="reorderCategories"
-                @select-anime="selectCategoryAnime"
+                @select-selection="selectCategorySelection"
                 @clear-selection="clearCategorySelection"
                 @clear-all-selections="clearAllSelections"
               />
