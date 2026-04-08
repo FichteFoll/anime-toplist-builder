@@ -49,4 +49,10 @@ export default [
       ],
     },
   },
+  {
+    files: ['**/*.{test,spec}.{js,jsx,ts,tsx,vue}'],
+    rules: {
+      'vue/one-component-per-file': 'off',
+    },
+  },
 ]
