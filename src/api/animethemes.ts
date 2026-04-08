@@ -14,6 +14,7 @@ const themesQuery = `
     findAnimeByExternalSite(site: ANILIST, id: $anilistIds) {
       name
       animethemes {
+        id
         type
         slug
         animethemeentries {
@@ -43,6 +44,7 @@ const themesQuery = `
 `
 
 export interface AnimeThemesSong {
+  id: number
   type: ThemeType
   slug: string
   title?: string | null
@@ -80,9 +82,10 @@ const pickPreviewVideoLink = (videos: AnimeThemesVideoNodeResponse[]) =>
   videos.find((video) => normalizeText(video.link))?.link ?? null
 
 const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
+  const id = typeof theme.id === 'number' && Number.isInteger(theme.id) ? theme.id : null
   const slug = normalizeText(theme.slug)
 
-  if (!isThemeType(theme.type) || !slug) {
+  if (!id || !isThemeType(theme.type) || !slug) {
     return null
   }
 
@@ -106,6 +109,7 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
   const firstEpisodeHint = entries.map((entry) => normalizeSongEpisodes(entry.episodes)).find(Boolean) ?? null
 
   return {
+    id,
     type: theme.type,
     slug,
     title: normalizeText(theme.song?.title),

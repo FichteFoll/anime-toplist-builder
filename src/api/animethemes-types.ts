@@ -39,6 +39,7 @@ export interface AnimeThemesSongResponse {
 }
 
 export interface AnimeThemeResponse {
+  id?: number | null
   type?: string | null
   slug?: string | null
   animethemeentries?: AnimeThemesEntryResponse[] | null

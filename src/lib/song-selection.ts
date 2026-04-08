@@ -68,6 +68,7 @@ export const createSongSelection = ({
   animeTitle: AnimeTitle
   animeCoverImage: AnimeCoverImage
   song: {
+    id: number
     type: ThemeType
     slug: string
     title?: string | null
@@ -183,4 +184,4 @@ export const getSongContextLabel = (
 }
 
 export const getSongSelectionKey = (selection: SongSelection) =>
-  `${selection.animeId}:${selection.song.slug}`
+  `${selection.animeId}:${selection.song.id}`
