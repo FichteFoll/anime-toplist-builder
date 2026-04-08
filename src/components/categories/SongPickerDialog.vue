@@ -5,22 +5,17 @@ import {
   DialogPortal,
   DialogRoot,
   DialogTrigger,
-  TooltipArrow,
-  TooltipContent,
-  TooltipPortal,
-  TooltipRoot,
-  TooltipTrigger,
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
-import { fetchAnimeSongs, normalizeAnimeThemesError, searchAnimeMedia, type AnimeThemesSong } from '@/api'
+import { fetchAniListMediaById, fetchAnimeSongs, normalizeAnimeThemesError, searchAnimeMedia, type AnimeThemesSong } from '@/api'
 import AnimePickerResultCard from '@/components/categories/AnimePickerResultCard.vue'
 import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
 import PickerFilterSummary from '@/components/categories/PickerFilterSummary.vue'
 import PickerResultsFrame from '@/components/categories/PickerResultsFrame.vue'
 import PickerSearchToolbar from '@/components/categories/PickerSearchToolbar.vue'
 import SongPreviewDialog from '@/components/categories/SongPreviewDialog.vue'
-import PlayIcon from '@/components/icons/PlayIcon.vue'
+import SongPickerSidebar from '@/components/categories/SongPickerSidebar.vue'
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
 import { loadCachedAnimeSongs, saveCachedAnimeSongs } from '@/lib/song-cache'
 import { mergeFilterStates } from '@/lib/filter-merge'
@@ -28,7 +23,6 @@ import { buildActiveFilterSummary } from '@/lib/filter-summary'
 import {
   createSongSelection,
   getSongContextLabel,
-  getSongSelectionKey,
   resolveSongTitle,
 } from '@/lib/song-selection'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
@@ -67,7 +61,8 @@ const errorMessage = ref<string | null>(null)
 const searchResponse = ref<AniListSearchResponse | null>(null)
 const localSortField = ref<FilterSortField | ''>('')
 const localSortDirection = ref<FilterSortDirection>('desc')
-const expandedAnimeId = ref<number | null>(null)
+const focusedAnimeId = ref<number | null>(null)
+const isDetailCollapsed = ref(false)
 const songStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const songErrorMessage = ref<string | null>(null)
 const songPreview = ref<{ open: boolean, title: string, description: string, videoUrl: string, videoHeight: number | null }>({
@@ -78,7 +73,7 @@ const songPreview = ref<{ open: boolean, title: string, description: string, vid
   videoHeight: null,
 })
 const songsByAnimeId = ref<Record<number, AnimeThemesSong[]>>({})
-const pinnedResult = ref<AniListSearchResult | null>(null)
+const hydratedSelectedAnime = ref<AniListSearchResult | null>(null)
 const debouncedSearch = useDebouncedValue(searchDraft, 250)
 const isResettingState = ref(false)
 const aniListAuthStore = useAniListAuthStore()
@@ -123,30 +118,12 @@ const pickerSort = computed<FilterSort | undefined>(() => {
 const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
 const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
 const listVisibility = computed(() => (canUseListFilters.value ? pickerFiltersStore.listVisibility : null))
-const combinedResults = computed(() => {
-  const results = searchResponse.value?.results ?? []
-
-  if (!pinnedResult.value || searchDraft.value || currentPage.value !== 1 || localSortField.value) {
-    return results
-  }
-
-  const withoutPinned = results.filter((result) => result.id !== pinnedResult.value?.id)
-
-  return [pinnedResult.value, ...withoutPinned]
-})
-const filteredSongs = computed(() => {
-  const songs = expandedAnimeId.value ? songsByAnimeId.value[expandedAnimeId.value] ?? [] : []
-  const allowedTypes = props.category.songFilter.types
-
-  if (allowedTypes.length === 0) {
-    return songs
-  }
-
-  return songs.filter((song) => allowedTypes.includes(song.type))
-})
-const selectedSongKey = computed(() =>
-  props.selectedSong ? getSongSelectionKey(props.selectedSong) : null,
+const detailAnime = computed(() =>
+  searchResponse.value?.results.find((result) => result.id === focusedAnimeId.value)
+    ?? hydratedSelectedAnime.value
+    ?? null,
 )
+const focusedSongs = computed(() => (focusedAnimeId.value ? songsByAnimeId.value[focusedAnimeId.value] ?? [] : []))
 
 const resetState = () => {
   isResettingState.value = true
@@ -157,28 +134,61 @@ const resetState = () => {
   status.value = 'idle'
   songStatus.value = 'idle'
   songErrorMessage.value = null
+  songsByAnimeId.value = {}
+  hydratedSelectedAnime.value = createHydratedAnimePlaceholder()
   localSortField.value = currentCategorySort.value?.field ?? ''
   localSortDirection.value = currentCategorySort.value?.direction ?? 'desc'
-  pinnedResult.value = props.selectedSong
-    ? {
-        id: props.selectedSong.animeId,
-        title: props.selectedSong.animeTitle,
-        coverImage: props.selectedSong.animeCoverImage,
-        description: null,
-        season: null,
-        seasonYear: null,
-        format: null,
-        source: null,
-        genres: [],
-        tags: [],
-        popularity: null,
-        averageScore: null,
-        countryOfOrigin: null,
-        siteUrl: `https://anilist.co/anime/${props.selectedSong.animeId}`,
-      }
-    : null
-  expandedAnimeId.value = props.selectedSong?.animeId ?? null
+  focusedAnimeId.value = props.selectedSong?.animeId ?? null
+  isDetailCollapsed.value = !props.selectedSong
   isResettingState.value = false
+}
+
+const createHydratedAnimePlaceholder = () => props.selectedSong
+  ? {
+      id: props.selectedSong.animeId,
+      title: props.selectedSong.animeTitle,
+      coverImage: props.selectedSong.animeCoverImage,
+      description: null,
+      season: null,
+      seasonYear: null,
+      format: null,
+      source: null,
+      genres: [],
+      tags: [],
+      popularity: null,
+      averageScore: null,
+      countryOfOrigin: null,
+      siteUrl: `https://anilist.co/anime/${props.selectedSong.animeId}`,
+    }
+  : null
+
+const hydrateSelectedAnime = async () => {
+  if (!props.selectedSong) {
+    hydratedSelectedAnime.value = null
+    return
+  }
+
+  const accessToken = aniListAuthStore.resolveAccessTokenForRequest()
+
+  try {
+    const result = await fetchAniListMediaById(props.selectedSong.animeId, accessToken)
+
+    hydratedSelectedAnime.value = result ?? createHydratedAnimePlaceholder()
+    focusedAnimeId.value = hydratedSelectedAnime.value?.id ?? props.selectedSong.animeId
+    isDetailCollapsed.value = false
+    if (hydratedSelectedAnime.value) {
+      void loadSongsForAnime(hydratedSelectedAnime.value)
+    }
+  } catch (error) {
+    aniListAuthStore.handleRequestAuthFailure(error)
+
+    hydratedSelectedAnime.value = createHydratedAnimePlaceholder()
+    focusedAnimeId.value = props.selectedSong.animeId
+    isDetailCollapsed.value = false
+    if (hydratedSelectedAnime.value) {
+      void loadSongsForAnime(hydratedSelectedAnime.value)
+    }
+  }
 }
 
 const loadResults = async (searchTerm: string, page: number) => {
@@ -207,13 +217,6 @@ const loadResults = async (searchTerm: string, page: number) => {
     }
 
     searchResponse.value = response
-    if (pinnedResult.value) {
-      const hydratedPinnedResult = response.results.find((result) => result.id === pinnedResult.value?.id)
-
-      if (hydratedPinnedResult) {
-        pinnedResult.value = hydratedPinnedResult
-      }
-    }
     status.value = 'ready'
   } catch (error) {
     if (requestId !== activeRequestId) {
@@ -231,7 +234,8 @@ const loadResults = async (searchTerm: string, page: number) => {
 }
 
 const loadSongsForAnime = async (result: AniListSearchResult) => {
-  expandedAnimeId.value = result.id
+  focusedAnimeId.value = result.id
+  isDetailCollapsed.value = false
   songErrorMessage.value = null
 
   const cached = loadCachedAnimeSongs(result.id)
@@ -275,6 +279,16 @@ const loadSongsForAnime = async (result: AniListSearchResult) => {
   }
 }
 
+const collapseDetailPanel = () => {
+  isDetailCollapsed.value = true
+}
+
+const expandDetailPanel = () => {
+  if (detailAnime.value) {
+    isDetailCollapsed.value = false
+  }
+}
+
 const selectSong = (result: AniListSearchResult, song: AnimeThemesSong) => {
   emit('select', createSongSelection({
     animeId: result.id,
@@ -311,9 +325,7 @@ watch(open, (isOpen) => {
   if (isOpen) {
     resetState()
     void loadResults('', 1)
-    if (pinnedResult.value && expandedAnimeId.value === pinnedResult.value.id) {
-      void loadSongsForAnime(pinnedResult.value)
-    }
+    void hydrateSelectedAnime()
     return
   }
 
@@ -327,9 +339,7 @@ watch(debouncedSearch, (value, previousValue) => {
     return
   }
 
-  pinnedResult.value = null
   currentPage.value = 1
-  expandedAnimeId.value = null
   void loadResults(value, 1)
 })
 
@@ -338,8 +348,6 @@ watch(currentPage, (page, previousPage) => {
     return
   }
 
-  pinnedResult.value = null
-  expandedAnimeId.value = null
   void loadResults(debouncedSearch.value, page)
 })
 
@@ -352,9 +360,7 @@ watch(pickerSort, (value, previousValue) => {
     return
   }
 
-  pinnedResult.value = null
   currentPage.value = 1
-  expandedAnimeId.value = null
   void loadResults(debouncedSearch.value, 1)
 })
 </script>
@@ -380,152 +386,73 @@ watch(pickerSort, (value, previousValue) => {
           :description="category.description"
         />
 
-        <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
-          <PickerSearchToolbar
-            :category-name="category.name"
-            :search-draft="searchDraft"
-            :local-sort-field="localSortField"
-            :local-sort-direction="localSortDirection"
-            :sort-field-options="sortFieldOptions"
-            :sort-field-placeholder-label="sortFieldPlaceholderLabel"
-            @update:search-draft="searchDraft = $event"
-            @update:local-sort-field="localSortField = $event"
-            @update:local-sort-direction="localSortDirection = $event"
-          />
+        <div class="mt-5 flex min-h-0 flex-1 overflow-hidden">
+          <div class="min-w-0 flex-1 overflow-y-auto pr-1">
+            <PickerSearchToolbar
+              :category-name="category.name"
+              :search-draft="searchDraft"
+              :local-sort-field="localSortField"
+              :local-sort-direction="localSortDirection"
+              :sort-field-options="sortFieldOptions"
+              :sort-field-placeholder-label="sortFieldPlaceholderLabel"
+              @update:search-draft="searchDraft = $event"
+              @update:local-sort-field="localSortField = $event"
+              @update:local-sort-direction="localSortDirection = $event"
+            />
 
-          <PickerFilterSummary
-            :active-filter-summary="activeFilterSummary"
-            :can-use-list-filters="canUseListFilters"
-            :only-on-list="pickerFiltersStore.onlyOnList"
-            :hide-on-list="pickerFiltersStore.hideOnList"
-            @toggle-list-visibility="pickerFiltersStore.toggleListVisibility($event)"
-          />
+            <PickerFilterSummary
+              :active-filter-summary="activeFilterSummary"
+              :can-use-list-filters="canUseListFilters"
+              :only-on-list="pickerFiltersStore.onlyOnList"
+              :hide-on-list="pickerFiltersStore.hideOnList"
+              @toggle-list-visibility="pickerFiltersStore.toggleListVisibility($event)"
+            />
 
-          <PickerResultsFrame
-            :total-results="totalResults"
-            :current-page="searchResponse?.pageInfo.currentPage ?? currentPage"
-            :last-page="searchResponse?.pageInfo.lastPage ?? 1"
-            :has-next-page="searchResponse?.pageInfo.hasNextPage ?? false"
-            :status="status"
-            :has-results="combinedResults.length > 0"
-            :error-message="errorMessage"
-            empty-message="No anime matched the current effective filters and search term."
-            @previous="currentPage -= 1"
-            @next="currentPage += 1"
-            @retry="loadResults(debouncedSearch, currentPage)"
-          >
-            <div class="space-y-3">
-              <article
-                v-for="result in combinedResults"
-                :key="result.id"
-                class="rounded-[1.5rem] border border-app-border/70 bg-app-surface/85 p-3"
-              >
-                <div class="grid gap-3 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start">
+            <PickerResultsFrame
+              :total-results="totalResults"
+              :current-page="searchResponse?.pageInfo.currentPage ?? currentPage"
+              :last-page="searchResponse?.pageInfo.lastPage ?? 1"
+              :has-next-page="searchResponse?.pageInfo.hasNextPage ?? false"
+              :status="status"
+              :has-results="(searchResponse?.results?.length ?? 0) > 0"
+              :error-message="errorMessage"
+              empty-message="No anime matched the current effective filters and search term."
+              @previous="currentPage -= 1"
+              @next="currentPage += 1"
+              @retry="loadResults(debouncedSearch, currentPage)"
+            >
+              <div class="relative min-h-[24rem] overflow-visible">
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   <AnimePickerResultCard
+                    v-for="result in searchResponse?.results ?? []"
+                    :key="result.id"
                     :result="result"
                     :title-language="titleLanguage"
-                    :is-selected="expandedAnimeId === result.id"
+                    :is-selected="focusedAnimeId === result.id"
                     @select="loadSongsForAnime"
                     @clear="emit('clear')"
                   />
-
-                  <div
-                    v-if="expandedAnimeId === result.id"
-                    class="rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 p-4"
-                  >
-                    <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-                      Songs
-                    </p>
-                    <p class="mt-2 text-sm leading-6 text-app-muted">
-                      {{ category.songFilter.types.length > 0 ? `Showing ${category.songFilter.types.join(', ')} themes.` : 'Showing all available theme types.' }}
-                    </p>
-
-                    <div
-                      v-if="songStatus === 'loading'"
-                      class="mt-4 text-sm text-app-muted"
-                    >
-                      Loading songs...
-                    </div>
-                    <div
-                      v-else-if="songStatus === 'error'"
-                      class="mt-4 space-y-3"
-                    >
-                      <p class="text-sm leading-6 text-app-muted">
-                        {{ songErrorMessage }}
-                      </p>
-                      <button
-                        type="button"
-                        class="shell-button"
-                        @click="loadSongsForAnime(result)"
-                      >
-                        Retry songs
-                      </button>
-                    </div>
-                    <div
-                      v-else-if="songStatus === 'ready' && filteredSongs.length === 0"
-                      class="mt-4 text-sm leading-6 text-app-muted"
-                    >
-                      No results.
-                    </div>
-                    <div
-                      v-else
-                      class="mt-4 space-y-2"
-                    >
-                      <button
-                        v-for="song in filteredSongs"
-                        :key="`${result.id}:${song.id}`"
-                        type="button"
-                        class="flex w-full items-start justify-between gap-3 rounded-[1rem] border px-3 py-3 text-left transition"
-                        :class="selectedSongKey === `${result.id}:${song.id}` ? 'border-app-accent bg-app-accent/10' : 'border-app-border/70 bg-app-surface/70 hover:border-app-accent/40'"
-                        @click="selectSong(result, song)"
-                      >
-                        <div class="min-w-0">
-                          <TooltipRoot v-if="resolveSongTitle(song, titleLanguage).tooltip">
-                            <TooltipTrigger as-child>
-                              <p class="break-words font-medium text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-                                {{ resolveSongTitle(song, titleLanguage).primary }}
-                              </p>
-                            </TooltipTrigger>
-                            <TooltipPortal>
-                              <TooltipContent
-                                class="z-[60] rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                                :side-offset="8"
-                              >
-                                {{ resolveSongTitle(song, titleLanguage).tooltip }}
-                                <TooltipArrow class="fill-app-surface" />
-                              </TooltipContent>
-                            </TooltipPortal>
-                          </TooltipRoot>
-                          <p
-                            v-else
-                            class="break-words font-medium text-app-text"
-                          >
-                            {{ resolveSongTitle(song, titleLanguage).primary }}
-                          </p>
-                          <p class="mt-1 text-sm text-app-muted">
-                            by {{ song.artist }}
-                          </p>
-                          <p class="mt-1 text-xs leading-5 text-app-muted">
-                            {{ song.slug }}<span v-if="song.episodes"> (ep {{ song.episodes }})</span>
-                          </p>
-                        </div>
-
-                        <button
-                          v-if="song.videoLink"
-                          type="button"
-                          class="shell-button inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
-                          :aria-label="`Preview ${resolveSongTitle(song, titleLanguage).primary}`"
-                          @click.stop="openPreview(result, song)"
-                        >
-                          <PlayIcon class="h-5 w-5" />
-                        </button>
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              </article>
-            </div>
-          </PickerResultsFrame>
+              </div>
+            </PickerResultsFrame>
+          </div>
+
+          <SongPickerSidebar
+            v-if="detailAnime"
+            :detail-anime="detailAnime"
+            :songs="focusedSongs"
+            :is-collapsed="isDetailCollapsed"
+            :song-error-message="songErrorMessage"
+            :song-status="songStatus"
+            :title-language="titleLanguage"
+            :selected-song="selectedSong"
+            :song-filter-types="category.songFilter.types"
+            @clear="emit('clear')"
+            @collapse-toggle="isDetailCollapsed ? expandDetailPanel() : collapseDetailPanel()"
+            @preview-song="openPreview(detailAnime, $event)"
+            @retry-songs="loadSongsForAnime(detailAnime)"
+            @select-song="selectSong(detailAnime, $event)"
+          />
         </div>
       </DialogContent>
     </DialogPortal>

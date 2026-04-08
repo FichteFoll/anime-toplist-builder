@@ -66,6 +66,14 @@ vi.mock('reka-ui', () => ({
   },
 }))
 
+vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
+  default: {
+    props: ['result', 'titleLanguage', 'isSelected', 'showClearButton'],
+    emits: ['select', 'clear'],
+    template: '<div><button type="button" class="select-result" @click="$emit(\'select\', result)">select</button><button v-if="showClearButton !== false && isSelected" type="button" class="clear-result" @click="$emit(\'clear\')">Unselect</button></div>',
+  },
+}))
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
@@ -127,6 +135,7 @@ describe('CategoryMediaPickerDialog', () => {
     });
 
     (wrapper.vm as unknown as { open: boolean }).open = true
+    await new Promise((resolve) => setTimeout(resolve, 0))
     await nextTick()
     await nextTick()
 

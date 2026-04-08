@@ -9,8 +9,14 @@ import type {
 
 import { buildAniListMediaSearchVariables } from './anilist-query-builder'
 import { isAniListAuthenticationFailure, requestAniList } from './anilist-client'
-import { fetchAniListMetadataQuery, fetchAniListViewerQuery, searchAnimeMediaQuery } from './anilist-queries'
+import {
+  fetchAniListMetadataQuery,
+  fetchAniListMediaByIdQuery,
+  fetchAniListViewerQuery,
+  searchAnimeMediaQuery,
+} from './anilist-queries'
 import type {
+  AniListMediaByIdData,
   AniListMediaResponse,
   AniListMediaSearchData,
   AniListMetadataData,
@@ -102,6 +108,18 @@ export const searchAnimeMedia = async ({
     pageInfo: data.Page.pageInfo,
     results: data.Page.media.map(mapAniListSearchResult),
   }
+}
+
+export const fetchAniListMediaById = async (id: number, accessToken?: string | null): Promise<AniListSearchResult | null> => {
+  const data = await requestAniList<AniListMediaByIdData, { id: number }>(
+    fetchAniListMediaByIdQuery,
+    { id },
+    {
+      accessToken,
+    },
+  )
+
+  return data.Media ? mapAniListSearchResult(data.Media) : null
 }
 
 export const fetchAniListMetadata = async (): Promise<AniListMetadata> => {

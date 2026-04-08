@@ -5,11 +5,14 @@ import { resolveAnimeTitle } from '@/lib/anime-title'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import type { AniListSearchResult, AnimeTitleLanguage } from '@/types'
 
-defineProps<{
+withDefaults(defineProps<{
   result: AniListSearchResult
   titleLanguage: AnimeTitleLanguage
   isSelected: boolean
-}>()
+  showClearButton?: boolean
+}>(), {
+  showClearButton: true,
+})
 
 const emit = defineEmits<{
   select: [result: AniListSearchResult]
@@ -67,7 +70,7 @@ const emit = defineEmits<{
         <ExternalLinkIcon class="h-3.5 w-3.5" />
       </a>
       <button
-        v-if="isSelected"
+        v-if="showClearButton !== false && isSelected"
         type="button"
         class="shell-button"
         @click="emit('clear')"

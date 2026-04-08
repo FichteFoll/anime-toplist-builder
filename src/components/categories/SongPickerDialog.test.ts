@@ -10,6 +10,7 @@ import { createSongSelection } from '@/lib/song-selection'
 import type { AniListSearchResponse, AniListSearchResult, Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
+  fetchAniListMediaById: vi.fn(),
   searchAnimeMedia: vi.fn(),
   fetchAnimeSongs: vi.fn(),
   resolveAccessTokenForRequest: vi.fn(() => 'token'),
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@/api', () => ({
+  fetchAniListMediaById: mocks.fetchAniListMediaById,
   fetchAnimeSongs: mocks.fetchAnimeSongs,
   normalizeAnimeThemesError: vi.fn((error: unknown) => ({
     message: error instanceof Error ? error.message : 'Unknown error',
@@ -56,8 +58,9 @@ vi.mock('reka-ui', () => ({
 
 vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
   default: {
-    props: ['result', 'titleLanguage', 'isSelected'],
-    template: '<div>{{ result.description ?? "" }} {{ result.seasonYear ?? "" }}</div>',
+    props: ['result', 'titleLanguage', 'isSelected', 'showClearButton'],
+    emits: ['select', 'clear'],
+    template: '<div><button type="button" class="select-result" @click="$emit(\'select\', result)">select</button><button v-if="showClearButton !== false && isSelected" type="button" class="clear-result" @click="$emit(\'clear\')">Unselect</button>{{ result.description ?? "" }} {{ result.seasonYear ?? "" }}</div>',
   },
 }))
 
@@ -78,6 +81,10 @@ vi.mock('@/components/categories/PickerSearchToolbar.vue', () => ({
 }))
 
 vi.mock('@/components/categories/SongPreviewDialog.vue', () => ({
+  default: { template: '<div />' },
+}))
+
+vi.mock('@/components/categories/SongPickerSidebar.vue', () => ({
   default: { template: '<div />' },
 }))
 
@@ -155,11 +162,21 @@ describe('SongPickerDialog', () => {
     }
 
     mocks.searchAnimeMedia.mockResolvedValue(response)
+    mocks.fetchAniListMediaById.mockResolvedValue(createResult())
     mocks.fetchAnimeSongs.mockResolvedValue({
       animeId: 42,
       animeTitle: selectedSong.animeTitle,
       animeCoverImage: selectedSong.animeCoverImage,
-      songs: [],
+      songs: [
+        {
+          id: 7,
+          type: 'OP',
+          slug: 'op1',
+          title: 'Blue Flow',
+          titleNative: null,
+          artist: 'ROUND TABLE',
+        },
+      ],
     })
 
     const wrapper = mount(SongPickerDialog, {
@@ -172,10 +189,61 @@ describe('SongPickerDialog', () => {
     })
 
     ;(wrapper.vm as unknown as { open: boolean }).open = true
+    await Promise.resolve()
+    await Promise.resolve()
     await nextTick()
     await nextTick()
 
+    expect(mocks.fetchAniListMediaById).toHaveBeenCalledWith(42, 'token')
     expect(wrapper.text()).toContain('A quiet synopsis.')
     expect(wrapper.text()).toContain('2002')
+  })
+
+  it('shows the clear action in the detail panel instead of the anime cards', async () => {
+    const response: AniListSearchResponse = {
+      pageInfo: {
+        currentPage: 1,
+        hasNextPage: false,
+        lastPage: 1,
+        perPage: 15,
+        total: 1,
+      },
+      results: [createResult()],
+    }
+
+    mocks.searchAnimeMedia.mockResolvedValue(response)
+    mocks.fetchAniListMediaById.mockResolvedValue(createResult())
+    mocks.fetchAnimeSongs.mockResolvedValue({
+      animeId: 42,
+      animeTitle: selectedSong.animeTitle,
+      animeCoverImage: selectedSong.animeCoverImage,
+      songs: [
+        {
+          id: 7,
+          type: 'OP',
+          slug: 'op1',
+          title: 'Blue Flow',
+          titleNative: null,
+          artist: 'ROUND TABLE',
+        },
+      ],
+    })
+
+    const wrapper = mount(SongPickerDialog, {
+      props: {
+        category,
+        globalFilter: createEmptyFilterState(),
+        selectedSong,
+        titleLanguage: 'english',
+      },
+    })
+
+    ;(wrapper.vm as unknown as { open: boolean }).open = true
+    await Promise.resolve()
+    await Promise.resolve()
+    await nextTick()
+    await nextTick()
+
+    expect(wrapper.text()).toContain('Unselect')
   })
 })
