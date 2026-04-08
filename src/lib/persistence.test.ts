@@ -185,6 +185,7 @@ describe('persistence helpers', () => {
       animeTitle: createSelection().title,
       animeCoverImage: createSelection().coverImage,
       song: {
+        id: 101,
         type: 'OP',
         slug: 'op1-test',
         title: 'Duvet',

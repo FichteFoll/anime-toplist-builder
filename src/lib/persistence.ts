@@ -267,6 +267,7 @@ const parseStoredSongSelection = (value: unknown): SongSelection | null => {
     !isNullableString(value.animeCoverImage.extraLarge) ||
     !isNullableString(value.animeCoverImage.color) ||
     !isRecord(value.song) ||
+    !(typeof value.song.id === 'number' && Number.isInteger(value.song.id)) ||
     !isThemeType(value.song.type) ||
     !isString(value.song.slug) ||
     !isString(value.song.artist)
@@ -306,6 +307,7 @@ const parseStoredSongSelection = (value: unknown): SongSelection | null => {
       color: value.animeCoverImage.color ?? null,
     },
     song: {
+      id: value.song.id,
       type: value.song.type,
       slug: value.song.slug,
       title: value.song.title ?? null,

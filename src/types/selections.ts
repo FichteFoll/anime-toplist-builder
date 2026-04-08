@@ -36,6 +36,7 @@ export interface SongSelection {
   animeTitle: AnimeTitle
   animeCoverImage: AnimeCoverImage
   song: {
+    id: number
     type: ThemeType
     slug: string
     title?: string | null

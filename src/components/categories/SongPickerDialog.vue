@@ -464,10 +464,10 @@ watch(pickerSort, (value, previousValue) => {
                     >
                       <button
                         v-for="song in filteredSongs"
-                        :key="`${result.id}:${song.slug}`"
+                        :key="`${result.id}:${song.id}`"
                         type="button"
                         class="flex w-full items-start justify-between gap-3 rounded-[1rem] border px-3 py-3 text-left transition"
-                        :class="selectedSongKey === `${result.id}:${song.slug}` ? 'border-app-accent bg-app-accent/10' : 'border-app-border/70 bg-app-surface/70 hover:border-app-accent/40'"
+                        :class="selectedSongKey === `${result.id}:${song.id}` ? 'border-app-accent bg-app-accent/10' : 'border-app-border/70 bg-app-surface/70 hover:border-app-accent/40'"
                         @click="selectSong(result, song)"
                       >
                         <div class="min-w-0">

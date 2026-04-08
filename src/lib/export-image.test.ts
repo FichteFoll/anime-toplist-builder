@@ -45,6 +45,7 @@ describe('song title helpers', () => {
         color: null,
       },
       song: {
+        id: 101,
         type: 'OP',
         slug: 'op1',
         title: 'My Song',

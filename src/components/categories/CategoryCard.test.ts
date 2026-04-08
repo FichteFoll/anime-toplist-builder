@@ -99,6 +99,7 @@ describe('CategoryCard', () => {
           animeTitle: selection.title,
           animeCoverImage: selection.coverImage,
           song: {
+            id: 101,
             type: 'OP',
             slug: 'op1',
             title: 'Free Bird',
