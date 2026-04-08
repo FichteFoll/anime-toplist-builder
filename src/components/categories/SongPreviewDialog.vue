@@ -2,6 +2,7 @@
 import {
   DialogContent,
   DialogDescription,
+  DialogClose,
   DialogOverlay,
   DialogPortal,
   DialogRoot,
@@ -38,12 +39,25 @@ watch(
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 w-[min(94vw,56rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell">
-        <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
-          {{ title }}
-        </DialogTitle>
-        <DialogDescription class="mt-2 text-sm leading-6 text-app-muted">
-          {{ description }}
-        </DialogDescription>
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
+              {{ title }}
+            </DialogTitle>
+            <DialogDescription class="mt-2 text-sm leading-6 text-app-muted">
+              {{ description }}
+            </DialogDescription>
+          </div>
+
+          <DialogClose as-child>
+            <button
+              type="button"
+              class="shell-button self-start"
+            >
+              Close
+            </button>
+          </DialogClose>
+        </div>
 
         <div class="mt-4 overflow-hidden rounded-[1.25rem] border border-app-border/70 bg-app-bg/60 p-3">
           <video
