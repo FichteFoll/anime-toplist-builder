@@ -20,6 +20,7 @@ export interface AnimeThemesAudioResponse {
 
 export interface AnimeThemesVideoNodeResponse {
   link?: string | null
+  resolution?: number | null
   audio?: AnimeThemesAudioResponse | null
 }
 
