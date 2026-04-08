@@ -517,7 +517,7 @@ watch(pickerSort, (value, previousValue) => {
                           :aria-label="`Preview ${resolveSongTitle(song, titleLanguage).primary}`"
                           @click.stop="openPreview(result, song)"
                         >
-                          <PlayIcon class="h-4 w-4" />
+                          <PlayIcon class="h-5 w-5" />
                         </button>
                       </button>
                     </div>
