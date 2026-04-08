@@ -471,27 +471,28 @@ watch(pickerSort, (value, previousValue) => {
                         @click="selectSong(result, song)"
                       >
                         <div class="min-w-0">
-                          <div class="flex flex-wrap items-center gap-2">
-                            <p class="break-words font-medium text-app-text">
-                              {{ resolveSongTitle(song, titleLanguage).primary }}
-                            </p>
-                            <TooltipRoot v-if="resolveSongTitle(song, titleLanguage).tooltip">
-                              <TooltipTrigger as-child>
-                                <span class="cursor-help rounded-full border border-app-border/70 px-2 py-0.5 text-xs text-app-muted">
-                                  Alt
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipPortal>
-                                <TooltipContent
-                                  class="rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                                  :side-offset="8"
-                                >
-                                  {{ resolveSongTitle(song, titleLanguage).tooltip }}
-                                  <TooltipArrow class="fill-app-surface" />
-                                </TooltipContent>
-                              </TooltipPortal>
-                            </TooltipRoot>
-                          </div>
+                          <TooltipRoot v-if="resolveSongTitle(song, titleLanguage).tooltip">
+                            <TooltipTrigger as-child>
+                              <p class="break-words font-medium text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
+                                {{ resolveSongTitle(song, titleLanguage).primary }}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                              <TooltipContent
+                                class="z-[60] rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+                                :side-offset="8"
+                              >
+                                {{ resolveSongTitle(song, titleLanguage).tooltip }}
+                                <TooltipArrow class="fill-app-surface" />
+                              </TooltipContent>
+                            </TooltipPortal>
+                          </TooltipRoot>
+                          <p
+                            v-else
+                            class="break-words font-medium text-app-text"
+                          >
+                            {{ resolveSongTitle(song, titleLanguage).primary }}
+                          </p>
                           <p class="mt-1 text-sm text-app-muted">
                             by {{ song.artist }}
                           </p>

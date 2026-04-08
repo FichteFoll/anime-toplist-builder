@@ -44,6 +44,15 @@ const selectionTitle = computed(() => {
     ? resolveSongTitle(props.selection.song, props.titleLanguage).primary
     : resolveAnimeTitle(props.selection.title, props.titleLanguage)
 })
+const selectionAltTitle = computed(() => {
+  if (!props.selection) {
+    return null
+  }
+
+  return props.selection.kind === 'song'
+    ? resolveSongTitle(props.selection.song, props.titleLanguage).tooltip
+    : null
+})
 const selectionCoverImage = computed(() =>
   props.selection ? getSelectionCoverImage(props.selection) : null,
 )
@@ -98,10 +107,32 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
           :alt="selectionTitle ?? 'Selected anime cover'"
           class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
         >
+
         <div class="min-w-0 space-y-2">
-          <p class="break-words text-base font-semibold text-app-text">
+          <TooltipRoot v-if="selectionAltTitle">
+            <TooltipTrigger as-child>
+              <p class="break-words text-base font-semibold text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
+                {{ selectionTitle }}
+              </p>
+            </TooltipTrigger>
+
+            <TooltipPortal>
+              <TooltipContent
+                class="z-50 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+                :side-offset="8"
+              >
+                {{ selectionAltTitle }}
+                <TooltipArrow class="fill-app-surface" />
+              </TooltipContent>
+            </TooltipPortal>
+          </TooltipRoot>
+          <p
+            v-else
+            class="break-words text-base font-semibold text-app-text"
+          >
             {{ selectionTitle }}
           </p>
+
           <p
             v-if="selection.kind === 'anime'"
             class="text-sm text-app-muted"
@@ -115,6 +146,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
           >
             {{ songArtistLine }}
           </p>
+
           <p
             v-if="selection.kind === 'song'"
             class="text-xs leading-5 text-app-muted"
