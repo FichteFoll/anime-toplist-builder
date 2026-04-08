@@ -1,5 +1,8 @@
 repos:
   - repo: https://github.com/qoomon/git-conventional-commits
-    rev: v2.7.2
+    # rev: v2.7.2
+    # Allows autosquash-formatted commit summary lines
+    # https://github.com/qoomon/git-conventional-commits/issues/197
+    rev: copilot/ignore-fixup-and-squash-commits
     hooks:
       - id: conventional-commits
