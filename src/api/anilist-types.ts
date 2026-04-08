@@ -102,6 +102,10 @@ export interface AniListMediaSearchData {
   }
 }
 
+export interface AniListMediaByIdData {
+  Media: AniListMediaResponse | null
+}
+
 export interface AniListMetadataData {
   GenreCollection?: string[] | null
   MediaTagCollection?: AniListTagResponse[] | null

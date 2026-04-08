@@ -287,6 +287,7 @@ watch(listVisibility, (value, previousValue) => {
                 :result="result"
                 :title-language="titleLanguage"
                 :is-selected="result.id === selectedMediaId"
+                :show-clear-button="true"
                 @select="selectResult"
                 @clear="emit('clear')"
               />
