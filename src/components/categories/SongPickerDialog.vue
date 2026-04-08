@@ -496,7 +496,7 @@ watch(pickerSort, (value, previousValue) => {
                             by {{ song.artist }}
                           </p>
                           <p class="mt-1 text-xs leading-5 text-app-muted">
-                            {{ song.slug }}<span v-if="song.episodes">, {{ song.episodes }}</span> · {{ song.type }}
+                            {{ song.slug }}<span v-if="song.episodes"> (ep {{ song.episodes }})</span>
                           </p>
                         </div>
 

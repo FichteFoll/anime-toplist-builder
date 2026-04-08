@@ -178,7 +178,7 @@ export const getSongContextLabel = (
   const episodes = normalizeSongEpisodes(selection.song.episodes)
 
   return episodes
-    ? `from ${animeName} (${selection.song.slug}, ${episodes})`
+    ? `from ${animeName} (${selection.song.slug}, ep ${episodes})`
     : `from ${animeName} (${selection.song.slug})`
 }
 

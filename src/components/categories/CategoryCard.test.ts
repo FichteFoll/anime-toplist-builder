@@ -131,6 +131,6 @@ describe('CategoryCard', () => {
 
     expect(wrapper.text()).toContain('Free Bird')
     expect(wrapper.text()).toContain('by Ayaka')
-    expect(wrapper.text()).toContain('from Haibane Renmei (op1, 2-12, 14)')
+    expect(wrapper.text()).toContain('from Haibane Renmei (op1, ep 2-12, 14)')
   })
 })
