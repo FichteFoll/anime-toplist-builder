@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_ANILIST_URL?: string
   readonly VITE_ANILIST_CLIENT_ID?: string
+  readonly VITE_ANIMETHEMES_URL?: string
   readonly VITE_APP_NAME?: string
   readonly VITE_BASE_PATH?: string
   readonly VITE_DEFAULT_TEMPLATE_ID?: string

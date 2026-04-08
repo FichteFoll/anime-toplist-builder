@@ -1,8 +1,9 @@
 import type { AniListError } from '@/types'
+import { appConfig } from '@/config/app'
 
 import type { GraphQlResponse } from './animethemes-types'
 
-const animeThemesGraphQlEndpoint = 'https://graphql.animethemes.moe/'
+const animeThemesGraphQlEndpoint = appConfig.animeThemesUrl
 
 export class AnimeThemesRequestError extends Error {
   readonly normalizedError: AniListError
