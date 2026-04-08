@@ -21,6 +21,7 @@ import {
   getCategoryFilterDisabledReasons,
   isNonBlankName,
 } from '@/lib/filter-editor'
+import { formatThemeTypeLabel } from '@/lib/format-label'
 import type { AniListMetadata, Category, CategoryEntityKind, FilterState, SongFilterState } from '@/types'
 
 const props = defineProps<{
@@ -110,6 +111,25 @@ const save = () => {
     songFilter: cloneSongFilter(draftSongFilter.value),
   })
   open.value = false
+}
+
+const songTypeOptions = [
+  { value: 'OP', label: 'Opening' },
+  { value: 'IN', label: 'Insert' },
+  { value: 'ED', label: 'Ending' },
+] as const
+
+const isSongTypeSelected = (value: SongFilterState['types'][number]) =>
+  draftSongFilter.value.types.includes(value)
+
+const toggleSongType = (value: SongFilterState['types'][number]) => {
+  const nextTypes = isSongTypeSelected(value)
+    ? draftSongFilter.value.types.filter((entry) => entry !== value)
+    : [...draftSongFilter.value.types, value]
+
+  draftSongFilter.value = {
+    types: [...new Set(nextTypes)].sort(),
+  }
 }
 </script>
 
@@ -234,34 +254,27 @@ const save = () => {
 
           <div
             v-if="draftEntityKind === 'song'"
-            class="mb-5 rounded-[1.25rem] border border-app-border/70 bg-app-bg/35 p-4"
+            class="mb-5 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4"
           >
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
-              Song types
+            <p class="text-sm font-medium text-app-text">
+              Song type
             </p>
-            <p class="mt-2 text-sm leading-6 text-app-muted">
-              Leave all unchecked to allow every supported song type.
+            <p class="mt-1 text-xs leading-5 text-app-muted">
+              Choose which theme types this category can include.
             </p>
             <div class="mt-4 flex flex-wrap gap-2">
-              <label
-                v-for="type in ['OP', 'IN', 'ED']"
-                :key="type"
-                class="inline-flex items-center gap-2 rounded-full border border-app-border/70 bg-app-surface/80 px-3 py-2 text-sm text-app-text"
+              <button
+                v-for="type in songTypeOptions"
+                :key="type.value"
+                type="button"
+                class="shell-button"
+                :class="isSongTypeSelected(type.value) ? 'border-app-accent/70 bg-app-accentSoft/70 text-app-text' : ''"
+                :aria-pressed="isSongTypeSelected(type.value)"
+                :aria-label="`${isSongTypeSelected(type.value) ? 'Remove' : 'Add'} ${type.label}`"
+                @click="toggleSongType(type.value)"
               >
-                <input
-                  :checked="draftSongFilter.types.includes(type as SongFilterState['types'][number])"
-                  type="checkbox"
-                  @change="($event) => {
-                    const checked = ($event.target as HTMLInputElement).checked
-                    draftSongFilter = {
-                      types: checked
-                        ? [...draftSongFilter.types, type as SongFilterState['types'][number]].sort()
-                        : draftSongFilter.types.filter((entry) => entry !== type),
-                    }
-                  }"
-                >
-                <span>{{ type }}</span>
-              </label>
+                {{ formatThemeTypeLabel(type.value) }}
+              </button>
             </div>
           </div>
 
