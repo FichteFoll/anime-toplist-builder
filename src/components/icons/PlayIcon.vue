@@ -8,13 +8,8 @@
     stroke-width="1.8"
     aria-hidden="true"
   >
-    <circle
-      cx="12"
-      cy="12"
-      r="9"
-    />
     <path
-      d="M10 8.75 16 12l-6 3.25z"
+      d="M8 5v14l11-7z"
       fill="currentColor"
       stroke="none"
     />
