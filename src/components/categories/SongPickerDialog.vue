@@ -206,6 +206,13 @@ const loadResults = async (searchTerm: string, page: number) => {
     }
 
     searchResponse.value = response
+    if (pinnedResult.value) {
+      const hydratedPinnedResult = response.results.find((result) => result.id === pinnedResult.value?.id)
+
+      if (hydratedPinnedResult) {
+        pinnedResult.value = hydratedPinnedResult
+      }
+    }
     status.value = 'ready'
   } catch (error) {
     if (requestId !== activeRequestId) {
