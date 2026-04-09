@@ -355,15 +355,17 @@ onBeforeUnmount(() => {
           </article>
         </div>
 
-        <div class="mt-6 flex justify-end">
-          <button
-            type="button"
-            class="shell-button shell-button-active"
-            :disabled="!previewBlob || isRendering"
-            @click="downloadPreview"
-          >
-            Download image
-          </button>
+        <div class="sticky bottom-0 -mx-6 mt-6 border-t border-app-border/70 bg-app-surface/95 px-6 pb-6 pt-4 backdrop-blur-sm">
+          <div class="flex justify-end">
+            <button
+              type="button"
+              class="shell-button shell-button-active"
+              :disabled="!previewBlob || isRendering"
+              @click="downloadPreview"
+            >
+              Download image
+            </button>
+          </div>
         </div>
       </DialogContent>
     </DialogPortal>
