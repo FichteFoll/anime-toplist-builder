@@ -84,6 +84,10 @@ vi.mock('@/components/categories/SongPreviewDialog.vue', () => ({
   default: { template: '<div />' },
 }))
 
+vi.mock('@/components/categories/SongPickerSidebar.vue', () => ({
+  default: { template: '<div />' },
+}))
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
