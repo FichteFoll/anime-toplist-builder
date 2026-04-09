@@ -3,18 +3,13 @@ import type { FilterSortDirection, FilterSortField } from '@/types'
 
 defineProps<{
   categoryName: string
-  searchDraft: string
-  localSortField: FilterSortField | ''
-  localSortDirection: FilterSortDirection
   sortFieldOptions: Array<{ value: FilterSortField, label: string }>
   sortFieldPlaceholderLabel: string
 }>()
 
-const emit = defineEmits<{
-  'update:searchDraft': [value: string]
-  'update:localSortField': [value: FilterSortField | '']
-  'update:localSortDirection': [value: FilterSortDirection]
-}>()
+const searchDraft = defineModel<string>('searchDraft', { required: true })
+const localSortField = defineModel<FilterSortField | ''>('localSortField', { required: true })
+const localSortDirection = defineModel<FilterSortDirection>('localSortDirection', { required: true })
 </script>
 
 <template>
@@ -24,13 +19,12 @@ const emit = defineEmits<{
         Search title
       </span>
       <input
-        :model-value="searchDraft"
+        v-model="searchDraft"
         type="search"
         inputmode="search"
         class="shell-input"
         placeholder="Type to search ..."
         :aria-label="`Search anime for ${categoryName}`"
-        @input="emit('update:searchDraft', ($event.target as HTMLInputElement).value)"
       >
     </label>
 
@@ -39,10 +33,9 @@ const emit = defineEmits<{
         Sort
       </span>
       <select
-        :value="localSortField"
+        v-model="localSortField"
         class="shell-input"
         :aria-label="`Sort search results for ${categoryName}`"
-        @change="emit('update:localSortField', ($event.target as HTMLSelectElement).value as FilterSortField | '')"
       >
         <option value="">
           {{ sortFieldPlaceholderLabel }}
@@ -64,7 +57,7 @@ const emit = defineEmits<{
         :class="localSortDirection === 'asc' ? 'shell-button-active' : ''"
         :disabled="!localSortField"
         aria-label="Use ascending sort order"
-        @click="emit('update:localSortDirection', 'asc')"
+        @click="localSortDirection = 'asc'"
       >
         Asc
       </button>
@@ -74,7 +67,7 @@ const emit = defineEmits<{
         :class="localSortDirection === 'desc' ? 'shell-button-active' : ''"
         :disabled="!localSortField"
         aria-label="Use descending sort order"
-        @click="emit('update:localSortDirection', 'desc')"
+        @click="localSortDirection = 'desc'"
       >
         Desc
       </button>

@@ -245,15 +245,12 @@ watch(listVisibility, (value, previousValue) => {
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
           <PickerSearchToolbar
+            v-model:search-draft="searchDraft"
+            v-model:local-sort-field="localSortField"
+            v-model:local-sort-direction="localSortDirection"
             :category-name="category.name"
-            :search-draft="searchDraft"
-            :local-sort-field="localSortField"
-            :local-sort-direction="localSortDirection"
             :sort-field-options="sortFieldOptions"
             :sort-field-placeholder-label="sortFieldPlaceholderLabel"
-            @update:search-draft="searchDraft = $event"
-            @update:local-sort-field="localSortField = $event"
-            @update:local-sort-direction="localSortDirection = $event"
           />
 
           <PickerFilterSummary

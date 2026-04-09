@@ -10,16 +10,13 @@ import {
 } from 'reka-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+const open = defineModel<boolean>('open', { required: true })
+
 const props = defineProps<{
-  open: boolean
   title: string
   description: string
   videoUrl: string
   videoHeight: number | null
-}>()
-
-const emit = defineEmits<{
-  'update:open': [value: boolean]
 }>()
 
 const failed = ref(false)
@@ -49,7 +46,7 @@ const previewFrameStyle = computed(() => {
 })
 
 watch(
-  () => props.open,
+  () => open.value,
   () => {
     failed.value = false
   },
@@ -67,8 +64,7 @@ onBeforeUnmount(() => {
 
 <template>
   <DialogRoot
-    :open="open"
-    @update:open="emit('update:open', $event)"
+    v-model:open="open"
   >
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm" />
