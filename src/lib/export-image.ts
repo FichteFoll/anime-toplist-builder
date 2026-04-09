@@ -1,6 +1,6 @@
 import { appConfig } from '@/config/app'
 import { resolveAnimeTitle } from '@/lib/anime-title'
-import { getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
+import { formatSongEpisodesHint, getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
 import type {
   AnimeFormat,
   AnimeTitleLanguage,
@@ -34,8 +34,11 @@ const truncateSongMeta = (
   episodes: string | null,
   maxWidth: number,
 ) => {
-  const buildLine = (name: string) =>
-    episodes ? `from ${name} (${slug}, ${episodes})` : `from ${name} (${slug})`
+  const buildLine = (name: string) => {
+    const episodesHint = formatSongEpisodesHint(episodes)
+
+    return episodesHint ? `from ${name} (${slug}, ${episodesHint})` : `from ${name} (${slug})`
+  }
 
   const fullLine = buildLine(animeName)
 

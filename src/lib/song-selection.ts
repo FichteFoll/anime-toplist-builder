@@ -117,6 +117,16 @@ export const normalizeSongEpisodes = (value: string | null | undefined) => {
   return normalizedValue
 }
 
+export const formatSongEpisodesHint = (value: string | null | undefined) => {
+  const episodes = normalizeSongEpisodes(value)
+
+  if (!episodes) {
+    return null
+  }
+
+  return /^\d+$/.test(episodes) ? `ep ${episodes}` : `eps ${episodes}`
+}
+
 export const resolveSongTitle = (
   song: Pick<SongSelection['song'], 'title' | 'titleNative'>,
   titleLanguage: AnimeTitleLanguage,
@@ -176,10 +186,10 @@ export const getSongContextLabel = (
   titleLanguage: AnimeTitleLanguage,
 ) => {
   const animeName = resolveAnimeTitle(selection.animeTitle, titleLanguage)
-  const episodes = normalizeSongEpisodes(selection.song.episodes)
+  const episodesHint = formatSongEpisodesHint(selection.song.episodes)
 
-  return episodes
-    ? `from ${animeName} (${selection.song.slug}, ep ${episodes})`
+  return episodesHint
+    ? `from ${animeName} (${selection.song.slug}, ${episodesHint})`
     : `from ${animeName} (${selection.song.slug})`
 }
 

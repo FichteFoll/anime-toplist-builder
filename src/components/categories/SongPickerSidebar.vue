@@ -13,7 +13,7 @@ import type { AnimeThemesSong } from '@/api'
 import CaretIcon from '@/components/icons/CaretIcon.vue'
 import PlayIcon from '@/components/icons/PlayIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
-import { getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
+import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
 import type { AniListSearchResult, AnimeTitleLanguage, SongSelection } from '@/types'
 
 const props = defineProps<{
@@ -170,7 +170,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
                   by {{ song.artist }}
                 </p>
                 <p class="mt-1 text-xs leading-5 text-app-muted">
-                  {{ song.slug }}<span v-if="song.episodes"> (ep {{ song.episodes }})</span>
+                  {{ song.slug }}<span v-if="formatSongEpisodesHint(song.episodes)"> ({{ formatSongEpisodesHint(song.episodes) }})</span>
                 </p>
               </div>
 
