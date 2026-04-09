@@ -1,9 +1,25 @@
 import type { AnimeFormat, AnimeSeason } from './filters'
 import type { AnimeCoverImage, AnimeTitle } from './selections'
 
-export type AniListErrorKind = 'auth' | 'network' | 'http' | 'graphql' | 'parse' | 'unknown'
+export enum AniListErrorKind {
+  Auth = 'auth',
+  Network = 'network',
+  Http = 'http',
+  GraphQl = 'graphql',
+  Parse = 'parse',
+  Unknown = 'unknown',
+}
 
-export type AniListListVisibility = 'only' | 'hide'
+export enum AniListListVisibility {
+  Only = 'only',
+  Hide = 'hide',
+}
+
+export enum AniListAuthStatus {
+  Disconnected = 'disconnected',
+  Connecting = 'connecting',
+  Connected = 'connected',
+}
 
 export interface AniListError {
   kind: AniListErrorKind

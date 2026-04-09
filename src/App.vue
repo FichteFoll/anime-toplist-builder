@@ -19,7 +19,7 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import type { AniListMetadata, CategorySelection, FilterState } from '@/types'
+import { CategoryEntityKind, ThemeType, type AniListMetadata, type CategorySelection, type FilterState } from '@/types'
 
 const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
@@ -65,8 +65,8 @@ const updateCategory = (
     name: string
     description: string
     filter: FilterState
-    entityKind: 'anime' | 'song'
-    songFilter: { types: Array<'OP' | 'IN' | 'ED'> }
+    entityKind: CategoryEntityKind
+    songFilter: { types: ThemeType[] }
   },
 ) => {
   templateStore.updateActiveTemplate((template) => {

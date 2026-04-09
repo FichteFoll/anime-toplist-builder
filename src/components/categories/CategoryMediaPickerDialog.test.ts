@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
-import type { AniListSearchResponse, AniListSearchResult, Category } from '@/types'
+import { CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   searchAnimeMedia: vi.fn(),
@@ -79,7 +79,7 @@ const category: Category = {
   name: 'Best Opening',
   description: '',
   filter: createEmptyFilterState(),
-  entityKind: 'anime',
+  entityKind: CategoryEntityKind.Anime,
   songFilter: createEmptySongFilterState(),
 }
 

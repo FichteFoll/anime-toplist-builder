@@ -1,4 +1,4 @@
-import type { AniListError } from '@/types'
+import { AniListErrorKind, type AniListError } from '@/types'
 import { appConfig } from '@/config/app'
 
 import type { GraphQlResponse } from './animethemes-types'
@@ -27,7 +27,7 @@ const normalizeUnknownError = (error: unknown): AniListError => {
 
   if (error instanceof TypeError) {
     return {
-      kind: 'network',
+      kind: AniListErrorKind.Network,
       message: 'AnimeThemes could not be reached. Check your connection and try again.',
       details: [],
       retryable: true,
@@ -36,7 +36,7 @@ const normalizeUnknownError = (error: unknown): AniListError => {
 
   if (error instanceof Error) {
     return {
-      kind: 'unknown',
+      kind: AniListErrorKind.Unknown,
       message: error.message,
       details: [],
       retryable: true,
@@ -44,7 +44,7 @@ const normalizeUnknownError = (error: unknown): AniListError => {
   }
 
   return {
-    kind: 'unknown',
+    kind: AniListErrorKind.Unknown,
     message: 'AnimeThemes request failed for an unknown reason.',
     details: [],
     retryable: true,
@@ -56,7 +56,7 @@ const parseResponseJson = async <TData>(response: Response) => {
     return (await response.json()) as GraphQlResponse<TData>
   } catch {
     throw createAnimeThemesError({
-      kind: 'parse',
+      kind: AniListErrorKind.Parse,
       message: 'AnimeThemes returned an unreadable response.',
       details: [],
       retryable: true,
@@ -66,7 +66,7 @@ const parseResponseJson = async <TData>(response: Response) => {
 }
 
 const normalizeGraphQlErrors = (messages: string[], status?: number): AniListError => ({
-  kind: status && status >= 400 ? 'http' : 'graphql',
+  kind: status && status >= 400 ? AniListErrorKind.Http : AniListErrorKind.GraphQl,
   message: messages[0] ?? 'AnimeThemes returned an unexpected error.',
   details: messages.slice(1),
   retryable: status === undefined || status >= 500 || status === 429,
@@ -110,7 +110,7 @@ export async function requestAnimeThemes<TData, TVariables extends object>(
 
   if (!response.ok) {
     throw createAnimeThemesError({
-      kind: 'http',
+      kind: AniListErrorKind.Http,
       message: `AnimeThemes request failed with status ${response.status}.`,
       details: [],
       retryable: response.status >= 500 || response.status === 429,
@@ -120,7 +120,7 @@ export async function requestAnimeThemes<TData, TVariables extends object>(
 
   if (!payload.data) {
     throw createAnimeThemesError({
-      kind: 'parse',
+      kind: AniListErrorKind.Parse,
       message: 'AnimeThemes returned no data for the request.',
       details: [],
       retryable: true,

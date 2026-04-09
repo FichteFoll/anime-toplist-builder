@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
-import type { AnimeSelection, Category } from '@/types'
+import { CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
   name: 'CategoryMediaPickerDialog',
@@ -30,7 +30,7 @@ const category: Category = {
   name: 'Best Opening',
   description: '',
   filter: createEmptyFilterState(),
-  entityKind: 'anime',
+  entityKind: CategoryEntityKind.Anime,
   songFilter: createEmptySongFilterState(),
 }
 
@@ -92,7 +92,7 @@ describe('CategoryCard', () => {
       props: {
         category: {
           ...category,
-          entityKind: 'song',
+          entityKind: CategoryEntityKind.Song,
         },
         selection: createSongSelection({
           animeId: 42,
@@ -100,7 +100,7 @@ describe('CategoryCard', () => {
           animeCoverImage: selection.coverImage,
           song: {
             id: 101,
-            type: 'OP',
+            type: ThemeType.OP,
             slug: 'op1',
             title: 'Free Bird',
             artist: 'Ayaka',

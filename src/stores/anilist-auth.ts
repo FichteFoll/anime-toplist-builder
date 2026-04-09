@@ -21,18 +21,16 @@ import {
   saveAniListOAuthState,
   saveStoredAniListAuthSession,
 } from '@/lib/anilist-auth'
-import type { AniListAuthSession } from '@/types'
+import { AniListAuthStatus, type AniListAuthSession } from '@/types'
 
 import { usePickerFiltersStore } from './picker-filters'
 import { useToastStore } from './toasts'
-
-type AniListAuthStatus = 'disconnected' | 'connecting' | 'connected'
 
 const expiredSessionMessage = 'Your AniList session expired. Connect AniList again to keep using My Anime filters.'
 const invalidSessionMessage = 'AniList rejected the saved session. Connect AniList again to keep using My Anime filters.'
 
 export const useAniListAuthStore = defineStore('anilist-auth', () => {
-  const status = ref<AniListAuthStatus>('disconnected')
+  const status = ref<AniListAuthStatus>(AniListAuthStatus.Disconnected)
   const accessToken = ref<string | null>(null)
   const username = ref<string | null>(null)
   const expiresAt = ref<number | null>(null)
@@ -48,14 +46,14 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
     accessToken.value = session.accessToken
     username.value = session.username
     expiresAt.value = session.expiresAt
-    status.value = 'connected'
+    status.value = AniListAuthStatus.Connected
   }
 
   const clearSessionState = () => {
     accessToken.value = null
     username.value = null
     expiresAt.value = null
-    status.value = 'disconnected'
+    status.value = AniListAuthStatus.Disconnected
   }
 
   const clearSession = (notification?: { title: string, description?: string }) => {
@@ -106,7 +104,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
     const state = createAniListOAuthState()
 
     saveAniListOAuthState(state)
-    status.value = 'connecting'
+    status.value = AniListAuthStatus.Connecting
     window.location.assign(createAniListAuthorizationUrl(appConfig.anilistClientId, state))
     return true
   }
@@ -157,7 +155,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
       return true
     }
 
-    status.value = 'connecting'
+    status.value = AniListAuthStatus.Connecting
 
     try {
       const viewer = await fetchAuthenticatedAniListViewer(callback.accessToken)

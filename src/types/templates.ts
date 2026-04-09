@@ -8,26 +8,38 @@ export type TemplateId = string
 
 export type CategoryId = string
 
-export const categoryEntityKinds = ['anime', 'song'] as const
+export enum CategoryEntityKind {
+  Anime = 'anime',
+  Song = 'song',
+}
 
-export type CategoryEntityKind = (typeof categoryEntityKinds)[number]
+export const categoryEntityKinds = [CategoryEntityKind.Anime, CategoryEntityKind.Song] as const
 
-export const themeTypes = ['OP', 'IN', 'ED'] as const
+export enum ThemeType {
+  OP = 'OP',
+  IN = 'IN',
+  ED = 'ED',
+}
 
-export type ThemeType = (typeof themeTypes)[number]
+export const themeTypes = [ThemeType.OP, ThemeType.IN, ThemeType.ED] as const
 
 export interface SongFilterState {
   types: ThemeType[]
 }
 
-export const templateOrigins = [
-  'predefined',
-  'user',
-  'imported-file',
-  'imported-url',
-] as const
+export enum TemplateOrigin {
+  Predefined = 'predefined',
+  User = 'user',
+  ImportedFile = 'imported-file',
+  ImportedUrl = 'imported-url',
+}
 
-export type TemplateOrigin = (typeof templateOrigins)[number]
+export const templateOrigins = [
+  TemplateOrigin.Predefined,
+  TemplateOrigin.User,
+  TemplateOrigin.ImportedFile,
+  TemplateOrigin.ImportedUrl,
+] as const
 
 export interface Category {
   id: CategoryId

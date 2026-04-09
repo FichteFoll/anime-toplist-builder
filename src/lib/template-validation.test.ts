@@ -9,7 +9,7 @@ import {
   parseTemplateImportPayload,
   stringifyTemplateExportPayload,
 } from '@/lib/template-validation'
-import { templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
+import { TemplateOrigin, templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
 
 describe('template validation', () => {
   it('parses and normalizes imported payload fields', () => {
@@ -131,11 +131,11 @@ describe('template validation', () => {
           },
         ],
       },
-      'imported-file',
+      TemplateOrigin.ImportedFile,
     )
 
     expect(isTemplateId(template.id)).toBe(true)
-    expect(template.origin).toBe('imported-file')
+    expect(template.origin).toBe(TemplateOrigin.ImportedFile)
     expect(template.description).toBe('Shared context')
     expect(template.categories).toHaveLength(1)
     expect(isCategoryId(template.categories[0]?.id)).toBe(true)
@@ -164,7 +164,7 @@ describe('template validation', () => {
           },
         ],
       },
-      'user',
+      TemplateOrigin.User,
     )
 
     expect(createTemplateExportPayload(template)).toEqual({
@@ -221,7 +221,7 @@ describe('template validation', () => {
           seasons: [],
         },
       },
-      'user',
+      TemplateOrigin.User,
     )
 
     expect(stringifyTemplateExportPayload(template)).not.toContain('"seasons": []')
@@ -287,7 +287,7 @@ describe('template validation', () => {
       },
     })
 
-    const normalized = normalizeImportedTemplate(payload, 'user')
+    const normalized = normalizeImportedTemplate(payload, TemplateOrigin.User)
 
     expect(createTemplateExportPayload(normalized).categories[0]).toMatchObject({
       entityKind: 'song',

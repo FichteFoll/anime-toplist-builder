@@ -13,6 +13,8 @@ import {
   defaultAnimeTitleLanguage,
   defaultThemePreference,
   templateSchemaVersion,
+  TemplateOrigin,
+  ThemeType,
   type AnimeSelection,
 } from '@/types'
 
@@ -72,7 +74,7 @@ describe('persistence helpers', () => {
         description: 'Local context',
         categories: [{ id: 'localpick01', name: 'Local Pick', description: '' }],
       },
-      'user',
+      TemplateOrigin.User,
     )
     const remoteTemplate = normalizeImportedTemplate(
       {
@@ -82,7 +84,7 @@ describe('persistence helpers', () => {
         description: 'Remote context',
         categories: [{ id: 'remotepick01', name: 'Remote Pick', description: '' }],
       },
-      'imported-url',
+      TemplateOrigin.ImportedUrl,
     )
     const predefinedTemplate = normalizeImportedTemplate(
       {
@@ -92,7 +94,7 @@ describe('persistence helpers', () => {
         description: 'Predefined context',
         categories: [{ id: 'predefinedpick01', name: 'Predefined Pick', description: '' }],
       },
-      'predefined',
+      TemplateOrigin.Predefined,
     )
 
     saveStoredTemplates(
@@ -186,7 +188,7 @@ describe('persistence helpers', () => {
       animeCoverImage: createSelection().coverImage,
       song: {
         id: 101,
-        type: 'OP',
+        type: ThemeType.OP,
         slug: 'op1-test',
         title: 'Duvet',
         titleNative: null,

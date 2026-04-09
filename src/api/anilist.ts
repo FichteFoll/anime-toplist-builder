@@ -1,10 +1,10 @@
-import type {
+import {
   AniListListVisibility,
-  AniListMetadata,
-  AniListSearchResponse,
-  AniListSearchResult,
-  AniListViewer,
-  FilterState,
+  type AniListMetadata,
+  type AniListSearchResponse,
+  type AniListSearchResult,
+  type AniListViewer,
+  type FilterState,
 } from '@/types'
 
 import { buildAniListMediaSearchVariables } from './anilist-query-builder'

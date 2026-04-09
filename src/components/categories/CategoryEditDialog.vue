@@ -22,7 +22,14 @@ import {
   isNonBlankName,
 } from '@/lib/filter-editor'
 import { formatThemeTypeLabel } from '@/lib/format-label'
-import type { AniListMetadata, Category, CategoryEntityKind, FilterState, SongFilterState } from '@/types'
+import {
+  CategoryEntityKind,
+  ThemeType,
+  type AniListMetadata,
+  type Category,
+  type FilterState,
+  type SongFilterState,
+} from '@/types'
 
 const props = defineProps<{
   category: Category
@@ -114,9 +121,9 @@ const save = () => {
 }
 
 const songTypeOptions = [
-  { value: 'OP', label: 'Opening' },
-  { value: 'IN', label: 'Insert' },
-  { value: 'ED', label: 'Ending' },
+  { value: ThemeType.OP, label: 'Opening' },
+  { value: ThemeType.IN, label: 'Insert' },
+  { value: ThemeType.ED, label: 'Ending' },
 ] as const
 
 const isSongTypeSelected = (value: SongFilterState['types'][number]) =>
@@ -253,7 +260,7 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
           </div>
 
           <div
-            v-if="draftEntityKind === 'song'"
+            v-if="draftEntityKind === CategoryEntityKind.Song"
             class="mb-5 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4"
           >
             <p class="text-sm font-medium text-app-text">

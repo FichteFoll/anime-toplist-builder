@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { countWrappedTextLines } from '@/lib/export-image'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
+import { ThemeType } from '@/types'
 
 const createContext = (measureWidth: (text: string) => number) =>
   ({
@@ -46,7 +47,7 @@ describe('song title helpers', () => {
       },
       song: {
         id: 101,
-        type: 'OP',
+        type: ThemeType.OP,
         slug: 'op1',
         title: 'My Song',
         titleNative: '私の歌',

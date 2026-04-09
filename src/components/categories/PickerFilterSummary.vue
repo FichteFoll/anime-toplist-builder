@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { AniListListVisibility } from '@/types'
+
 defineProps<{
   activeFilterSummary: string[]
   canUseListFilters: boolean
@@ -7,7 +9,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  toggleListVisibility: [mode: 'only' | 'hide']
+  toggleListVisibility: [mode: AniListListVisibility]
 }>()
 </script>
 
@@ -45,7 +47,7 @@ const emit = defineEmits<{
           :class="onlyOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
           :aria-pressed="onlyOnList"
           :aria-label="onlyOnList ? 'Turn off only my anime filter' : 'Show only my anime'"
-          @click="emit('toggleListVisibility', 'only')"
+          @click="emit('toggleListVisibility', AniListListVisibility.Only)"
         >
           Only my anime
         </button>
@@ -55,7 +57,7 @@ const emit = defineEmits<{
           :class="hideOnList ? 'border-app-accent bg-app-accent/15 text-app-text' : 'border-app-border/70 bg-app-surface/80 text-app-muted hover:text-app-text'"
           :aria-pressed="hideOnList"
           :aria-label="hideOnList ? 'Turn off hide my anime filter' : 'Hide my anime'"
-          @click="emit('toggleListVisibility', 'hide')"
+          @click="emit('toggleListVisibility', AniListListVisibility.Hide)"
         >
           Hide my anime
         </button>

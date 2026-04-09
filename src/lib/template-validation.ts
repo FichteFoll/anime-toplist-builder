@@ -10,7 +10,7 @@ import {
   type AnimeFormat,
   type AnimeSeason,
   type AnimeSource,
-  type CategoryEntityKind,
+  CategoryEntityKind,
   type FilterSortDirection,
   type FilterSortField,
   type FilterState,
@@ -223,7 +223,7 @@ const asOptionalSort = (
 
 const parseCategoryEntityKind = (value: unknown, path: string): CategoryEntityKind => {
   if (value === undefined) {
-    return 'anime'
+    return CategoryEntityKind.Anime
   }
 
   const entityKind = asTrimmedString(value, path)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { AniListListVisibility } from '@/types'
 
 import { buildAniListMediaSearchVariables } from './anilist-query-builder'
 
@@ -24,7 +25,7 @@ describe('buildAniListMediaSearchVariables', () => {
         popularity: { minimum: 100 },
       },
       categoryFilter: createEmptyFilterState(),
-      listVisibility: 'hide',
+      listVisibility: AniListListVisibility.Hide,
       search: '  mecha  ',
       page: 2,
       perPage: 20,

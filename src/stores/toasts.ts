@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { ToastInput, ToastItem, ToastTone } from '@/types'
+import { ToastTone, type ToastInput, type ToastItem } from '@/types'
 
 const defaultToastDuration = 3500
 
@@ -17,7 +17,7 @@ const createToast = (input: ToastInput): ToastItem => ({
   id: createToastId(),
   title: input.title,
   description: input.description,
-  tone: input.tone ?? 'info',
+  tone: input.tone ?? ToastTone.Info,
   duration: input.duration ?? defaultToastDuration,
   open: true,
 })
@@ -59,15 +59,15 @@ export const useToastStore = defineStore('toasts', () => {
   }
 
   const success = (title: string, description?: string) => {
-    notify('success', title, description)
+    notify(ToastTone.Success, title, description)
   }
 
   const error = (title: string, description?: string) => {
-    notify('error', title, description)
+    notify(ToastTone.Error, title, description)
   }
 
   const info = (title: string, description?: string) => {
-    notify('info', title, description)
+    notify(ToastTone.Info, title, description)
   }
 
   return {

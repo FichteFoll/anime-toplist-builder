@@ -1,4 +1,4 @@
-import type { Template, TemplateImportPayloadV1 } from '@/types'
+import { TemplateOrigin, type Template, type TemplateImportPayloadV1 } from '@/types'
 
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 
@@ -312,5 +312,5 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
 ]
 
 export const predefinedTemplates: Template[] = predefinedTemplatePayloads.map((payload) =>
-  normalizeImportedTemplate(payload, 'predefined'),
+  normalizeImportedTemplate(payload, TemplateOrigin.Predefined),
 )

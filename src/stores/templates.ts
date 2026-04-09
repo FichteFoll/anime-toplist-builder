@@ -17,7 +17,7 @@ import {
   normalizeImportedTemplate,
   parseTemplateImportJson,
 } from '@/lib/template-validation'
-import type { Template, TemplateId } from '@/types'
+import { TemplateOrigin, type Template, type TemplateId } from '@/types'
 
 import { useSelectionsStore } from './selections'
 import { useSettingsStore } from './settings'
@@ -55,15 +55,15 @@ export const useTemplateStore = defineStore('templates', () => {
   })
 
   const predefinedTemplates = computed(() =>
-    registeredTemplates.value.filter((template) => template.origin === 'predefined'),
+    registeredTemplates.value.filter((template) => template.origin === TemplateOrigin.Predefined),
   )
 
   const userTemplates = computed(() =>
-    localTemplates.value.filter((template) => template.origin !== 'imported-url'),
+    localTemplates.value.filter((template) => template.origin !== TemplateOrigin.ImportedUrl),
   )
 
   const remoteTemplates = computed(() =>
-    localTemplates.value.filter((template) => template.origin === 'imported-url'),
+    localTemplates.value.filter((template) => template.origin === TemplateOrigin.ImportedUrl),
   )
 
   const persistLocalTemplates = () => {
@@ -109,7 +109,7 @@ export const useTemplateStore = defineStore('templates', () => {
     const remoteTemplateUrl = remoteTemplateUrls.value[templateId]
 
     replaceWindowTemplateHash(
-      template.origin === 'imported-url' && remoteTemplateUrl
+      template.origin === TemplateOrigin.ImportedUrl && remoteTemplateUrl
         ? {
             kind: 'url',
             url: remoteTemplateUrl,
@@ -219,13 +219,13 @@ export const useTemplateStore = defineStore('templates', () => {
 
   const importTemplate = (
     payloadJson: string,
-    origin: 'imported-file' | 'imported-url',
+    origin: TemplateOrigin.ImportedFile | TemplateOrigin.ImportedUrl,
     remoteUrl?: string,
   ) => {
     const parsedPayload = parseTemplateImportJson(payloadJson)
     const importedTemplate = normalizeImportedTemplate(parsedPayload, origin)
 
-    if (origin === 'imported-url' && remoteUrl) {
+    if (origin === TemplateOrigin.ImportedUrl && remoteUrl) {
       const existingTemplateId = Object.entries(remoteTemplateUrls.value).find(
         ([, storedRemoteUrl]) => storedRemoteUrl === remoteUrl,
       )?.[0]
@@ -242,7 +242,7 @@ export const useTemplateStore = defineStore('templates', () => {
 
     upsertLocalTemplate(importedTemplate)
 
-    if (origin === 'imported-url') {
+    if (origin === TemplateOrigin.ImportedUrl) {
       pendingStartupTemplateUrl.value = remoteUrl ?? null
     }
 
@@ -259,7 +259,7 @@ export const useTemplateStore = defineStore('templates', () => {
     }
 
     const payloadText = await response.text()
-    const importedTemplate = importTemplate(payloadText, 'imported-url', url)
+    const importedTemplate = importTemplate(payloadText, TemplateOrigin.ImportedUrl, url)
 
     pendingStartupTemplateUrl.value = url
     replaceWindowTemplateHash({ kind: 'url', url })

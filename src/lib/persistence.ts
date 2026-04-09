@@ -4,6 +4,7 @@ import {
   animeTitleLanguages,
   defaultAnimeTitleLanguage,
   defaultThemePreference,
+  TemplateOrigin,
   themeTypes,
   themePreferences,
   type AnimeTitleLanguage,
@@ -11,7 +12,6 @@ import {
   type SongPerformance,
   type SongSelection,
   type Template,
-  type TemplateOrigin,
   type TemplateSelectionsMap,
   type ThemePreference,
 } from '@/types'
@@ -89,7 +89,10 @@ const isThemeType = (value: unknown): value is (typeof themeTypes)[number] =>
   typeof value === 'string' && themeTypes.includes(value as (typeof themeTypes)[number])
 
 const isTemplateOrigin = (value: unknown): value is TemplateOrigin =>
-  value === 'user' || value === 'imported-file' || value === 'imported-url' || value === 'predefined'
+  value === TemplateOrigin.User ||
+  value === TemplateOrigin.ImportedFile ||
+  value === TemplateOrigin.ImportedUrl ||
+  value === TemplateOrigin.Predefined
 
 const isHttpUrl = (value: unknown): value is string => {
   if (typeof value !== 'string') {
@@ -352,7 +355,7 @@ export const loadStoredTemplates = (storage = getBrowserStorage()): LoadedTempla
 
     templates.push(parsedTemplate.template)
 
-    if (parsedTemplate.remoteUrl && parsedTemplate.template.origin === 'imported-url') {
+    if (parsedTemplate.remoteUrl && parsedTemplate.template.origin === TemplateOrigin.ImportedUrl) {
       remoteTemplateUrls[parsedTemplate.template.id] = parsedTemplate.remoteUrl
     }
   }
@@ -376,7 +379,7 @@ export const saveStoredTemplates = (
         ...createTemplateExportPayload(template),
         origin: template.origin,
         remoteUrl:
-          template.origin === 'imported-url' ? remoteTemplateUrls[template.id] : undefined,
+          template.origin === TemplateOrigin.ImportedUrl ? remoteTemplateUrls[template.id] : undefined,
       })),
   }
 

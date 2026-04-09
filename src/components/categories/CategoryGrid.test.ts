@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
-import type { AnimeSelection, Category } from '@/types'
+import { CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
   sortableDestroy: vi.fn(),
@@ -108,7 +108,7 @@ const categories: Category[] = [
     name: 'Best Opening',
     description: '',
     filter: createEmptyFilterState(),
-    entityKind: 'anime',
+    entityKind: CategoryEntityKind.Anime,
     songFilter: createEmptySongFilterState(),
   },
 ]
