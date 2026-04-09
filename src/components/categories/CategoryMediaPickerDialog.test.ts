@@ -101,12 +101,6 @@ const createResult = (): AniListSearchResult => ({
   season: 'FALL',
   seasonYear: 2002,
   format: 'TV',
-  source: null,
-  genres: [],
-  tags: [],
-  popularity: null,
-  averageScore: null,
-  countryOfOrigin: null,
   siteUrl: 'https://anilist.co/anime/42',
 })
 

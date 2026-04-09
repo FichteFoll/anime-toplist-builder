@@ -86,12 +86,6 @@ export interface AniListMediaResponse {
   season?: AnimeSeason | null
   seasonYear?: number | null
   format?: AnimeFormat | null
-  source?: AnimeSource | null
-  genres?: string[] | null
-  tags?: AniListTagResponse[] | null
-  popularity?: number | null
-  averageScore?: number | null
-  countryOfOrigin?: string | null
   siteUrl?: string | null
 }
 

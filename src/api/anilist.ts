@@ -48,18 +48,6 @@ const mapAniListSearchResult = (media: AniListMediaResponse): AniListSearchResul
   season: media.season ?? null,
   seasonYear: media.seasonYear ?? null,
   format: media.format ?? null,
-  source: media.source ?? null,
-  genres: media.genres ?? [],
-  tags: (media.tags ?? []).map((tag) => ({
-    id: tag.id,
-    name: tag.name,
-    description: tag.description ?? null,
-    rank: tag.rank ?? null,
-    isAdult: tag.isAdult ?? false,
-  })),
-  popularity: media.popularity ?? null,
-  averageScore: media.averageScore ?? null,
-  countryOfOrigin: media.countryOfOrigin ?? null,
   siteUrl: media.siteUrl ?? `https://anilist.co/anime/${media.id}`,
 })
 

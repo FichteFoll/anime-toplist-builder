@@ -144,23 +144,17 @@ const resetState = () => {
 }
 
 const createHydratedAnimePlaceholder = () => props.selectedSong
-  ? {
-      id: props.selectedSong.animeId,
-      title: props.selectedSong.animeTitle,
-      coverImage: props.selectedSong.animeCoverImage,
-      description: null,
-      season: null,
-      seasonYear: null,
-      format: null,
-      source: null,
-      genres: [],
-      tags: [],
-      popularity: null,
-      averageScore: null,
-      countryOfOrigin: null,
-      siteUrl: `https://anilist.co/anime/${props.selectedSong.animeId}`,
-    }
-  : null
+    ? {
+        id: props.selectedSong.animeId,
+        title: props.selectedSong.animeTitle,
+        coverImage: props.selectedSong.animeCoverImage,
+        description: null,
+        season: null,
+        seasonYear: null,
+        format: null,
+        siteUrl: `https://anilist.co/anime/${props.selectedSong.animeId}`,
+      }
+    : null
 
 const hydrateSelectedAnime = async () => {
   if (!props.selectedSong) {

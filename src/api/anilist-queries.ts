@@ -72,18 +72,6 @@ export const searchAnimeMediaQuery = `
         season
         seasonYear
         format
-        source
-        genres
-        tags {
-          id
-          name
-          description
-          rank
-          isAdult
-        }
-        popularity
-        averageScore
-        countryOfOrigin
         siteUrl
       }
     }
@@ -130,18 +118,6 @@ export const fetchAniListMediaByIdQuery = `
       season
       seasonYear
       format
-      source
-      genres
-      tags {
-        id
-        name
-        description
-        rank
-        isAdult
-      }
-      popularity
-      averageScore
-      countryOfOrigin
       siteUrl
     }
   }
