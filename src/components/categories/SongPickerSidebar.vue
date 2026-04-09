@@ -13,6 +13,7 @@ import type { AnimeThemesSong } from '@/api'
 import CaretIcon from '@/components/icons/CaretIcon.vue'
 import PlayIcon from '@/components/icons/PlayIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
 import type { AniListSearchResult, AnimeTitleLanguage, SongSelection } from '@/types'
 
@@ -81,7 +82,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
 
             <p class="text-sm text-app-muted">
               {{ detailAnime.seasonYear ?? 'Unknown year' }}
-              <span v-if="detailAnime.format"> · {{ detailAnime.format }}</span>
+              <span v-if="detailAnime.format"> · {{ formatAnimeFormatLabel(detailAnime.format) }}</span>
             </p>
 
             <p

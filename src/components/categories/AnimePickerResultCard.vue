@@ -2,6 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { formatAnimeFormatLabel } from '@/lib/format-label'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
 import type { AniListSearchResult, AnimeTitleLanguage } from '@/types'
 
@@ -45,7 +46,7 @@ const emit = defineEmits<{
 
           <p class="text-sm text-app-muted">
             {{ result.seasonYear ?? 'Unknown year' }}
-            <span v-if="result.format"> · {{ result.format }}</span>
+            <span v-if="result.format"> · {{ formatAnimeFormatLabel(result.format) }}</span>
           </p>
         </div>
       </div>
