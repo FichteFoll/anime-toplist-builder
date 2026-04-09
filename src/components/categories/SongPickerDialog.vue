@@ -386,71 +386,73 @@ watch(pickerSort, (value, previousValue) => {
           :description="category.description"
         />
 
-        <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
-          <PickerSearchToolbar
-            :category-name="category.name"
-            :search-draft="searchDraft"
-            :local-sort-field="localSortField"
-            :local-sort-direction="localSortDirection"
-            :sort-field-options="sortFieldOptions"
-            :sort-field-placeholder-label="sortFieldPlaceholderLabel"
-            @update:search-draft="searchDraft = $event"
-            @update:local-sort-field="localSortField = $event"
-            @update:local-sort-direction="localSortDirection = $event"
-          />
+        <div class="mt-5 flex min-h-0 flex-1 overflow-hidden">
+          <div class="min-w-0 flex-1 overflow-y-auto pr-1">
+            <PickerSearchToolbar
+              :category-name="category.name"
+              :search-draft="searchDraft"
+              :local-sort-field="localSortField"
+              :local-sort-direction="localSortDirection"
+              :sort-field-options="sortFieldOptions"
+              :sort-field-placeholder-label="sortFieldPlaceholderLabel"
+              @update:search-draft="searchDraft = $event"
+              @update:local-sort-field="localSortField = $event"
+              @update:local-sort-direction="localSortDirection = $event"
+            />
 
-          <PickerFilterSummary
-            :active-filter-summary="activeFilterSummary"
-            :can-use-list-filters="canUseListFilters"
-            :only-on-list="pickerFiltersStore.onlyOnList"
-            :hide-on-list="pickerFiltersStore.hideOnList"
-            @toggle-list-visibility="pickerFiltersStore.toggleListVisibility($event)"
-          />
+            <PickerFilterSummary
+              :active-filter-summary="activeFilterSummary"
+              :can-use-list-filters="canUseListFilters"
+              :only-on-list="pickerFiltersStore.onlyOnList"
+              :hide-on-list="pickerFiltersStore.hideOnList"
+              @toggle-list-visibility="pickerFiltersStore.toggleListVisibility($event)"
+            />
 
-          <PickerResultsFrame
-            :total-results="totalResults"
-            :current-page="searchResponse?.pageInfo.currentPage ?? currentPage"
-            :last-page="searchResponse?.pageInfo.lastPage ?? 1"
-            :has-next-page="searchResponse?.pageInfo.hasNextPage ?? false"
-            :status="status"
-            :has-results="(searchResponse?.results?.length ?? 0) > 0"
-            :error-message="errorMessage"
-            empty-message="No anime matched the current effective filters and search term."
-            @previous="currentPage -= 1"
-            @next="currentPage += 1"
-            @retry="loadResults(debouncedSearch, currentPage)"
-          >
-            <div class="relative min-h-[24rem] overflow-visible">
-              <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                <AnimePickerResultCard
-                  v-for="result in searchResponse?.results ?? []"
-                  :key="result.id"
-                  :result="result"
-                  :title-language="titleLanguage"
-                  :is-selected="focusedAnimeId === result.id"
-                  @select="loadSongsForAnime"
-                  @clear="emit('clear')"
-                />
+            <PickerResultsFrame
+              :total-results="totalResults"
+              :current-page="searchResponse?.pageInfo.currentPage ?? currentPage"
+              :last-page="searchResponse?.pageInfo.lastPage ?? 1"
+              :has-next-page="searchResponse?.pageInfo.hasNextPage ?? false"
+              :status="status"
+              :has-results="(searchResponse?.results?.length ?? 0) > 0"
+              :error-message="errorMessage"
+              empty-message="No anime matched the current effective filters and search term."
+              @previous="currentPage -= 1"
+              @next="currentPage += 1"
+              @retry="loadResults(debouncedSearch, currentPage)"
+            >
+              <div class="relative min-h-[24rem] overflow-visible">
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  <AnimePickerResultCard
+                    v-for="result in searchResponse?.results ?? []"
+                    :key="result.id"
+                    :result="result"
+                    :title-language="titleLanguage"
+                    :is-selected="focusedAnimeId === result.id"
+                    @select="loadSongsForAnime"
+                    @clear="emit('clear')"
+                  />
+                </div>
               </div>
+            </PickerResultsFrame>
+          </div>
 
-              <SongPickerSidebar
-                v-if="detailAnime"
-                :detail-anime="detailAnime"
-                :songs="focusedSongs"
-                :is-collapsed="isDetailCollapsed"
-                :song-error-message="songErrorMessage"
-                :song-status="songStatus"
-                :title-language="titleLanguage"
-                :selected-song="selectedSong"
-                :song-filter-types="category.songFilter.types"
-                @clear="emit('clear')"
-                @collapse-toggle="isDetailCollapsed ? expandDetailPanel() : collapseDetailPanel()"
-                @preview-song="openPreview(detailAnime, $event)"
-                @retry-songs="loadSongsForAnime(detailAnime)"
-                @select-song="selectSong(detailAnime, $event)"
-              />
-            </div>
-          </PickerResultsFrame>
+          <SongPickerSidebar
+            v-if="detailAnime"
+            :detail-anime="detailAnime"
+            :songs="focusedSongs"
+            :is-collapsed="isDetailCollapsed"
+            :song-error-message="songErrorMessage"
+            :song-status="songStatus"
+            :title-language="titleLanguage"
+            :selected-song="selectedSong"
+            :song-filter-types="category.songFilter.types"
+            @clear="emit('clear')"
+            @collapse-toggle="isDetailCollapsed ? expandDetailPanel() : collapseDetailPanel()"
+            @preview-song="openPreview(detailAnime, $event)"
+            @retry-songs="loadSongsForAnime(detailAnime)"
+            @select-song="selectSong(detailAnime, $event)"
+          />
         </div>
       </DialogContent>
     </DialogPortal>
