@@ -6,7 +6,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { predefinedTemplates } from '@/templates/predefined'
 import { createAnimeSelection } from '@/lib/song-selection'
-import { templateSchemaVersion, type AnimeSelection } from '@/types'
+import { AnimeFormat, AnimeSeason, templateSchemaVersion, type AnimeSelection } from '@/types'
 
 const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 5114,
@@ -22,9 +22,9 @@ const createSelection = (): AnimeSelection => createAnimeSelection({
     extraLarge: null,
     color: '#1f2937',
   },
-  season: 'SPRING',
+  season: AnimeSeason.Spring,
   seasonYear: 2009,
-  format: 'TV',
+  format: AnimeFormat.Tv,
 })
 
 describe('template store fork-on-edit behavior', () => {

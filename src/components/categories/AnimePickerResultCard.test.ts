@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
 import AnimePickerResultCard from '@/components/categories/AnimePickerResultCard.vue'
-import type { AniListSearchResult } from '@/types'
+import { AnimeFormat, AnimeTitleLanguage, type AniListSearchResult } from '@/types'
 
 describe('AnimePickerResultCard', () => {
   it('formats the anime release format label', () => {
@@ -24,14 +24,14 @@ describe('AnimePickerResultCard', () => {
       },
       description: null,
       seasonYear: 2024,
-      format: 'TV_SHORT',
+      format: AnimeFormat.TvShort,
       siteUrl: 'https://anilist.co/anime/1',
     }
 
     const wrapper = mount(AnimePickerResultCard, {
       props: {
         result,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
         isSelected: false,
       },
     })

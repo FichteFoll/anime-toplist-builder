@@ -34,7 +34,7 @@ import {
   type AnimeTitleLanguage,
   type Category,
   type FilterSort,
-  type FilterSortDirection,
+  FilterSortDirection,
   type FilterSortField,
   type FilterState,
   type SongSelection,
@@ -60,7 +60,7 @@ const status = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const errorMessage = ref<string | null>(null)
 const searchResponse = ref<AniListSearchResponse | null>(null)
 const localSortField = ref<FilterSortField | ''>('')
-const localSortDirection = ref<FilterSortDirection>('desc')
+const localSortDirection = ref<FilterSortDirection>(FilterSortDirection.Desc)
 const focusedAnimeId = ref<number | null>(null)
 const isDetailCollapsed = ref(false)
 const songStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
@@ -137,7 +137,7 @@ const resetState = () => {
   songsByAnimeId.value = {}
   hydratedSelectedAnime.value = createHydratedAnimePlaceholder()
   localSortField.value = currentCategorySort.value?.field ?? ''
-  localSortDirection.value = currentCategorySort.value?.direction ?? 'desc'
+  localSortDirection.value = currentCategorySort.value?.direction ?? FilterSortDirection.Desc
   focusedAnimeId.value = props.selectedSong?.animeId ?? null
   isDetailCollapsed.value = !props.selectedSong
   isResettingState.value = false

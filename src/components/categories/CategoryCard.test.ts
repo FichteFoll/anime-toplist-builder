@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
-import { CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
   name: 'CategoryMediaPickerDialog',
@@ -48,9 +48,9 @@ const selection: AnimeSelection = createAnimeSelection({
     extraLarge: null,
     color: '#475569',
   },
-  season: 'FALL',
+  season: AnimeSeason.Fall,
   seasonYear: 2002,
-  format: 'TV',
+  format: AnimeFormat.Tv,
 })
 
 describe('CategoryCard', () => {
@@ -64,7 +64,7 @@ describe('CategoryCard', () => {
         metadataStatus: 'idle',
         metadataError: null,
         canReorder: false,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
       global: {
         stubs: {
@@ -112,7 +112,7 @@ describe('CategoryCard', () => {
         metadataStatus: 'idle',
         metadataError: null,
         canReorder: false,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
       global: {
         stubs: {

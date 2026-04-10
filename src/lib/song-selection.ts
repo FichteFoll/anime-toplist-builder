@@ -1,13 +1,13 @@
-import type {
+import {
   AnimeFormat,
-  AnimeCoverImage,
   AnimeSeason,
-  AnimeTitle,
   AnimeTitleLanguage,
-  CategorySelection,
-  SongPerformance,
-  SongSelection,
   ThemeType,
+  type AnimeCoverImage,
+  type AnimeTitle,
+  type CategorySelection,
+  type SongPerformance,
+  type SongSelection,
 } from '@/types'
 
 import { resolveAnimeTitle } from '@/lib/anime-title'
@@ -134,7 +134,7 @@ export const resolveSongTitle = (
   const defaultTitle = normalizeText(song.title)
   const nativeTitle = normalizeText(song.titleNative)
 
-  if (titleLanguage === 'native') {
+  if (titleLanguage === AnimeTitleLanguage.Native) {
     return nativeTitle
       ? {
           primary: nativeTitle,

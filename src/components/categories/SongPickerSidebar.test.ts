@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
 import SongPickerSidebar from '@/components/categories/SongPickerSidebar.vue'
-import type { AniListSearchResult } from '@/types'
+import { AnimeFormat, AnimeTitleLanguage, type AniListSearchResult } from '@/types'
 
 describe('SongPickerSidebar', () => {
   it('formats the anime release format label in the detail panel', () => {
@@ -24,7 +24,7 @@ describe('SongPickerSidebar', () => {
       },
       description: null,
       seasonYear: 2024,
-      format: 'TV_SHORT',
+      format: AnimeFormat.TvShort,
       siteUrl: 'https://anilist.co/anime/1',
     }
 
@@ -36,7 +36,7 @@ describe('SongPickerSidebar', () => {
         songFilterTypes: [],
         songErrorMessage: null,
         songStatus: 'ready',
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 

@@ -1,15 +1,26 @@
-export const animeTitleLanguages = ['romaji', 'english', 'native'] as const
+export enum AnimeTitleLanguage {
+  Romaji = 'romaji',
+  English = 'english',
+  Native = 'native',
+}
 
-export type AnimeTitleLanguage = (typeof animeTitleLanguages)[number]
+export const animeTitleLanguages = [AnimeTitleLanguage.Romaji, AnimeTitleLanguage.English, AnimeTitleLanguage.Native] as const
 
-export const defaultAnimeTitleLanguage: AnimeTitleLanguage = 'english'
+export const defaultAnimeTitleLanguage: AnimeTitleLanguage = AnimeTitleLanguage.English
 
-export const themePreferences = ['system', 'light', 'dark'] as const
+export enum ThemePreference {
+  System = 'system',
+  Light = 'light',
+  Dark = 'dark',
+}
 
-export type ThemePreference = (typeof themePreferences)[number]
+export const themePreferences = [ThemePreference.System, ThemePreference.Light, ThemePreference.Dark] as const
 
-export const defaultThemePreference: ThemePreference = 'system'
+export const defaultThemePreference: ThemePreference = ThemePreference.System
 
-export const exportImageLayouts = ['portrait', 'landscape'] as const
+export enum ExportImageLayout {
+  Portrait = 'portrait',
+  Landscape = 'landscape',
+}
 
-export type ExportImageLayout = (typeof exportImageLayouts)[number]
+export const exportImageLayouts = [ExportImageLayout.Portrait, ExportImageLayout.Landscape] as const

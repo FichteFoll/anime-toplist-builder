@@ -21,6 +21,7 @@ import { createAnimeSelection } from '@/lib/song-selection'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { usePickerFiltersStore } from '@/stores/picker-filters'
 import {
+  AniListListVisibility,
   filterSortFields,
   type AniListSearchResponse,
   type AniListSearchResult,
@@ -28,7 +29,7 @@ import {
   type AnimeTitleLanguage,
   type Category,
   type FilterSort,
-  type FilterSortDirection,
+  FilterSortDirection,
   type FilterSortField,
   type FilterState,
 } from '@/types'
@@ -53,7 +54,7 @@ const status = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const errorMessage = ref<string | null>(null)
 const searchResponse = ref<AniListSearchResponse | null>(null)
 const localSortField = ref<FilterSortField | ''>('')
-const localSortDirection = ref<FilterSortDirection>('desc')
+const localSortDirection = ref<FilterSortDirection>(FilterSortDirection.Desc)
 const debouncedSearch = useDebouncedValue(searchDraft, 250)
 const isResettingState = ref(false)
 const aniListAuthStore = useAniListAuthStore()
@@ -107,7 +108,7 @@ const resetSearchState = () => {
   searchResponse.value = null
   status.value = 'idle'
   localSortField.value = currentCategorySort.value?.field ?? ''
-  localSortDirection.value = currentCategorySort.value?.direction ?? 'desc'
+  localSortDirection.value = currentCategorySort.value?.direction ?? FilterSortDirection.Desc
   isResettingState.value = false
 }
 

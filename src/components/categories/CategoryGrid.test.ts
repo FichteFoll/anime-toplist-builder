@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
-import { CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
   sortableDestroy: vi.fn(),
@@ -73,9 +73,9 @@ const categoryCardStub = defineComponent({
         extraLarge: null,
         color: '#475569',
       },
-      season: 'FALL',
+      season: AnimeSeason.Fall,
       seasonYear: 2002,
-      format: 'TV',
+      format: AnimeFormat.Tv,
     })
 
     return {
@@ -122,7 +122,7 @@ const mountCategoryGrid = () =>
       metadata: null,
       metadataStatus: 'idle',
       metadataError: null,
-      titleLanguage: 'english',
+      titleLanguage: AnimeTitleLanguage.English,
     },
     global: {
       stubs: {

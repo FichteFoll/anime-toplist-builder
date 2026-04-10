@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { countWrappedTextLines } from '@/lib/export-image'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
-import { ThemeType } from '@/types'
+import { AnimeTitleLanguage, ThemeType } from '@/types'
 
 const createContext = (measureWidth: (text: string) => number) =>
   ({
@@ -55,7 +55,7 @@ describe('song title helpers', () => {
       },
     })
 
-    expect(resolveSongTitle(songSelection.song, 'native')).toEqual({
+    expect(resolveSongTitle(songSelection.song, AnimeTitleLanguage.Native)).toEqual({
       primary: '私の歌',
       tooltip: 'My Song',
     })

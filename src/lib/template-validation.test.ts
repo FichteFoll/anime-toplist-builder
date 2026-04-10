@@ -9,7 +9,7 @@ import {
   parseTemplateImportPayload,
   stringifyTemplateExportPayload,
 } from '@/lib/template-validation'
-import { TemplateOrigin, templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
+import { AnimeFormat, TemplateOrigin, templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
 
 describe('template validation', () => {
   it('parses and normalizes imported payload fields', () => {
@@ -150,7 +150,7 @@ describe('template validation', () => {
         name: 'Export me',
         description: 'Export context',
         globalFilter: {
-          formats: ['TV', 'MOVIE'],
+          formats: [AnimeFormat.Tv, AnimeFormat.Movie],
           minimumTagRank: 40,
         },
         categories: [
@@ -174,7 +174,7 @@ describe('template validation', () => {
       description: 'Export context',
       globalFilter: {
         minimumTagRank: 40,
-        formats: ['MOVIE', 'TV'],
+        formats: [AnimeFormat.Movie, AnimeFormat.Tv],
       },
       categories: [
         {

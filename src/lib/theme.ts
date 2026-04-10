@@ -1,4 +1,4 @@
-import type { ThemePreference } from '@/types'
+import { ThemePreference } from '@/types'
 
 export enum ResolvedTheme {
   Light = 'light',
@@ -8,4 +8,9 @@ export enum ResolvedTheme {
 export const resolveThemePreference = (
   preference: ThemePreference,
   systemTheme: ResolvedTheme,
-): ResolvedTheme => (preference === 'system' ? systemTheme : (preference as ResolvedTheme))
+): ResolvedTheme =>
+  preference === ThemePreference.System
+    ? systemTheme
+    : preference === ThemePreference.Dark
+      ? ResolvedTheme.Dark
+      : ResolvedTheme.Light

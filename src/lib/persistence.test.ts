@@ -12,6 +12,8 @@ import { normalizeImportedTemplate } from '@/lib/template-validation'
 import {
   defaultAnimeTitleLanguage,
   defaultThemePreference,
+  AnimeFormat,
+  AnimeSeason,
   templateSchemaVersion,
   TemplateOrigin,
   ThemeType,
@@ -58,9 +60,9 @@ const createSelection = (): AnimeSelection => createAnimeSelection({
     extraLarge: null,
     color: '#111827',
   },
-  season: 'SUMMER',
+  season: AnimeSeason.Summer,
   seasonYear: 1998,
-  format: 'TV',
+  format: AnimeFormat.Tv,
 })
 
 describe('persistence helpers', () => {

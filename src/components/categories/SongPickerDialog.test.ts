@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createSongSelection } from '@/lib/song-selection'
-import { CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   fetchAniListMediaById: vi.fn(),
@@ -136,9 +136,9 @@ const createResult = (): AniListSearchResult => ({
     color: '#475569',
   },
   description: 'A quiet synopsis.',
-  season: 'FALL',
+  season: AnimeSeason.Fall,
   seasonYear: 2002,
-  format: 'TV',
+  format: AnimeFormat.Tv,
   siteUrl: 'https://anilist.co/anime/42',
 })
 
@@ -164,7 +164,7 @@ describe('SongPickerDialog', () => {
       songs: [
         {
           id: 7,
-          type: 'OP',
+          type: ThemeType.OP,
           slug: 'op1',
           title: 'Blue Flow',
           titleNative: null,
@@ -178,7 +178,7 @@ describe('SongPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedSong,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 
@@ -214,7 +214,7 @@ describe('SongPickerDialog', () => {
       songs: [
         {
           id: 7,
-          type: 'OP',
+          type: ThemeType.OP,
           slug: 'op1',
           title: 'Blue Flow',
           titleNative: null,
@@ -228,7 +228,7 @@ describe('SongPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedSong,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 

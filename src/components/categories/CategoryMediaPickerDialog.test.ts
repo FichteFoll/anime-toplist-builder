@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
-import { CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   searchAnimeMedia: vi.fn(),
@@ -98,9 +98,9 @@ const createResult = (): AniListSearchResult => ({
     color: '#475569',
   },
   description: null,
-  season: 'FALL',
+  season: AnimeSeason.Fall,
   seasonYear: 2002,
-  format: 'TV',
+  format: AnimeFormat.Tv,
   siteUrl: 'https://anilist.co/anime/42',
 })
 
@@ -124,7 +124,7 @@ describe('CategoryMediaPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedMediaId: 42,
-        titleLanguage: 'english',
+        titleLanguage: AnimeTitleLanguage.English,
       },
     });
 

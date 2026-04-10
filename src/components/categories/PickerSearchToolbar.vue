@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FilterSortDirection, FilterSortField } from '@/types'
+import { FilterSortDirection, type FilterSortField } from '@/types'
 
 defineProps<{
   categoryName: string
@@ -54,20 +54,20 @@ const localSortDirection = defineModel<FilterSortDirection>('localSortDirection'
       <button
         type="button"
         class="shell-button"
-        :class="localSortDirection === 'asc' ? 'shell-button-active' : ''"
+        :class="localSortDirection === FilterSortDirection.Asc ? 'shell-button-active' : ''"
         :disabled="!localSortField"
         aria-label="Use ascending sort order"
-        @click="localSortDirection = 'asc'"
+        @click="localSortDirection = FilterSortDirection.Asc"
       >
         Asc
       </button>
       <button
         type="button"
         class="shell-button"
-        :class="localSortDirection === 'desc' ? 'shell-button-active' : ''"
+        :class="localSortDirection === FilterSortDirection.Desc ? 'shell-button-active' : ''"
         :disabled="!localSortField"
         aria-label="Use descending sort order"
-        @click="localSortDirection = 'desc'"
+        @click="localSortDirection = FilterSortDirection.Desc"
       >
         Desc
       </button>

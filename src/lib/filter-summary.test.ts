@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { buildActiveFilterSummary } from '@/lib/filter-summary'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { AnimeFormat, AnimeSeason, AnimeSource } from '@/types'
 import type { FilterState } from '@/types'
 
 describe('buildActiveFilterSummary', () => {
@@ -11,14 +12,14 @@ describe('buildActiveFilterSummary', () => {
       yearRange: { minimum: 2001 },
       episodes: { maximum: 24 },
       duration: { minimum: 20, maximum: 45 },
-      seasons: ['SPRING'],
+      seasons: [AnimeSeason.Spring],
       countryOfOrigin: 'JP',
       genres: ['Action'],
       excludedGenres: ['Horror'],
-      formats: ['TV_SHORT'],
+      formats: [AnimeFormat.TvShort],
       tags: ['Time Travel'],
       excludedTags: ['Ecchi'],
-      source: ['MANGA'],
+      source: [AnimeSource.Manga],
       minimumTagRank: 40,
     }
 

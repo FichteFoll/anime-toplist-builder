@@ -19,17 +19,18 @@ import {
 } from '@/lib/export-image'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSettingsStore } from '@/stores/settings'
-import type {
-  AnimeTitleLanguage,
-  CategorySelectionMap,
+import {
   ExportImageLayout,
-  Template,
+  type AnimeTitleLanguage,
+  type CategorySelectionMap,
+  type Template,
 } from '@/types'
+import { ResolvedTheme } from '@/lib/theme'
 
 const props = defineProps<{
   template: Template | null
   selectionByCategory: CategorySelectionMap
-  resolvedTheme: 'light' | 'dark'
+  resolvedTheme: ResolvedTheme
   titleLanguage: AnimeTitleLanguage
   defaultAuthor?: string
   defaultAuthorSource?: 'anilist' | 'manual'
@@ -40,7 +41,7 @@ const settingsStore = useSettingsStore()
 const isOpen = ref(false)
 const author = ref('')
 const hideAuthor = ref(false)
-const layout = ref<ExportImageLayout>('portrait')
+const layout = ref<ExportImageLayout>(ExportImageLayout.Portrait)
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
 const isRendering = ref(false)
@@ -51,7 +52,9 @@ let renderRequestId = 0
 const defaultAuthor = computed(() => props.defaultAuthor?.trim() || 'Anonymous')
 const resolvedAuthor = computed(() => author.value.trim() || defaultAuthor.value)
 const defaultLayout = computed<ExportImageLayout>(() =>
-  props.template && props.template.categories.length >= 12 ? 'landscape' : 'portrait',
+  props.template && props.template.categories.length >= 12
+    ? ExportImageLayout.Landscape
+    : ExportImageLayout.Portrait,
 )
 const showAniListBadge = computed(
   () =>
