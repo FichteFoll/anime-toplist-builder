@@ -747,19 +747,9 @@ export const renderTemplatePng = async ({
         ? resolveSongTitle(selection.song, titleLanguage).primary
         : resolveAnimeTitle(selection.title, titleLanguage)
       : ''
-    const metaText = selection
-      ? selection.kind === 'song'
-        ? formatSongSourceMetaLines(
-            context,
-            resolveAnimeTitle(selection.animeTitle, titleLanguage),
-            selection.song.slug,
-            selection.song.episodes ?? null,
-            textWidth,
-          )
-        : [selection.seasonYear ?? null, selection.format ?? null]
-            .filter((value): value is number | AnimeFormat => value !== null)
-            .join(' • ')
-      : ''
+
+    setCanvasFont(context, 500, fonts.meta)
+    context.fillStyle = palette.muted
 
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
@@ -852,6 +842,11 @@ export const renderTemplatePng = async ({
 
       context.restore()
     } else {
+      const metaText = selection
+        ? [selection.seasonYear ?? null, selection.format ?? null]
+            .filter((value): value is number | AnimeFormat => value !== null)
+            .join(' • ')
+        : ''
       drawWrappedText(
         context,
         metaText,
@@ -863,9 +858,6 @@ export const renderTemplatePng = async ({
         palette.muted,
       )
     }
-
-    setCanvasFont(context, 500, fonts.meta)
-    context.fillStyle = palette.muted
   })
 
   setCanvasFont(context, 500, fonts.meta)
