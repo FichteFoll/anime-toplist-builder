@@ -21,6 +21,7 @@ jobs:
       VITE_BASE_PATH: /${{ github.event.repository.name }}/
       VITE_REPOSITORY_URL: https://github.com/${{ github.repository }}
       VITE_EXPORT_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      VITE_ANILIST_CLIENT_ID: ${{ vars.VITE_ANILIST_CLIENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
