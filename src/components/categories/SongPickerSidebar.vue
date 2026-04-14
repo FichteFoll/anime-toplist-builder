@@ -67,7 +67,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
         />
       </button>
 
-      <aside class="h-full w-[26rem] min-w-[26rem] backdrop-blur-sm flex-col gap-4 overflow-hidden rounded-[1.25rem] border border-app-border/70 bg-app-bg/95 p-4">
+      <aside class="flex h-full w-[26rem] min-w-[26rem] flex-col gap-4 overflow-hidden rounded-[1.25rem] border border-app-border/70 bg-app-bg/95 p-4 backdrop-blur-sm">
         <div class="grid shrink-0 grid-cols-[5rem_1fr] gap-4 p-4 border-app-border/70 bg-app-surface/70 rounded-[1rem] border">
           <img
             :src="detailAnime.coverImage.large"
