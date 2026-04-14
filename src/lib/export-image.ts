@@ -28,28 +28,25 @@ export const FONT_SIZE_CATEGORY_TITLE = 20
 export const FONT_SIZE_BODY = 18
 export const FONT_SIZE_META = 16
 
-const truncateSongMeta = (
+export const formatSongSourceMetaLines = (
   context: CanvasRenderingContext2D,
   animeName: string,
   slug: string,
   episodes: string | null,
   maxWidth: number,
 ) => {
-  const buildLine = (name: string) => {
-    const episodesHint = formatSongEpisodesHint(episodes)
-
-    return episodesHint ? `from ${name} (${slug}, ${episodesHint})` : `from ${name} (${slug})`
-  }
-
-  const fullLine = buildLine(animeName)
+  const episodesHint = formatSongEpisodesHint(episodes)
+  const suffix = episodesHint ? `(${slug}, ${episodesHint})` : `(${slug})`
+  const fullLine = `from ${animeName} ${suffix}`
 
   if (context.measureText(fullLine).width <= maxWidth) {
-    return fullLine
+    return [fullLine]
   }
 
-  const fallbackWidth = Math.max(90, maxWidth - context.measureText(`from  (${slug})`).width)
+  const labelWidth = context.measureText('from ').width
+  const sourceName = fitTextToWidth(context, animeName, Math.max(90, maxWidth - labelWidth))
 
-  return buildLine(fitTextToWidth(context, animeName, fallbackWidth))
+  return [`from ${sourceName}`, fitTextToWidth(context, suffix, maxWidth)]
 }
 
 interface ExportPalette {
@@ -752,7 +749,7 @@ export const renderTemplatePng = async ({
       : ''
     const metaText = selection
       ? selection.kind === 'song'
-        ? truncateSongMeta(
+        ? formatSongSourceMetaLines(
             context,
             resolveAnimeTitle(selection.animeTitle, titleLanguage),
             selection.song.slug,
@@ -825,6 +822,13 @@ export const renderTemplatePng = async ({
     context.fillStyle = palette.muted
     if (selection?.kind === 'song') {
       const artist = selection.song.artist.trim()
+      const sourceLines = formatSongSourceMetaLines(
+        context,
+        resolveAnimeTitle(selection.animeTitle, titleLanguage),
+        selection.song.slug,
+        selection.song.episodes ?? null,
+        textWidth,
+      )
 
       if (artist) {
         prevLineY = drawWrappedText(
@@ -838,16 +842,15 @@ export const renderTemplatePng = async ({
           palette.muted,
         )
       }
-      drawWrappedText(
-        context,
-        metaText,
-        textX,
-        prevLineY + CARD_TEXT_GAP,
-        textWidth,
-        Math.round(fonts.meta * 1.3),
-        2,
-        palette.muted,
-      )
+
+      context.save()
+      context.fillStyle = palette.muted
+
+      for (const [lineIndex, line] of sourceLines.entries()) {
+        context.fillText(line, textX, prevLineY + CARD_TEXT_GAP + lineIndex * Math.round(fonts.meta * 1.3))
+      }
+
+      context.restore()
     } else {
       drawWrappedText(
         context,

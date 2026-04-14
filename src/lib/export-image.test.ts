@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { countWrappedTextLines } from '@/lib/export-image'
+import { countWrappedTextLines, formatSongSourceMetaLines } from '@/lib/export-image'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 import { AnimeTitleLanguage, ThemeType } from '@/types'
 
@@ -26,6 +26,24 @@ describe('countWrappedTextLines', () => {
     const context = createContext((text) => text.length * 10)
 
     expect(countWrappedTextLines(context, 'One two three four five six', 70, 2)).toBe(2)
+  })
+})
+
+describe('formatSongSourceMetaLines', () => {
+  it('splits long song source info across two lines', () => {
+    const context = createContext((text) => text.length * 10)
+
+    expect(
+      formatSongSourceMetaLines(context, 'Eyeshield 21', 'ED6', '117-126', 220),
+    ).toEqual(['from Eyeshield 21', '(ED6, eps 117-126)'])
+  })
+
+  it('keeps short song source info on one line', () => {
+    const context = createContext((text) => text.length * 10)
+
+    expect(formatSongSourceMetaLines(context, 'Cowboy Bebop', 'OP1', '1-25', 360)).toEqual([
+      'from Cowboy Bebop (OP1, eps 1-25)',
+    ])
   })
 })
 
