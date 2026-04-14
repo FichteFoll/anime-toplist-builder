@@ -8,7 +8,7 @@ import {
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
-import { fetchAniListMediaById, fetchAnimeSongs, normalizeAnimeThemesError, searchAnimeMedia, type AnimeThemesSong } from '@/api'
+import { fetchAniListMediaById, fetchAnimeSongs, normalizeAniListError, normalizeAnimeThemesError, searchAnimeMedia, type AnimeThemesSong } from '@/api'
 import AnimePickerResultCard from '@/components/categories/AnimePickerResultCard.vue'
 import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
 import PickerFilterSummary from '@/components/categories/PickerFilterSummary.vue'
@@ -219,7 +219,7 @@ const loadResults = async (searchTerm: string, page: number) => {
     }
 
     status.value = 'error'
-    errorMessage.value = normalizeAnimeThemesError(error).message
+    errorMessage.value = normalizeAniListError(error).message
   }
 }
 

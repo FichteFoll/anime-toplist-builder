@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/api', () => ({
   fetchAniListMediaById: mocks.fetchAniListMediaById,
   fetchAnimeSongs: mocks.fetchAnimeSongs,
-  normalizeAnimeThemesError: vi.fn((error: unknown) => ({
+  normalizeAniListError: vi.fn((error: unknown) => ({
     message: error instanceof Error ? error.message : 'Unknown error',
   })),
   searchAnimeMedia: mocks.searchAnimeMedia,
@@ -53,8 +53,8 @@ vi.mock('reka-ui', () => ({
   TooltipArrow: { template: '<div><slot /></div>' },
   TooltipContent: { template: '<div><slot /></div>' },
   TooltipPortal: { template: '<div><slot /></div>' },
-  TooltipRoot: { template: '<div><slot /></slot></div>' },
-  TooltipTrigger: { template: '<div><slot /></slot></div>' },
+  TooltipRoot: { template: '<div><slot /></div>' },
+  TooltipTrigger: { template: '<div><slot /></div>' },
 }))
 
 vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
@@ -195,7 +195,7 @@ describe('SongPickerDialog', () => {
     expect(wrapper.text()).toContain('2002')
   })
 
-  it('shows the clear action in the detail panel instead of the anime cards', async () => {
+  it('keeps the clear action out of the anime cards', async () => {
     setActivePinia(createPinia())
 
     const response: AniListSearchResponse = {
@@ -241,6 +241,6 @@ describe('SongPickerDialog', () => {
     await nextTick()
     await nextTick()
 
-    expect(wrapper.text()).toContain('Unselect')
+    expect(wrapper.find('.clear-result').exists()).toBe(false)
   })
 })

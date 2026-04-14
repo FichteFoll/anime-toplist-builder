@@ -146,13 +146,17 @@ watch(
             v-else
             class="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1"
           >
-            <button
+            <div
               v-for="song in filteredSongs"
               :key="`${detailAnime.id}:${song.id}`"
-              type="button"
+              role="button"
+              tabindex="0"
               class="flex w-full items-start justify-between gap-3 rounded-[1rem] border px-3 py-3 text-left transition"
               :class="selectedSongKey === `${detailAnime.id}:${song.id}` ? 'border-app-accent bg-app-accent/10' : 'border-app-border/70 bg-app-surface/70 hover:border-app-accent/40'"
+              :aria-pressed="selectedSongKey === `${detailAnime.id}:${song.id}`"
               @click="emit('selectSong', song)"
+              @keydown.enter.prevent="emit('selectSong', song)"
+              @keydown.space.prevent="emit('selectSong', song)"
             >
               <div class="min-w-0">
                 <TooltipRoot v-if="resolveSongTitle(song, settingsStore.titleLanguage).tooltip">
@@ -197,7 +201,7 @@ watch(
               >
                 <PlayIcon class="h-5 w-5" />
               </button>
-            </button>
+            </div>
           </div>
         </div>
       </aside>

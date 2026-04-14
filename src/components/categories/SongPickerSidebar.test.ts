@@ -34,7 +34,6 @@ describe('SongPickerSidebar', () => {
     const wrapper = mount(SongPickerSidebar, {
       props: {
         detailAnime,
-        isCollapsed: false,
         songs: [],
         songFilterTypes: [],
         songErrorMessage: null,
