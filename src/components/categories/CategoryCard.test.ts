@@ -132,6 +132,51 @@ describe('CategoryCard', () => {
 
     expect(wrapper.text()).toContain('Free Bird')
     expect(wrapper.text()).toContain('by Ayaka')
-    expect(wrapper.text()).toContain('from Haibane Renmei (op1, ep 2-12, 14)')
+    expect(wrapper.text()).toContain('from Haibane Renmei (op1, eps 2-12, 14)')
+  })
+
+  it('hides the artist line when the song artist is blank', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: CategoryEntityKind.Song,
+        },
+        selection: createSongSelection({
+          animeId: 42,
+          animeTitle: selection.title,
+          animeCoverImage: selection.coverImage,
+          song: {
+            id: 101,
+            type: ThemeType.OP,
+            slug: 'op1',
+            title: 'Free Bird',
+            artist: '   ',
+          },
+        }),
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+        titleLanguage: AnimeTitleLanguage.English,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          CategoryMediaPickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    expect(wrapper.text()).not.toContain('by')
   })
 })

@@ -57,7 +57,9 @@ const selectionCoverImage = computed(() =>
   props.selection ? getSelectionCoverImage(props.selection) : null,
 )
 const songArtistLine = computed(() =>
-  props.selection?.kind === 'song' ? `by ${props.selection.song.artist}` : null,
+  props.selection?.kind === 'song' && props.selection.song.artist.trim()
+    ? `by ${props.selection.song.artist.trim()}`
+    : null,
 )
 const songContextLine = computed(() =>
   props.selection?.kind === 'song' ? getSongContextLabel(props.selection, props.titleLanguage) : null,

@@ -167,8 +167,11 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
                 >
                   {{ resolveSongTitle(song, titleLanguage).primary }}
                 </p>
-                <p class="mt-1 text-sm text-app-muted">
-                  by {{ song.artist }}
+                <p
+                  v-if="song.artist.trim()"
+                  class="mt-1 text-sm text-app-muted"
+                >
+                  by {{ song.artist.trim() }}
                 </p>
                 <p class="mt-1 text-xs leading-5 text-app-muted">
                   {{ song.slug }}<span v-if="formatSongEpisodesHint(song.episodes)"> ({{ formatSongEpisodesHint(song.episodes) }})</span>

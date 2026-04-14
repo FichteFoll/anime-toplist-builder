@@ -823,21 +823,25 @@ export const renderTemplatePng = async ({
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted
     if (selection?.kind === 'song') {
-      drawWrappedText(
-        context,
-        `by ${selection.song.artist}`,
-        textX,
-        titleBottomY + 12,
-        textWidth,
-        Math.round(fonts.meta * 1.3),
-        2,
-        palette.muted,
-      )
+      const artistLine = selection.song.artist.trim()
+
+      if (artistLine) {
+        drawWrappedText(
+          context,
+          `by ${artistLine}`,
+          textX,
+          titleBottomY + 12,
+          textWidth,
+          Math.round(fonts.meta * 1.3),
+          2,
+          palette.muted,
+        )
+      }
       drawWrappedText(
         context,
         metaText,
         textX,
-        titleBottomY + 38,
+        titleBottomY + (artistLine ? 38 : 16),
         textWidth,
         Math.round(fonts.meta * 1.3),
         2,
