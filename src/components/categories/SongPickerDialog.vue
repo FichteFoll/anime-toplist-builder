@@ -419,6 +419,7 @@ watch(pickerSort, (value, previousValue) => {
                     :key="result.id"
                     :result="result"
                     :is-selected="focusedAnimeId === result.id"
+                    :show-clear-button="false"
                     @select="loadSongsForAnime"
                     @clear="emit('clear')"
                   />
