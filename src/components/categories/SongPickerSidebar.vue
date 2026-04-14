@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import {
   TooltipArrow,
@@ -20,7 +20,6 @@ import type { AniListSearchResult, SongSelection } from '@/types'
 
 const props = defineProps<{
   detailAnime: AniListSearchResult
-  isCollapsed: boolean
   songs: AnimeThemesSong[]
   selectedSong?: SongSelection | null
   songFilterTypes: string[]
@@ -30,11 +29,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   clear: []
-  collapseToggle: []
   previewSong: [song: AnimeThemesSong]
   retrySongs: []
   selectSong: [song: AnimeThemesSong]
 }>()
+
+const isCollapsed = ref(!props.selectedSong)
 
 const filteredSongs = computed(() => {
   if (props.songFilterTypes.length === 0) {
@@ -46,8 +46,17 @@ const filteredSongs = computed(() => {
 
 const settingsStore = useSettingsStore()
 const selectedSongKey = computed(() => props.selectedSong ? getSongSelectionKey(props.selectedSong) : null)
-const detailPanelToggleLabel = computed(() => props.isCollapsed ? 'Show detail panel' : 'Hide detail panel')
-const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-180' : '')
+const detailPanelToggleLabel = computed(() => isCollapsed.value ? 'Show detail panel' : 'Hide detail panel')
+const detailPanelToggleIconClass = computed(() => isCollapsed.value ? 'rotate-180' : '')
+
+watch(
+  () => props.detailAnime.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      isCollapsed.value = false
+    }
+  },
+)
 </script>
 
 <template>
@@ -60,7 +69,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
         type="button"
         class="z-30 inline-flex w-[2rem] shrink-0 items-center justify-center bg-app-surface text-app-text hover:bg-app-accent/10"
         :aria-label="detailPanelToggleLabel"
-        @click="emit('collapseToggle')"
+        @click="isCollapsed = !isCollapsed"
       >
         <CaretIcon
           class="h-4 w-4 transition-transform duration-300"

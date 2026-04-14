@@ -61,7 +61,6 @@ const searchResponse = ref<AniListSearchResponse | null>(null)
 const localSortField = ref<FilterSortField | ''>('')
 const localSortDirection = ref<FilterSortDirection>(FilterSortDirection.Desc)
 const focusedAnimeId = ref<number | null>(null)
-const isDetailCollapsed = ref(false)
 const songStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const songErrorMessage = ref<string | null>(null)
 const songPreview = ref<{ open: boolean, title: string, description: string, videoUrl: string, videoHeight: number | null }>({
@@ -139,7 +138,6 @@ const resetState = () => {
   localSortField.value = currentCategorySort.value?.field ?? ''
   localSortDirection.value = currentCategorySort.value?.direction ?? FilterSortDirection.Desc
   focusedAnimeId.value = props.selectedSong?.animeId ?? null
-  isDetailCollapsed.value = !props.selectedSong
   isResettingState.value = false
 }
 
@@ -169,7 +167,6 @@ const hydrateSelectedAnime = async () => {
 
     hydratedSelectedAnime.value = result ?? createHydratedAnimePlaceholder()
     focusedAnimeId.value = hydratedSelectedAnime.value?.id ?? props.selectedSong.animeId
-    isDetailCollapsed.value = false
     if (hydratedSelectedAnime.value) {
       void loadSongsForAnime(hydratedSelectedAnime.value)
     }
@@ -178,7 +175,6 @@ const hydrateSelectedAnime = async () => {
 
     hydratedSelectedAnime.value = createHydratedAnimePlaceholder()
     focusedAnimeId.value = props.selectedSong.animeId
-    isDetailCollapsed.value = false
     if (hydratedSelectedAnime.value) {
       void loadSongsForAnime(hydratedSelectedAnime.value)
     }
@@ -229,7 +225,6 @@ const loadResults = async (searchTerm: string, page: number) => {
 
 const loadSongsForAnime = async (result: AniListSearchResult) => {
   focusedAnimeId.value = result.id
-  isDetailCollapsed.value = false
   songErrorMessage.value = null
 
   const cached = loadCachedAnimeSongs(result.id)
@@ -270,16 +265,6 @@ const loadSongsForAnime = async (result: AniListSearchResult) => {
 
     songStatus.value = 'error'
     songErrorMessage.value = normalizeAnimeThemesError(error).message
-  }
-}
-
-const collapseDetailPanel = () => {
-  isDetailCollapsed.value = true
-}
-
-const expandDetailPanel = () => {
-  if (detailAnime.value) {
-    isDetailCollapsed.value = false
   }
 }
 
@@ -432,13 +417,11 @@ watch(pickerSort, (value, previousValue) => {
             v-if="detailAnime"
             :detail-anime="detailAnime"
             :songs="focusedSongs"
-            :is-collapsed="isDetailCollapsed"
             :song-error-message="songErrorMessage"
             :song-status="songStatus"
             :selected-song="selectedSong"
             :song-filter-types="category.songFilter.types"
             @clear="emit('clear')"
-            @collapse-toggle="isDetailCollapsed ? expandDetailPanel() : collapseDetailPanel()"
             @preview-song="openPreview(detailAnime, $event)"
             @retry-songs="loadSongsForAnime(detailAnime)"
             @select-song="selectSong(detailAnime, $event)"
