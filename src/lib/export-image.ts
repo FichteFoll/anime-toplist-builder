@@ -17,6 +17,7 @@ export const PORTRAIT_COLUMNS = 3
 export const LANDSCAPE_COLUMNS = 5
 export const CARD_WIDTH = 415
 export const CARD_PADDING = 20
+export const CARD_TEXT_GAP = 4
 export const COVER_WIDTH = 126
 export const COVER_HEIGHT = 183
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
@@ -796,7 +797,7 @@ export const renderTemplatePng = async ({
 
     setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
     context.fillStyle = palette.text
-    const categoryBottomY = drawWrappedText(
+    let prevLineY = drawWrappedText(
       context,
       category.name,
       textX,
@@ -809,11 +810,11 @@ export const renderTemplatePng = async ({
 
     setCanvasFont(context, 700, fonts.body)
     context.fillStyle = palette.text
-    const titleBottomY = drawWrappedText(
+    prevLineY = drawWrappedText(
       context,
       selectionTitle,
       textX,
-      categoryBottomY + 14,
+      prevLineY + CARD_TEXT_GAP,
       textWidth,
       Math.round(fonts.body * 1.28),
       selection?.kind === 'song' ? 2 : 3,
@@ -823,14 +824,14 @@ export const renderTemplatePng = async ({
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted
     if (selection?.kind === 'song') {
-      const artistLine = selection.song.artist.trim()
+      const artist = selection.song.artist.trim()
 
-      if (artistLine) {
-        drawWrappedText(
+      if (artist) {
+        prevLineY = drawWrappedText(
           context,
-          `by ${artistLine}`,
+          `by ${artist}`,
           textX,
-          titleBottomY + 12,
+          prevLineY + CARD_TEXT_GAP,
           textWidth,
           Math.round(fonts.meta * 1.3),
           2,
@@ -841,7 +842,7 @@ export const renderTemplatePng = async ({
         context,
         metaText,
         textX,
-        titleBottomY + (artistLine ? 38 : 16),
+        prevLineY + CARD_TEXT_GAP,
         textWidth,
         Math.round(fonts.meta * 1.3),
         2,
@@ -852,7 +853,7 @@ export const renderTemplatePng = async ({
         context,
         metaText,
         textX,
-        titleBottomY + 16,
+        prevLineY + CARD_TEXT_GAP,
         textWidth,
         Math.round(fonts.meta * 1.3),
         2,
