@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
   sortableDestroy: vi.fn(),
@@ -122,7 +122,6 @@ const mountCategoryGrid = () =>
       metadata: null,
       metadataStatus: 'idle',
       metadataError: null,
-      titleLanguage: AnimeTitleLanguage.English,
     },
     global: {
       stubs: {

@@ -5,7 +5,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import type {
   AniListMetadata,
-  AnimeTitleLanguage,
   Category,
   CategorySelection,
   FilterState,
@@ -18,7 +17,6 @@ const props = defineProps<{
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
@@ -213,7 +211,6 @@ onBeforeUnmount(() => {
         :metadata-error="metadataError"
         :can-reorder="canReorder"
         class="w-full md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.889rem)]"
-        :title-language="titleLanguage"
         @save="forwardCategoryUpdate(category.id, $event)"
         @delete="emit('deleteCategory', $event)"
         @select-selection="forwardAnimeSelection(category.id, $event)"

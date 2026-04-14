@@ -27,11 +27,11 @@ import {
 } from '@/lib/song-selection'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { usePickerFiltersStore } from '@/stores/picker-filters'
+import { useSettingsStore } from '@/stores/settings'
 import {
   filterSortFields,
   type AniListSearchResponse,
   type AniListSearchResult,
-  type AnimeTitleLanguage,
   type Category,
   type FilterSort,
   FilterSortDirection,
@@ -45,7 +45,6 @@ const props = defineProps<{
   category: Category
   globalFilter: FilterState
   selectedSong?: SongSelection | null
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
@@ -78,6 +77,7 @@ const debouncedSearch = useDebouncedValue(searchDraft, 250)
 const isResettingState = ref(false)
 const aniListAuthStore = useAniListAuthStore()
 const pickerFiltersStore = usePickerFiltersStore()
+const settingsStore = useSettingsStore()
 
 let activeRequestId = 0
 let activeSongRequestId = 0
@@ -304,12 +304,12 @@ const openPreview = (result: AniListSearchResult, song: AnimeThemesSong) => {
     animeCoverImage: result.coverImage,
     song,
   })
-  const title = `${resolveSongTitle(songSelection.song, props.titleLanguage).primary} by ${song.artist}`
+  const title = `${resolveSongTitle(songSelection.song, settingsStore.titleLanguage).primary} by ${song.artist}`
 
   songPreview.value = {
     open: true,
     title,
-    description: getSongContextLabel(songSelection, props.titleLanguage),
+    description: getSongContextLabel(songSelection, settingsStore.titleLanguage),
     videoUrl: song.videoLink,
     videoHeight: song.videoHeight ?? null,
   }
@@ -418,7 +418,6 @@ watch(pickerSort, (value, previousValue) => {
                     v-for="result in searchResponse?.results ?? []"
                     :key="result.id"
                     :result="result"
-                    :title-language="titleLanguage"
                     :is-selected="focusedAnimeId === result.id"
                     @select="loadSongsForAnime"
                     @clear="emit('clear')"
@@ -435,7 +434,6 @@ watch(pickerSort, (value, previousValue) => {
             :is-collapsed="isDetailCollapsed"
             :song-error-message="songErrorMessage"
             :song-status="songStatus"
-            :title-language="titleLanguage"
             :selected-song="selectedSong"
             :song-filter-types="category.songFilter.types"
             @clear="emit('clear')"

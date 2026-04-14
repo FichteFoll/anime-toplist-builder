@@ -13,7 +13,6 @@ import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import { getSelectionDisplayLabel } from '@/lib/song-selection'
 import { createBlankCategory } from '@/lib/template-factories'
 import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
-import { useTheme } from '@/composables/useTheme'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
@@ -26,7 +25,6 @@ const templateStore = useTemplateStore()
 const selectionsStore = useSelectionsStore()
 const toastStore = useToastStore()
 const aniListAuthStore = useAniListAuthStore()
-const { resolvedTheme, theme } = useTheme()
 const {
   isOpen: isConfirmationOpen,
   state: confirmationState,
@@ -214,17 +212,10 @@ onMounted(async () => {
     <TooltipProvider :delay-duration="120">
       <div class="min-h-screen bg-app-bg text-app-text">
         <div class="mx-auto flex min-h-screen max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-          <AppHeader
-            v-model="theme"
-            v-model:title-language="settingsStore.titleLanguage"
-            :resolved-theme="resolvedTheme"
-          />
+          <AppHeader />
 
           <main class="flex-1 py-8">
-            <TemplateManagementSection
-              :resolved-theme="resolvedTheme"
-              :title-language="settingsStore.titleLanguage"
-            />
+            <TemplateManagementSection />
 
             <section class="mt-6">
               <div
@@ -242,7 +233,6 @@ onMounted(async () => {
                 :metadata="metadata"
                 :metadata-status="metadataStatus"
                 :metadata-error="metadataError"
-                :title-language="settingsStore.titleLanguage"
                 @add-category="addCategory"
                 @update-category="updateCategory"
                 @delete-category="deleteCategory"

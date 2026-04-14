@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { describe, expect, it } from 'vitest'
 
 import SongPickerSidebar from '@/components/categories/SongPickerSidebar.vue'
-import { AnimeFormat, AnimeTitleLanguage, type AniListSearchResult } from '@/types'
+import { AnimeFormat, type AniListSearchResult } from '@/types'
 
 describe('SongPickerSidebar', () => {
   it('formats the anime release format label in the detail panel', () => {
+    setActivePinia(createPinia())
+
     const detailAnime: AniListSearchResult = {
       id: 1,
       title: {
@@ -36,7 +39,6 @@ describe('SongPickerSidebar', () => {
         songFilterTypes: [],
         songErrorMessage: null,
         songStatus: 'ready',
-        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 

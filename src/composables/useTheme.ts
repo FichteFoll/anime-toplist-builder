@@ -8,6 +8,7 @@ import { useSettingsStore } from '@/stores/settings'
 const systemTheme = ref<ResolvedTheme>(ResolvedTheme.Light)
 
 let isInitialized = false
+let isWatchingTheme = false
 
 const syncDocumentTheme = (value: ResolvedTheme) => {
   if (typeof document === 'undefined') {
@@ -19,7 +20,7 @@ const syncDocumentTheme = (value: ResolvedTheme) => {
   document.documentElement.style.colorScheme = value
 }
 
-const ensureInitialized = () => {
+const initializeThemeIntegration = () => {
   if (isInitialized) {
     return
   }
@@ -45,11 +46,14 @@ const ensureInitialized = () => {
     mediaQuery.addEventListener('change', handleChange)
   }
 
-  watch(resolvedTheme, syncDocumentTheme, { immediate: true })
+  if (!isWatchingTheme) {
+    isWatchingTheme = true
+    watch(resolvedTheme, syncDocumentTheme, { immediate: true })
+  }
 }
 
 export const useTheme = () => {
-  ensureInitialized()
+  initializeThemeIntegration()
   const settingsStore = useSettingsStore()
   const theme = computed<ThemePreference>({
     get: () => settingsStore.themePreference,

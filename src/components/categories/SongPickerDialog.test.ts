@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createSongSelection } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   fetchAniListMediaById: vi.fn(),
@@ -144,6 +145,8 @@ const createResult = (): AniListSearchResult => ({
 
 describe('SongPickerDialog', () => {
   it('hydrates the selected anime metadata in the pinned result', async () => {
+    setActivePinia(createPinia())
+
     const response: AniListSearchResponse = {
       pageInfo: {
         currentPage: 1,
@@ -178,7 +181,6 @@ describe('SongPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedSong,
-        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 
@@ -194,6 +196,8 @@ describe('SongPickerDialog', () => {
   })
 
   it('shows the clear action in the detail panel instead of the anime cards', async () => {
+    setActivePinia(createPinia())
+
     const response: AniListSearchResponse = {
       pageInfo: {
         currentPage: 1,
@@ -228,7 +232,6 @@ describe('SongPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedSong,
-        titleLanguage: AnimeTitleLanguage.English,
       },
     })
 

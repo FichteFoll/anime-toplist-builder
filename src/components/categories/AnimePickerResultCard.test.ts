@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { describe, expect, it } from 'vitest'
 
 import AnimePickerResultCard from '@/components/categories/AnimePickerResultCard.vue'
-import { AnimeFormat, AnimeTitleLanguage, type AniListSearchResult } from '@/types'
+import { AnimeFormat, type AniListSearchResult } from '@/types'
 
 describe('AnimePickerResultCard', () => {
   it('formats the anime release format label', () => {
+    setActivePinia(createPinia())
+
     const result: AniListSearchResult = {
       id: 1,
       title: {
@@ -31,7 +34,6 @@ describe('AnimePickerResultCard', () => {
     const wrapper = mount(AnimePickerResultCard, {
       props: {
         result,
-        titleLanguage: AnimeTitleLanguage.English,
         isSelected: false,
       },
     })

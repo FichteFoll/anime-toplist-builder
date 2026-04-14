@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { defineComponent } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, beforeEach } from 'vitest'
 
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
   name: 'CategoryMediaPickerDialog',
@@ -54,7 +55,12 @@ const selection: AnimeSelection = createAnimeSelection({
 })
 
 describe('CategoryCard', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   it('forwards unselect from the picker dialog', async () => {
+
     const wrapper = mount(CategoryCard, {
       props: {
         category,
@@ -64,7 +70,6 @@ describe('CategoryCard', () => {
         metadataStatus: 'idle',
         metadataError: null,
         canReorder: false,
-        titleLanguage: AnimeTitleLanguage.English,
       },
       global: {
         stubs: {
@@ -112,7 +117,6 @@ describe('CategoryCard', () => {
         metadataStatus: 'idle',
         metadataError: null,
         canReorder: false,
-        titleLanguage: AnimeTitleLanguage.English,
       },
       global: {
         stubs: {
@@ -159,7 +163,6 @@ describe('CategoryCard', () => {
         metadataStatus: 'idle',
         metadataError: null,
         canReorder: false,
-        titleLanguage: AnimeTitleLanguage.English,
       },
       global: {
         stubs: {

@@ -4,16 +4,18 @@ import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.vue'
-import type { AniListSearchResult, AnimeTitleLanguage } from '@/types'
+import { useSettingsStore } from '@/stores/settings'
+import type { AniListSearchResult } from '@/types'
 
 withDefaults(defineProps<{
   result: AniListSearchResult
-  titleLanguage: AnimeTitleLanguage
   isSelected: boolean
   showClearButton?: boolean
 }>(), {
   showClearButton: true,
 })
+
+const settingsStore = useSettingsStore()
 
 const emit = defineEmits<{
   select: [result: AniListSearchResult]
@@ -29,19 +31,19 @@ const emit = defineEmits<{
     <button
       type="button"
       class="flex flex-1 cursor-pointer flex-col gap-4 text-left"
-      :aria-label="`Select ${resolveAnimeTitle(result.title, titleLanguage)}`"
+      :aria-label="`Select ${resolveAnimeTitle(result.title, settingsStore.titleLanguage)}`"
       @click="emit('select', result)"
     >
       <div class="grid grid-cols-[5rem_1fr] gap-4">
         <img
           :src="result.coverImage.large"
-          :alt="resolveAnimeTitle(result.title, titleLanguage)"
+          :alt="resolveAnimeTitle(result.title, settingsStore.titleLanguage)"
           class="h-28 w-20 rounded-xl border border-app-border/70 object-cover"
         >
 
         <div class="min-w-0 space-y-2">
           <p class="min-w-0 break-words text-base font-semibold text-app-text">
-            {{ resolveAnimeTitle(result.title, titleLanguage) }}
+            {{ resolveAnimeTitle(result.title, settingsStore.titleLanguage) }}
           </p>
 
           <p class="text-sm text-app-muted">

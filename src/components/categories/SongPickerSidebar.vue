@@ -15,7 +15,8 @@ import PlayIcon from '@/components/icons/PlayIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
-import type { AniListSearchResult, AnimeTitleLanguage, SongSelection } from '@/types'
+import { useSettingsStore } from '@/stores/settings'
+import type { AniListSearchResult, SongSelection } from '@/types'
 
 const props = defineProps<{
   detailAnime: AniListSearchResult
@@ -25,7 +26,6 @@ const props = defineProps<{
   songFilterTypes: string[]
   songErrorMessage: string | null
   songStatus: 'idle' | 'loading' | 'ready' | 'error'
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
@@ -44,6 +44,7 @@ const filteredSongs = computed(() => {
   return props.songs.filter((song) => props.songFilterTypes.includes(song.type))
 })
 
+const settingsStore = useSettingsStore()
 const selectedSongKey = computed(() => props.selectedSong ? getSongSelectionKey(props.selectedSong) : null)
 const detailPanelToggleLabel = computed(() => props.isCollapsed ? 'Show detail panel' : 'Hide detail panel')
 const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-180' : '')
@@ -71,13 +72,13 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
         <div class="grid shrink-0 grid-cols-[5rem_1fr] gap-4 p-4 border-app-border/70 bg-app-surface/70 rounded-[1rem] border">
           <img
             :src="detailAnime.coverImage.large"
-            :alt="resolveAnimeTitle(detailAnime.title, titleLanguage)"
+            :alt="resolveAnimeTitle(detailAnime.title, settingsStore.titleLanguage)"
             class="h-28 w-20 rounded-xl border border-app-border/70 object-cover"
           >
 
           <div class="min-w-0 space-y-2">
             <p class="min-w-0 break-words text-base font-semibold text-app-text">
-              {{ resolveAnimeTitle(detailAnime.title, titleLanguage) }}
+              {{ resolveAnimeTitle(detailAnime.title, settingsStore.titleLanguage) }}
             </p>
 
             <p class="text-sm text-app-muted">
@@ -145,10 +146,10 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
               @click="emit('selectSong', song)"
             >
               <div class="min-w-0">
-                <TooltipRoot v-if="resolveSongTitle(song, titleLanguage).tooltip">
+                <TooltipRoot v-if="resolveSongTitle(song, settingsStore.titleLanguage).tooltip">
                   <TooltipTrigger as-child>
                     <p class="break-words font-medium text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-                      {{ resolveSongTitle(song, titleLanguage).primary }}
+                      {{ resolveSongTitle(song, settingsStore.titleLanguage).primary }}
                     </p>
                   </TooltipTrigger>
                   <TooltipPortal>
@@ -156,7 +157,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
                       class="z-[60] rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
                       :side-offset="8"
                     >
-                      {{ resolveSongTitle(song, titleLanguage).tooltip }}
+                      {{ resolveSongTitle(song, settingsStore.titleLanguage).tooltip }}
                       <TooltipArrow class="fill-app-surface" />
                     </TooltipContent>
                   </TooltipPortal>
@@ -165,7 +166,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
                   v-else
                   class="break-words font-medium text-app-text"
                 >
-                  {{ resolveSongTitle(song, titleLanguage).primary }}
+                  {{ resolveSongTitle(song, settingsStore.titleLanguage).primary }}
                 </p>
                 <p
                   v-if="song.artist.trim()"
@@ -182,7 +183,7 @@ const detailPanelToggleIconClass = computed(() => props.isCollapsed ? 'rotate-18
                 v-if="song.videoLink"
                 type="button"
                 class="shell-button inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
-                :aria-label="`Preview ${resolveSongTitle(song, titleLanguage).primary}`"
+                :aria-label="`Preview ${resolveSongTitle(song, settingsStore.titleLanguage).primary}`"
                 @click.stop="emit('previewSong', song)"
               >
                 <PlayIcon class="h-5 w-5" />

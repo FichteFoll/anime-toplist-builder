@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, AnimeTitleLanguage, CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   searchAnimeMedia: vi.fn(),
@@ -106,6 +107,8 @@ const createResult = (): AniListSearchResult => ({
 
 describe('CategoryMediaPickerDialog', () => {
   it('shows unselect for the selected result and clears it', async () => {
+    setActivePinia(createPinia())
+
     const response: AniListSearchResponse = {
       pageInfo: {
         currentPage: 1,
@@ -124,7 +127,6 @@ describe('CategoryMediaPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedMediaId: 42,
-        titleLanguage: AnimeTitleLanguage.English,
       },
     });
 

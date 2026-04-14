@@ -9,9 +9,9 @@ import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { getSelectionCoverImage, resolveSongTitle, getSongContextLabel } from '@/lib/song-selection'
+import { useSettingsStore } from '@/stores/settings'
 import type {
   AniListMetadata,
-  AnimeTitleLanguage,
   Category,
   CategorySelection,
   FilterState,
@@ -25,7 +25,6 @@ const props = defineProps<{
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
   canReorder: boolean
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
@@ -35,14 +34,16 @@ const emit = defineEmits<{
   clearSelection: [categoryId: string]
 }>()
 
+const settingsStore = useSettingsStore()
+
 const selectionTitle = computed(() => {
   if (!props.selection) {
     return null
   }
 
   return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, props.titleLanguage).primary
-    : resolveAnimeTitle(props.selection.title, props.titleLanguage)
+    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).primary
+    : resolveAnimeTitle(props.selection.title, settingsStore.titleLanguage)
 })
 const selectionAltTitle = computed(() => {
   if (!props.selection) {
@@ -50,7 +51,7 @@ const selectionAltTitle = computed(() => {
   }
 
   return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, props.titleLanguage).tooltip
+    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
     : null
 })
 const selectionCoverImage = computed(() =>
@@ -62,7 +63,7 @@ const songArtistLine = computed(() =>
     : null,
 )
 const songContextLine = computed(() =>
-  props.selection?.kind === 'song' ? getSongContextLabel(props.selection, props.titleLanguage) : null,
+  props.selection?.kind === 'song' ? getSongContextLabel(props.selection, settingsStore.titleLanguage) : null,
 )
 const deleteCategoryTooltip = computed(() => `Delete category ${props.category.name}`)
 </script>
@@ -179,7 +180,6 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         :category="category"
         :global-filter="globalFilter"
         :selected-media-id="selection?.kind === 'anime' ? selection.mediaId : null"
-        :title-language="titleLanguage"
         @select="emit('selectSelection', $event)"
         @clear="emit('clearSelection', category.id)"
       />
@@ -188,7 +188,6 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         :category="category"
         :global-filter="globalFilter"
         :selected-song="selection?.kind === 'song' ? selection : null"
-        :title-language="titleLanguage"
         @select="emit('selectSelection', $event)"
         @clear="emit('clearSelection', category.id)"
       />

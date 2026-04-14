@@ -21,12 +21,10 @@ import { createAnimeSelection } from '@/lib/song-selection'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { usePickerFiltersStore } from '@/stores/picker-filters'
 import {
-  AniListListVisibility,
   filterSortFields,
   type AniListSearchResponse,
   type AniListSearchResult,
   type AnimeSelection,
-  type AnimeTitleLanguage,
   type Category,
   type FilterSort,
   FilterSortDirection,
@@ -39,7 +37,6 @@ const props = defineProps<{
   category: Category
   globalFilter: FilterState
   selectedMediaId?: number | null
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
@@ -283,7 +280,6 @@ watch(listVisibility, (value, previousValue) => {
                 v-for="result in searchResponse.results"
                 :key="result.id"
                 :result="result"
-                :title-language="titleLanguage"
                 :is-selected="result.id === selectedMediaId"
                 :show-clear-button="true"
                 @select="selectResult"

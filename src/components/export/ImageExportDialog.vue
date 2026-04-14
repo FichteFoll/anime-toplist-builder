@@ -17,27 +17,25 @@ import {
   CATEGORIES_PER_ROW_PORTRAIT,
   renderTemplatePng,
 } from '@/lib/export-image'
+import { useTheme } from '@/composables/useTheme'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSettingsStore } from '@/stores/settings'
 import {
   ExportImageLayout,
-  type AnimeTitleLanguage,
   type CategorySelectionMap,
   type Template,
 } from '@/types'
-import { ResolvedTheme } from '@/lib/theme'
 
 const props = defineProps<{
   template: Template | null
   selectionByCategory: CategorySelectionMap
-  resolvedTheme: ResolvedTheme
-  titleLanguage: AnimeTitleLanguage
   defaultAuthor?: string
   defaultAuthorSource?: 'anilist' | 'manual'
 }>()
 
 const aniListAuthStore = useAniListAuthStore()
 const settingsStore = useSettingsStore()
+const { resolvedTheme } = useTheme()
 const isOpen = ref(false)
 const author = ref('')
 const hideAuthor = ref(false)
@@ -99,8 +97,8 @@ const generatePreview = async () => {
     const renderedImage = await renderTemplatePng({
       template: props.template,
       selectionByCategory: props.selectionByCategory,
-      theme: props.resolvedTheme,
-      titleLanguage: props.titleLanguage,
+      theme: resolvedTheme.value,
+      titleLanguage: settingsStore.titleLanguage,
       layout: layout.value,
       author: hideAuthor.value ? '' : resolvedAuthor.value,
       hideAuthor: hideAuthor.value,
@@ -165,8 +163,8 @@ watch(
   () => [
     props.template,
     props.selectionByCategory,
-    props.resolvedTheme,
-    props.titleLanguage,
+    resolvedTheme.value,
+    settingsStore.titleLanguage,
     layout.value,
     author.value,
     hideAuthor.value,

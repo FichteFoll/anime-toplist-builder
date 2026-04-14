@@ -6,15 +6,12 @@ import AniListIcon from '@/components/icons/AniListIcon.vue'
 import SettingsDialog from '@/components/SettingsDialog.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
-import type { AnimeTitleLanguage, ThemePreference } from '@/types'
+import { useSettingsStore } from '@/stores/settings'
+import { useTheme } from '@/composables/useTheme'
 
-defineProps<{
-  resolvedTheme: 'light' | 'dark'
-}>()
-
-const currentTheme = defineModel<ThemePreference>({ required: true })
-const titleLanguage = defineModel<AnimeTitleLanguage>('titleLanguage', { required: true })
 const aniListAuthStore = useAniListAuthStore()
+const settingsStore = useSettingsStore()
+const { theme } = useTheme()
 
 const connectionLabel = computed(() => {
   if (aniListAuthStore.isAuthenticated && aniListAuthStore.username) {
@@ -82,9 +79,9 @@ const connectionLabel = computed(() => {
           >
             Disconnect AniList
           </button>
-          <SettingsDialog v-model="titleLanguage" />
+          <SettingsDialog v-model="settingsStore.titleLanguage" />
         </div>
-        <ThemeToggle v-model="currentTheme" />
+        <ThemeToggle v-model="theme" />
       </div>
     </div>
   </header>
