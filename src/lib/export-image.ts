@@ -698,13 +698,13 @@ export const renderTemplatePng = async ({
   const imageEntries = await Promise.all(
     template.categories.map(async (category) => {
       const selection = selectionByCategory[category.id] ?? null
+      if (selection == null) {
+        return [category.id, null] as const
+      }
 
-      return [
-        category.id,
-        selection
-          ? await loadImage(getSelectionCoverImage(selection).extraLarge ?? getSelectionCoverImage(selection).large)
-          : null,
-      ] as const
+      const coverImage = getSelectionCoverImage(selection)
+      const imageElement = await loadImage(coverImage.extraLarge ?? coverImage.large)
+      return [category.id, imageElement] as const
     }),
   )
   const imagesByCategoryId = new Map(imageEntries)

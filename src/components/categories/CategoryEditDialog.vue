@@ -231,7 +231,7 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
               <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
                 <input
                   v-model="draftEntityKind"
-                  value="anime"
+                  :value="CategoryEntityKind.Anime"
                   type="radio"
                   class="mt-1 h-4 w-4"
                 >
@@ -245,7 +245,7 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
               <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
                 <input
                   v-model="draftEntityKind"
-                  value="song"
+                  :value="CategoryEntityKind.Song"
                   type="radio"
                   class="mt-1 h-4 w-4"
                 >

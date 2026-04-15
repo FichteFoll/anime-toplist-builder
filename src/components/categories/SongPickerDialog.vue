@@ -289,7 +289,9 @@ const openPreview = (result: AniListSearchResult, song: AnimeThemesSong) => {
     animeCoverImage: result.coverImage,
     song,
   })
-  const title = `${resolveSongTitle(songSelection.song, settingsStore.titleLanguage).primary} by ${song.artist}`
+  const songTitle = resolveSongTitle(songSelection.song, settingsStore.titleLanguage).primary;
+  const artist = song.artist.trim()
+  const title = artist ? `${songTitle} by ${artist}` : songTitle
 
   songPreview.value = {
     open: true,

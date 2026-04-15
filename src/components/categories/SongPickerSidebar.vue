@@ -16,13 +16,13 @@ import { resolveAnimeTitle } from '@/lib/anime-title'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
 import { useSettingsStore } from '@/stores/settings'
-import type { AniListSearchResult, SongSelection } from '@/types'
+import type { AniListSearchResult, SongSelection, ThemeType } from '@/types'
 
 const props = defineProps<{
   detailAnime: AniListSearchResult
   songs: AnimeThemesSong[]
   selectedSong?: SongSelection | null
-  songFilterTypes: string[]
+  songFilterTypes: ThemeType[]
   songErrorMessage: string | null
   songStatus: 'idle' | 'loading' | 'ready' | 'error'
 }>()
