@@ -11,6 +11,7 @@ convention:
     - chore
     - docs
   commitScopes:
+    - ci  # continuous integration
     - ui  # user-facing components, views, and interaction updates
     - anilist  # AniList API access, query building, and remote data flow
     - test  # test-only changes or test coverage updates
