@@ -2,7 +2,7 @@ import type { AnimeThemesAnimeSongs } from '@/api/animethemes'
 
 import { getBrowserStorage } from '@/lib/persistence'
 
-const songCacheStorageKey = 'anime-toplist-builder.song-cache.v1'
+const songCacheStorageKey = 'anime-toplist-builder.song-cache'
 const songCacheSchemaVersion = 2 as const
 const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000
 const maxSongCacheEntries = 50
