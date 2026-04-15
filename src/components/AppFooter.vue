@@ -25,6 +25,18 @@ const buildCommitUrl = buildCommitSha
             <ExternalLinkIcon class="h-3.5 w-3.5 shrink-0" />
           </span>
         </a>
+        and
+        <a
+          href="https://animethemes.moe/"
+          class="inline-flex items-center font-medium text-app-text transition hover:text-app-accent"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          <span class="inline-flex items-center gap-1 underline decoration-app-border underline-offset-4">
+            AnimeThemes
+            <ExternalLinkIcon class="h-3.5 w-3.5 shrink-0" />
+          </span>
+        </a>
         data.
       </p>
 
@@ -42,7 +54,7 @@ const buildCommitUrl = buildCommitSha
           </span>
         </a>
         .
-        AniList is not affiliated with this project.
+        AniList and AnimeThemes are not affiliated with this project.
       </p>
 
       <p class="leading-6 sm:text-right">

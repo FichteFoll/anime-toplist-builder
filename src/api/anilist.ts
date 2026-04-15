@@ -1,16 +1,22 @@
-import type {
+import {
   AniListListVisibility,
-  AniListMetadata,
-  AniListSearchResponse,
-  AniListSearchResult,
-  AniListViewer,
-  FilterState,
+  type AniListMetadata,
+  type AniListSearchResponse,
+  type AniListSearchResult,
+  type AniListViewer,
+  type FilterState,
 } from '@/types'
 
 import { buildAniListMediaSearchVariables } from './anilist-query-builder'
 import { isAniListAuthenticationFailure, requestAniList } from './anilist-client'
-import { fetchAniListMetadataQuery, fetchAniListViewerQuery, searchAnimeMediaQuery } from './anilist-queries'
+import {
+  fetchAniListMetadataQuery,
+  fetchAniListMediaByIdQuery,
+  fetchAniListViewerQuery,
+  searchAnimeMediaQuery,
+} from './anilist-queries'
 import type {
+  AniListMediaByIdData,
   AniListMediaResponse,
   AniListMediaSearchData,
   AniListMetadataData,
@@ -42,18 +48,6 @@ const mapAniListSearchResult = (media: AniListMediaResponse): AniListSearchResul
   season: media.season ?? null,
   seasonYear: media.seasonYear ?? null,
   format: media.format ?? null,
-  source: media.source ?? null,
-  genres: media.genres ?? [],
-  tags: (media.tags ?? []).map((tag) => ({
-    id: tag.id,
-    name: tag.name,
-    description: tag.description ?? null,
-    rank: tag.rank ?? null,
-    isAdult: tag.isAdult ?? false,
-  })),
-  popularity: media.popularity ?? null,
-  averageScore: media.averageScore ?? null,
-  countryOfOrigin: media.countryOfOrigin ?? null,
   siteUrl: media.siteUrl ?? `https://anilist.co/anime/${media.id}`,
 })
 
@@ -102,6 +96,18 @@ export const searchAnimeMedia = async ({
     pageInfo: data.Page.pageInfo,
     results: data.Page.media.map(mapAniListSearchResult),
   }
+}
+
+export const fetchAniListMediaById = async (id: number, accessToken?: string | null): Promise<AniListSearchResult | null> => {
+  const data = await requestAniList<AniListMediaByIdData, { id: number }>(
+    fetchAniListMediaByIdQuery,
+    { id },
+    {
+      accessToken,
+    },
+  )
+
+  return data.Media ? mapAniListSearchResult(data.Media) : null
 }
 
 export const fetchAniListMetadata = async (): Promise<AniListMetadata> => {

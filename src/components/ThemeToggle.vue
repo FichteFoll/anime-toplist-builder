@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { ThemePreference } from '@/types'
+import { ThemePreference } from '@/types'
 
 const themeOptions: Array<{ label: string; value: ThemePreference }> = [
-  { label: 'System', value: 'system' },
-  { label: 'Light', value: 'light' },
-  { label: 'Dark', value: 'dark' },
+  { label: 'System', value: ThemePreference.System },
+  { label: 'Light', value: ThemePreference.Light },
+  { label: 'Dark', value: ThemePreference.Dark },
 ]
 
 const model = defineModel<ThemePreference>({ required: true })

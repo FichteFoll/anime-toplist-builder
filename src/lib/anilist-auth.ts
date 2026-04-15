@@ -1,9 +1,9 @@
 import { appConfig } from '@/config/app'
 import type { AniListAuthSession } from '@/types'
 
-const anilistAuthStorageKey = 'anime-toplist-builder.anilist-auth.v1'
-const anilistOAuthStateStorageKey = 'anime-toplist-builder.anilist-oauth-state.v1'
+const anilistAuthStorageKey = 'anime-toplist-builder.anilist-auth'
 const anilistAuthStorageSchemaVersion = 1 as const
+const anilistOAuthStateStorageKey = 'anime-toplist-builder.anilist-oauth-state.v1'
 const expClaimToMilliseconds = 1000
 const expiryGracePeriodMs = 30_000
 

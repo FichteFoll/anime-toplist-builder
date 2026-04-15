@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import { loadStoredSelections, saveStoredSelections } from '@/lib/persistence'
-import type { AnimeSelection, Template, TemplateId, TemplateSelectionsMap } from '@/types'
+import type { CategorySelection, Template, TemplateId, TemplateSelectionsMap } from '@/types'
 
 export const useSelectionsStore = defineStore('selections', () => {
   const selections = ref<TemplateSelectionsMap>({})
@@ -52,7 +52,7 @@ export const useSelectionsStore = defineStore('selections', () => {
   const setCategorySelection = (
     templateId: TemplateId,
     categoryId: string,
-    selection: AnimeSelection | null,
+    selection: CategorySelection | null,
   ) => {
     const nextTemplateSelections = {
       ...(selections.value[templateId] ?? {}),
@@ -117,8 +117,21 @@ export const useSelectionsStore = defineStore('selections', () => {
       }
 
       const allowedCategoryIds = new Set(template.categories.map((category) => category.id))
+      const categoriesById = new Map(template.categories.map((category) => [category.id, category]))
       const nextCategorySelections = Object.fromEntries(
-        Object.entries(templateSelections).filter(([categoryId]) => allowedCategoryIds.has(categoryId)),
+        Object.entries(templateSelections).filter(([categoryId, selection]) => {
+          if (!allowedCategoryIds.has(categoryId)) {
+            return false
+          }
+
+          if (selection === null) {
+            return true
+          }
+
+          const category = categoriesById.get(categoryId)
+
+          return category ? category.entityKind === selection.kind : false
+        }),
       )
 
       if (Object.keys(nextCategorySelections).length > 0) {

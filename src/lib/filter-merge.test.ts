@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createEmptyFilterState, mergeFilterStates } from '@/lib/filter-merge'
+import { AnimeFormat, FilterSortDirection, FilterSortField } from '@/types'
 import type { FilterState } from '@/types'
 
 describe('mergeFilterStates', () => {
@@ -10,8 +11,8 @@ describe('mergeFilterStates', () => {
       genres: ['Action', 'Drama'],
       excludedGenres: [],
       sort: {
-        field: 'POPULARITY' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Popularity,
+        direction: FilterSortDirection.Desc,
       },
     }
 
@@ -20,8 +21,8 @@ describe('mergeFilterStates', () => {
     expect(result.hasConflicts).toBe(false)
     expect(result.filter.genres).toEqual(['Action', 'Drama'])
     expect(result.filter.sort).toEqual({
-      field: 'POPULARITY',
-      direction: 'desc',
+      field: FilterSortField.Popularity,
+      direction: FilterSortDirection.Desc,
     })
   })
 
@@ -30,7 +31,7 @@ describe('mergeFilterStates', () => {
       ...createEmptyFilterState(),
       genres: ['Action', 'Drama'],
       excludedGenres: [],
-      formats: ['MOVIE', 'TV'],
+      formats: [AnimeFormat.Movie, AnimeFormat.Tv],
       yearRange: {
         minimum: 2000,
         maximum: 2024,
@@ -53,7 +54,7 @@ describe('mergeFilterStates', () => {
       ...createEmptyFilterState(),
       genres: ['Action', 'Mystery'],
       excludedGenres: [],
-      formats: ['TV'],
+      formats: [AnimeFormat.Tv],
       yearRange: {
         minimum: 2010,
       },
@@ -100,24 +101,24 @@ describe('mergeFilterStates', () => {
     const globalFilter: FilterState = {
       ...createEmptyFilterState(),
       sort: {
-        field: 'POPULARITY' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Popularity,
+        direction: FilterSortDirection.Desc,
       },
     }
 
     const categoryFilter: FilterState = {
       ...createEmptyFilterState(),
       sort: {
-        field: 'TITLE' as const,
-        direction: 'asc' as const,
+        field: FilterSortField.Title,
+        direction: FilterSortDirection.Asc,
       },
     }
 
     const result = mergeFilterStates(globalFilter, categoryFilter)
 
     expect(result.filter.sort).toEqual({
-      field: 'TITLE',
-      direction: 'asc',
+      field: FilterSortField.Title,
+      direction: FilterSortDirection.Asc,
     })
   })
 

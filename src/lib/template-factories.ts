@@ -1,7 +1,8 @@
-import { templateSchemaVersion, type Template, type TemplateOrigin } from '@/types'
+import { CategoryEntityKind, TemplateOrigin, templateSchemaVersion, type Template } from '@/types'
 
 import { createCategoryId, createTemplateId } from '@/lib/ids'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { createEmptySongFilterState } from '@/lib/song-selection'
 
 const cloneWithFallback = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
@@ -18,7 +19,7 @@ const cloneWithFallback = <T>(value: T): T => {
 
 export const createBlankTemplate = (
   name = 'My Anime Toplist',
-  origin: TemplateOrigin = 'user',
+  origin: TemplateOrigin = TemplateOrigin.User,
 ): Template => ({
   id: createTemplateId(),
   name,
@@ -34,6 +35,8 @@ export const createBlankCategory = (name: string) => ({
   name,
   description: '',
   filter: createEmptyFilterState(),
+  entityKind: CategoryEntityKind.Anime,
+  songFilter: createEmptySongFilterState(),
 })
 
 export const cloneTemplate = (template: Template): Template => cloneWithFallback(template)
@@ -41,8 +44,8 @@ export const cloneTemplate = (template: Template): Template => cloneWithFallback
 export const forkTemplate = (template: Template): Template => ({
   ...cloneTemplate(template),
   id: createTemplateId(),
-  origin: 'user',
+  origin: TemplateOrigin.User,
 })
 
 export const isProtectedTemplateOrigin = (origin: TemplateOrigin) =>
-  origin === 'predefined' || origin === 'imported-url'
+  origin === TemplateOrigin.Predefined || origin === TemplateOrigin.ImportedUrl

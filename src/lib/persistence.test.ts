@@ -7,11 +7,16 @@ import {
   saveStoredSelections,
   saveStoredTemplates,
 } from '@/lib/persistence'
+import { createAnimeSelection, createSongSelection } from '@/lib/song-selection'
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 import {
   defaultAnimeTitleLanguage,
   defaultThemePreference,
+  AnimeFormat,
+  AnimeSeason,
   templateSchemaVersion,
+  TemplateOrigin,
+  ThemeType,
   type AnimeSelection,
 } from '@/types'
 
@@ -41,7 +46,7 @@ const createMockStorage = (): MockStorage => {
   }
 }
 
-const createSelection = (): AnimeSelection => ({
+const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 123,
   title: {
     userPreferred: 'Serial Experiments Lain',
@@ -55,9 +60,9 @@ const createSelection = (): AnimeSelection => ({
     extraLarge: null,
     color: '#111827',
   },
-  season: 'SUMMER',
+  season: AnimeSeason.Summer,
   seasonYear: 1998,
-  format: 'TV',
+  format: AnimeFormat.Tv,
 })
 
 describe('persistence helpers', () => {
@@ -71,7 +76,7 @@ describe('persistence helpers', () => {
         description: 'Local context',
         categories: [{ id: 'localpick01', name: 'Local Pick', description: '' }],
       },
-      'user',
+      TemplateOrigin.User,
     )
     const remoteTemplate = normalizeImportedTemplate(
       {
@@ -81,7 +86,7 @@ describe('persistence helpers', () => {
         description: 'Remote context',
         categories: [{ id: 'remotepick01', name: 'Remote Pick', description: '' }],
       },
-      'imported-url',
+      TemplateOrigin.ImportedUrl,
     )
     const predefinedTemplate = normalizeImportedTemplate(
       {
@@ -91,7 +96,7 @@ describe('persistence helpers', () => {
         description: 'Predefined context',
         categories: [{ id: 'predefinedpick01', name: 'Predefined Pick', description: '' }],
       },
-      'predefined',
+      TemplateOrigin.Predefined,
     )
 
     saveStoredTemplates(
@@ -175,5 +180,39 @@ describe('persistence helpers', () => {
     saveStoredSelections({}, storage)
 
     expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist-builder.selections.v1')
+  })
+
+  it('loads stored song selections', () => {
+    const storage = createMockStorage()
+    const songSelection = createSongSelection({
+      animeId: 123,
+      animeTitle: createSelection().title,
+      animeCoverImage: createSelection().coverImage,
+      song: {
+        id: 101,
+        type: ThemeType.OP,
+        slug: 'op1-test',
+        title: 'Duvet',
+        titleNative: null,
+        artist: 'Boa',
+        videoLink: 'https://video.example/op.mp4',
+        episodes: '2-12, 14',
+      },
+    })
+
+    storage.write('anime-toplist-builder.selections.v1', {
+      schemaVersion: 1,
+      selections: {
+        valid: {
+          saved: songSelection,
+        },
+      },
+    })
+
+    expect(loadStoredSelections(storage)).toEqual({
+      valid: {
+        saved: songSelection,
+      },
+    })
   })
 })

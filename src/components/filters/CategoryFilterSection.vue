@@ -3,19 +3,16 @@ import { computed } from 'vue'
 
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import { getCategoryFilterDisabledReasons, isNonBlankName } from '@/lib/filter-editor'
-import type { AniListMetadata, Category, FilterState } from '@/types'
+import type { AniListMetadata, FilterState } from '@/types'
+
+const categoryName = defineModel<string>('categoryName', { required: true })
+const categoryFilter = defineModel<FilterState>('categoryFilter', { required: true })
 
 const props = defineProps<{
-  category: Category
   globalFilter: FilterState
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
-}>()
-
-const emit = defineEmits<{
-  'update:categoryName': [value: string]
-  'update:categoryFilter': [value: FilterState]
 }>()
 
 const disabledFields = computed(() => getCategoryFilterDisabledReasons(props.globalFilter))
@@ -32,15 +29,15 @@ const commitCategoryName = (event: Event) => {
   if (!isNonBlankName(nextName)) {
     input.setCustomValidity('Category names cannot be blank.')
     input.reportValidity()
-    input.value = props.category.name
+    input.value = categoryName.value
     return
   }
 
   input.setCustomValidity('')
   input.value = nextName
 
-  if (nextName !== props.category.name) {
-    emit('update:categoryName', nextName)
+  if (nextName !== categoryName.value) {
+    categoryName.value = nextName
   }
 }
 </script>
@@ -53,7 +50,7 @@ const commitCategoryName = (event: Event) => {
           Category filter
         </p>
         <h2 class="mt-2 text-xl font-semibold tracking-tight text-app-text">
-          {{ category.name }}
+          {{ categoryName }}
         </h2>
       </div>
 
@@ -65,7 +62,7 @@ const commitCategoryName = (event: Event) => {
           type="text"
           required
           class="shell-input"
-          :value="category.name"
+          :value="categoryName"
           @input="clearCustomValidity"
           @change="commitCategoryName"
         >
@@ -76,13 +73,12 @@ const commitCategoryName = (event: Event) => {
     </div>
 
     <FilterEditor
+      v-model="categoryFilter"
       mode="category"
-      :model-value="category.filter"
       :metadata="metadata"
       :metadata-status="metadataStatus"
       :metadata-error="metadataError"
       :disabled-fields="disabledFields"
-      @update:model-value="emit('update:categoryFilter', $event)"
     />
   </article>
 </template>

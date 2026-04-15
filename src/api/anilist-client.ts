@@ -1,4 +1,4 @@
-import type { AniListError } from '@/types'
+import { AniListErrorKind, type AniListError } from '@/types'
 
 import type { GraphQlResponse } from './anilist-types'
 
@@ -32,7 +32,7 @@ const normalizeUnknownError = (error: unknown): AniListError => {
 
   if (isAbortError(error)) {
     return {
-      kind: 'unknown',
+      kind: AniListErrorKind.Unknown,
       message: 'The AniList request was cancelled.',
       details: [],
       retryable: true,
@@ -41,7 +41,7 @@ const normalizeUnknownError = (error: unknown): AniListError => {
 
   if (error instanceof TypeError) {
     return {
-      kind: 'network',
+      kind: AniListErrorKind.Network,
       message: 'AniList could not be reached. Check your connection and try again.',
       details: [],
       retryable: true,
@@ -50,15 +50,15 @@ const normalizeUnknownError = (error: unknown): AniListError => {
 
   if (error instanceof Error) {
     return {
-      kind: 'unknown',
+      kind: AniListErrorKind.Unknown,
       message: error.message,
       details: [],
       retryable: true,
     }
   }
 
-  return {
-    kind: 'unknown',
+    return {
+      kind: AniListErrorKind.Unknown,
     message: 'AniList request failed for an unknown reason.',
     details: [],
     retryable: true,
@@ -70,7 +70,7 @@ const parseResponseJson = async <TData>(response: Response) => {
     return (await response.json()) as GraphQlResponse<TData>
   } catch {
     throw createAniListError({
-      kind: 'parse',
+      kind: AniListErrorKind.Parse,
       message: 'AniList returned an unreadable response.',
       details: [],
       retryable: true,
@@ -80,7 +80,12 @@ const parseResponseJson = async <TData>(response: Response) => {
 }
 
 const normalizeGraphQlErrors = (messages: string[], status?: number): AniListError => ({
-  kind: status === 401 || status === 403 ? 'auth' : status && status >= 400 ? 'http' : 'graphql',
+  kind:
+    status === 401 || status === 403
+      ? AniListErrorKind.Auth
+      : status && status >= 400
+        ? AniListErrorKind.Http
+        : AniListErrorKind.GraphQl,
   message: messages[0] ?? 'AniList returned an unexpected error.',
   details: messages.slice(1),
   retryable: status === undefined || status >= 500 || status === 429,
@@ -136,7 +141,7 @@ export async function requestAniList<TData, TVariables extends object>(
 
   if (!response.ok) {
     throw createAniListError({
-      kind: response.status === 401 || response.status === 403 ? 'auth' : 'http',
+      kind: response.status === 401 || response.status === 403 ? AniListErrorKind.Auth : AniListErrorKind.Http,
       message: `AniList request failed with status ${response.status}.`,
       details: [],
       retryable: response.status >= 500 || response.status === 429,
@@ -146,7 +151,7 @@ export async function requestAniList<TData, TVariables extends object>(
 
   if (!payload.data) {
     throw createAniListError({
-      kind: 'parse',
+      kind: AniListErrorKind.Parse,
       message: 'AniList returned no data for the request.',
       details: [],
       retryable: true,

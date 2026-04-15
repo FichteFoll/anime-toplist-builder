@@ -17,6 +17,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: env.VITE_BASE_PATH || '/',
+    server: {
+      proxy: {
+        '/animethemes-graphql': {
+          target: 'https://graphql.animethemes.moe/',
+          changeOrigin: true,
+          rewrite: () => '/',
+        },
+      },
+    },
     define: {
       __BUILD_COMMIT__: JSON.stringify(commitHash),
       __BUILD_TIME__: JSON.stringify(buildTime),

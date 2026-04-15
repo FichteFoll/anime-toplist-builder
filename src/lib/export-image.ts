@@ -1,5 +1,6 @@
 import { appConfig } from '@/config/app'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { formatSongEpisodesHint, getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
 import type {
   AnimeFormat,
   AnimeTitleLanguage,
@@ -16,6 +17,7 @@ export const PORTRAIT_COLUMNS = 3
 export const LANDSCAPE_COLUMNS = 5
 export const CARD_WIDTH = 415
 export const CARD_PADDING = 20
+export const CARD_TEXT_GAP = 4
 export const COVER_WIDTH = 126
 export const COVER_HEIGHT = 183
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
@@ -25,6 +27,27 @@ export const FONT_SIZE_HEADER_META = 22
 export const FONT_SIZE_CATEGORY_TITLE = 20
 export const FONT_SIZE_BODY = 18
 export const FONT_SIZE_META = 16
+
+export const formatSongSourceMetaLines = (
+  context: CanvasRenderingContext2D,
+  animeName: string,
+  slug: string,
+  episodes: string | null,
+  maxWidth: number,
+) => {
+  const episodesHint = formatSongEpisodesHint(episodes)
+  const suffix = episodesHint ? `(${slug}, ${episodesHint})` : `(${slug})`
+  const fullLine = `from ${animeName} ${suffix}`
+
+  if (context.measureText(fullLine).width <= maxWidth) {
+    return [fullLine]
+  }
+
+  const labelWidth = context.measureText('from ').width
+  const sourceName = fitTextToWidth(context, animeName, Math.max(90, maxWidth - labelWidth))
+
+  return [`from ${sourceName}`, fitTextToWidth(context, suffix, maxWidth)]
+}
 
 interface ExportPalette {
   background: string
@@ -675,11 +698,13 @@ export const renderTemplatePng = async ({
   const imageEntries = await Promise.all(
     template.categories.map(async (category) => {
       const selection = selectionByCategory[category.id] ?? null
+      if (selection == null) {
+        return [category.id, null] as const
+      }
 
-      return [
-        category.id,
-        selection ? await loadImage(selection.coverImage.extraLarge ?? selection.coverImage.large) : null,
-      ] as const
+      const coverImage = getSelectionCoverImage(selection)
+      const imageElement = await loadImage(coverImage.extraLarge ?? coverImage.large)
+      return [category.id, imageElement] as const
     }),
   )
   const imagesByCategoryId = new Map(imageEntries)
@@ -717,10 +742,14 @@ export const renderTemplatePng = async ({
     const coverY = y + CARD_PADDING
     const textX = coverX + COVER_WIDTH + 14
     const textWidth = CARD_WIDTH - (textX - x) - CARD_PADDING
-    const selectionTitle = selection ? resolveAnimeTitle(selection.title, titleLanguage) : ''
-    const metaParts = [selection?.seasonYear ?? null, selection?.format ?? null].filter(
-      (value): value is number | AnimeFormat => value !== null,
-    )
+    const selectionTitle = selection
+      ? selection.kind === 'song'
+        ? resolveSongTitle(selection.song, titleLanguage).primary
+        : resolveAnimeTitle(selection.title, titleLanguage)
+      : ''
+
+    setCanvasFont(context, 500, fonts.meta)
+    context.fillStyle = palette.muted
 
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
@@ -738,7 +767,7 @@ export const renderTemplatePng = async ({
         18,
         palette,
         category.name,
-        selection?.coverImage.color ?? palette.elevated,
+        getSelectionCoverImage(selection).color ?? palette.elevated,
       )
     } else {
       drawMissingSelectionPlaceholder(
@@ -755,7 +784,7 @@ export const renderTemplatePng = async ({
 
     setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
     context.fillStyle = palette.text
-    const categoryBottomY = drawWrappedText(
+    let prevLineY = drawWrappedText(
       context,
       category.name,
       textX,
@@ -768,32 +797,67 @@ export const renderTemplatePng = async ({
 
     setCanvasFont(context, 700, fonts.body)
     context.fillStyle = palette.text
-    const titleBottomY = drawWrappedText(
+    prevLineY = drawWrappedText(
       context,
       selectionTitle,
       textX,
-      categoryBottomY + 14,
+      prevLineY + CARD_TEXT_GAP,
       textWidth,
       Math.round(fonts.body * 1.28),
-      3,
+      selection?.kind === 'song' ? 2 : 3,
       palette.text,
     )
 
     setCanvasFont(context, 500, fonts.meta)
     context.fillStyle = palette.muted
-    drawWrappedText(
-      context,
-      metaParts.join(' • '),
-      textX,
-      titleBottomY + 16,
-      textWidth,
-      Math.round(fonts.meta * 1.3),
-      2,
-      palette.muted,
-    )
+    if (selection?.kind === 'song') {
+      const artist = selection.song.artist.trim()
+      const sourceLines = formatSongSourceMetaLines(
+        context,
+        resolveAnimeTitle(selection.animeTitle, titleLanguage),
+        selection.song.slug,
+        selection.song.episodes ?? null,
+        textWidth,
+      )
 
-    setCanvasFont(context, 500, fonts.meta)
-    context.fillStyle = palette.muted
+      if (artist) {
+        prevLineY = drawWrappedText(
+          context,
+          `by ${artist}`,
+          textX,
+          prevLineY + CARD_TEXT_GAP,
+          textWidth,
+          Math.round(fonts.meta * 1.3),
+          2,
+          palette.muted,
+        )
+      }
+
+      context.save()
+      context.fillStyle = palette.muted
+
+      for (const [lineIndex, line] of sourceLines.entries()) {
+        context.fillText(line, textX, prevLineY + CARD_TEXT_GAP + lineIndex * Math.round(fonts.meta * 1.3))
+      }
+
+      context.restore()
+    } else {
+      const metaText = selection
+        ? [selection.seasonYear ?? null, selection.format ?? null]
+            .filter((value): value is number | AnimeFormat => value !== null)
+            .join(' • ')
+        : ''
+      drawWrappedText(
+        context,
+        metaText,
+        textX,
+        prevLineY + CARD_TEXT_GAP,
+        textWidth,
+        Math.round(fonts.meta * 1.3),
+        2,
+        palette.muted,
+      )
+    }
   })
 
   setCanvasFont(context, 500, fonts.meta)

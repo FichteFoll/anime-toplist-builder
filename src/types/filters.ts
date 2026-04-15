@@ -1,49 +1,84 @@
-export const animeSeasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL'] as const
+export enum AnimeSeason {
+  Winter = 'WINTER',
+  Spring = 'SPRING',
+  Summer = 'SUMMER',
+  Fall = 'FALL',
+}
 
-export type AnimeSeason = (typeof animeSeasons)[number]
+export const animeSeasons = [AnimeSeason.Winter, AnimeSeason.Spring, AnimeSeason.Summer, AnimeSeason.Fall] as const
+
+export enum AnimeFormat {
+  Tv = 'TV',
+  TvShort = 'TV_SHORT',
+  Movie = 'MOVIE',
+  Special = 'SPECIAL',
+  Ova = 'OVA',
+  Ona = 'ONA',
+  Music = 'MUSIC',
+}
 
 export const animeFormats = [
-  'TV',
-  'TV_SHORT',
-  'MOVIE',
-  'SPECIAL',
-  'OVA',
-  'ONA',
-  'MUSIC',
+  AnimeFormat.Tv,
+  AnimeFormat.TvShort,
+  AnimeFormat.Movie,
+  AnimeFormat.Special,
+  AnimeFormat.Ova,
+  AnimeFormat.Ona,
+  AnimeFormat.Music,
 ] as const
 
-export type AnimeFormat = (typeof animeFormats)[number]
+export enum AnimeSource {
+  Original = 'ORIGINAL',
+  Manga = 'MANGA',
+  LightNovel = 'LIGHT_NOVEL',
+  VisualNovel = 'VISUAL_NOVEL',
+  VideoGame = 'VIDEO_GAME',
+  Other = 'OTHER',
+  Novel = 'NOVEL',
+  Doujinshi = 'DOUJINSHI',
+  Anime = 'ANIME',
+  WebNovel = 'WEB_NOVEL',
+  LiveAction = 'LIVE_ACTION',
+}
 
 export const animeSources = [
-  'ORIGINAL',
-  'MANGA',
-  'LIGHT_NOVEL',
-  'VISUAL_NOVEL',
-  'VIDEO_GAME',
-  'OTHER',
-  'NOVEL',
-  'DOUJINSHI',
-  'ANIME',
-  'WEB_NOVEL',
-  'LIVE_ACTION',
+  AnimeSource.Original,
+  AnimeSource.Manga,
+  AnimeSource.LightNovel,
+  AnimeSource.VisualNovel,
+  AnimeSource.VideoGame,
+  AnimeSource.Other,
+  AnimeSource.Novel,
+  AnimeSource.Doujinshi,
+  AnimeSource.Anime,
+  AnimeSource.WebNovel,
+  AnimeSource.LiveAction,
 ] as const
 
-export type AnimeSource = (typeof animeSources)[number]
+export enum FilterSortField {
+  Popularity = 'POPULARITY',
+  Score = 'SCORE',
+  Trending = 'TRENDING',
+  StartDate = 'START_DATE',
+  Title = 'TITLE',
+  UpdatedAt = 'UPDATED_AT',
+}
 
 export const filterSortFields = [
-  'POPULARITY',
-  'SCORE',
-  'TRENDING',
-  'START_DATE',
-  'TITLE',
-  'UPDATED_AT',
+  FilterSortField.Popularity,
+  FilterSortField.Score,
+  FilterSortField.Trending,
+  FilterSortField.StartDate,
+  FilterSortField.Title,
+  FilterSortField.UpdatedAt,
 ] as const
 
-export type FilterSortField = (typeof filterSortFields)[number]
+export enum FilterSortDirection {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
-export const filterSortDirections = ['asc', 'desc'] as const
-
-export type FilterSortDirection = (typeof filterSortDirections)[number]
+export const filterSortDirections = [FilterSortDirection.Asc, FilterSortDirection.Desc] as const
 
 export interface NumericRange {
   minimum?: number

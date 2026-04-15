@@ -5,9 +5,10 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { predefinedTemplates } from '@/templates/predefined'
-import { templateSchemaVersion, type AnimeSelection } from '@/types'
+import { createAnimeSelection } from '@/lib/song-selection'
+import { AnimeFormat, AnimeSeason, templateSchemaVersion, type AnimeSelection } from '@/types'
 
-const createSelection = (): AnimeSelection => ({
+const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 5114,
   title: {
     userPreferred: 'Fullmetal Alchemist: Brotherhood',
@@ -21,9 +22,9 @@ const createSelection = (): AnimeSelection => ({
     extraLarge: null,
     color: '#1f2937',
   },
-  season: 'SPRING',
+  season: AnimeSeason.Spring,
   seasonYear: 2009,
-  format: 'TV',
+  format: AnimeFormat.Tv,
 })
 
 describe('template store fork-on-edit behavior', () => {

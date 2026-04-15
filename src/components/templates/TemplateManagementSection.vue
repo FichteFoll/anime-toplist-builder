@@ -28,13 +28,8 @@ import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSelectionsStore } from '@/stores/selections'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import type { AnimeTitleLanguage, FilterState } from '@/types'
-import type { ResolvedTheme } from '@/lib/theme'
-
-const props = defineProps<{
-  resolvedTheme: ResolvedTheme
-  titleLanguage: AnimeTitleLanguage
-}>()
+import { TemplateOrigin } from '@/types'
+import type { FilterState } from '@/types'
 
 const aniListAuthStore = useAniListAuthStore()
 const templateStore = useTemplateStore()
@@ -120,7 +115,7 @@ const importFromFile = async (event: Event) => {
 
   try {
     const fileContents = await file.text()
-    const template = templateStore.importTemplate(fileContents, 'imported-file')
+    const template = templateStore.importTemplate(fileContents, TemplateOrigin.ImportedFile)
 
     toastStore.success('Imported template from file.', template.name)
   } catch (error) {
@@ -352,8 +347,6 @@ onMounted(async () => {
           <ImageExportDialog
             :template="activeTemplate"
             :selection-by-category="activeTemplateSelections"
-            :resolved-theme="props.resolvedTheme"
-            :title-language="props.titleLanguage"
             :default-author="aniListAuthStore.username ?? undefined"
             :default-author-source="aniListAuthStore.isAuthenticated ? 'anilist' : 'manual'"
           />

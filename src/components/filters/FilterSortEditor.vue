@@ -3,10 +3,10 @@ import { computed } from 'vue'
 
 import FilterField from '@/components/filters/FilterField.vue'
 import {
+  FilterSortDirection,
   filterSortDirections,
   filterSortFields,
   type FilterSort,
-  type FilterSortDirection,
   type FilterSortField,
 } from '@/types'
 
@@ -33,7 +33,7 @@ const setField = (field: FilterSortField | '') => {
 
   model.value = {
     field,
-    direction: model.value?.direction ?? 'desc',
+    direction: model.value?.direction ?? FilterSortDirection.Desc,
   }
 }
 
@@ -84,10 +84,10 @@ const setDirection = (direction: FilterSortDirection) => {
           :class="model?.direction === direction ? 'shell-button-active' : ''"
           :disabled="!model"
           :aria-pressed="model?.direction === direction"
-          :aria-label="direction === 'asc' ? 'Use ascending sort order' : 'Use descending sort order'"
+          :aria-label="direction === FilterSortDirection.Asc ? 'Use ascending sort order' : 'Use descending sort order'"
           @click="setDirection(direction)"
         >
-          {{ direction === 'asc' ? 'Ascending' : 'Descending' }}
+          {{ direction === FilterSortDirection.Asc ? 'Ascending' : 'Descending' }}
         </button>
       </div>
     </div>

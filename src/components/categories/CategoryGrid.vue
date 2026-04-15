@@ -5,28 +5,35 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import type {
   AniListMetadata,
-  AnimeSelection,
-  AnimeTitleLanguage,
   Category,
+  CategorySelection,
   FilterState,
 } from '@/types'
 
 const props = defineProps<{
   categories: Category[]
-  selectionByCategory: Record<string, AnimeSelection | null>
+  selectionByCategory: Record<string, CategorySelection | null>
   globalFilter: FilterState
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
   addCategory: [name: string]
-  updateCategory: [categoryId: string, value: { name: string, description: string, filter: FilterState }]
+  updateCategory: [
+    categoryId: string,
+    value: {
+      name: string
+      description: string
+      filter: FilterState
+      entityKind: Category['entityKind']
+      songFilter: Category['songFilter']
+    },
+  ]
   deleteCategory: [categoryId: string]
   reorderCategories: [value: { fromIndex: number, toIndex: number }]
-  selectAnime: [categoryId: string, selection: AnimeSelection]
+  selectSelection: [categoryId: string, selection: CategorySelection]
   clearSelection: [categoryId: string]
   clearAllSelections: []
 }>()
@@ -44,13 +51,19 @@ const openCategoryCount = computed(() => props.categories.length - selectedCateg
 
 const forwardCategoryUpdate = (
   categoryId: string,
-  value: { name: string, description: string, filter: FilterState },
+  value: {
+    name: string
+    description: string
+    filter: FilterState
+    entityKind: Category['entityKind']
+    songFilter: Category['songFilter']
+  },
 ) => {
   emit('updateCategory', categoryId, value)
 }
 
-const forwardAnimeSelection = (categoryId: string, selection: AnimeSelection) => {
-  emit('selectAnime', categoryId, selection)
+const forwardAnimeSelection = (categoryId: string, selection: CategorySelection) => {
+  emit('selectSelection', categoryId, selection)
 }
 
 const addCategory = () => {
@@ -198,10 +211,9 @@ onBeforeUnmount(() => {
         :metadata-error="metadataError"
         :can-reorder="canReorder"
         class="w-full md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.889rem)]"
-        :title-language="titleLanguage"
         @save="forwardCategoryUpdate(category.id, $event)"
         @delete="emit('deleteCategory', $event)"
-        @select-anime="forwardAnimeSelection(category.id, $event)"
+        @select-selection="forwardAnimeSelection(category.id, $event)"
         @clear-selection="emit('clearSelection', $event)"
       />
 

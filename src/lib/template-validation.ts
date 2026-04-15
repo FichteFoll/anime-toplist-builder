@@ -1,17 +1,21 @@
 import {
+  categoryEntityKinds,
   animeFormats,
   animeSeasons,
   animeSources,
   filterSortDirections,
   filterSortFields,
   templateSchemaVersion,
+  themeTypes,
   type AnimeFormat,
   type AnimeSeason,
   type AnimeSource,
+  CategoryEntityKind,
   type FilterSortDirection,
   type FilterSortField,
   type FilterState,
   type NumericRange,
+  type SongFilterState,
   type Template,
   type TemplateExportFilterStateV1,
   type TemplateExportPayloadV1,
@@ -26,6 +30,7 @@ import {
   isCategoryId,
   isTemplateId,
 } from '@/lib/ids'
+import { createEmptySongFilterState } from '@/lib/song-selection'
 import { createEmptyFilterState } from '@/lib/filter-state'
 
 type JsonRecord = Record<string, unknown>
@@ -216,6 +221,34 @@ const asOptionalSort = (
   }
 }
 
+const parseCategoryEntityKind = (value: unknown, path: string): CategoryEntityKind => {
+  if (value === undefined) {
+    return CategoryEntityKind.Anime
+  }
+
+  const entityKind = asTrimmedString(value, path)
+
+  if (!categoryEntityKinds.includes(entityKind as CategoryEntityKind)) {
+    throw new TemplateValidationError(`Unsupported category entity kind at ${path}: ${entityKind}.`)
+  }
+
+  return entityKind as CategoryEntityKind
+}
+
+const parseSongFilterState = (value: unknown, path: string): SongFilterState => {
+  if (value === undefined) {
+    return createEmptySongFilterState()
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  return {
+    types: asEnumArray(value.types, `${path}.types`, themeTypes),
+  }
+}
+
 const parseFilterState = (value: unknown, path: string): FilterState => {
   if (value === undefined) {
     return createEmptyFilterState()
@@ -267,6 +300,8 @@ const parseCategoryPayload = (
     name: asTrimmedString(value.name, `${path}.name`),
     description: hasOwn(value, 'description') ? asTrimmedSearchString(value.description, `${path}.description`) : '',
     filter: parseFilterState(value.filter, `${path}.filter`),
+    entityKind: parseCategoryEntityKind(value.entityKind, `${path}.entityKind`),
+    songFilter: parseSongFilterState(value.songFilter, `${path}.songFilter`),
   }
 }
 
@@ -381,6 +416,8 @@ export const normalizeImportedTemplate = (
         ? ''
         : asTrimmedSearchString(category.description, `categories.${category.name}.description`),
     filter: parseFilterState(category.filter, `categories.${category.name}.filter`),
+    entityKind: parseCategoryEntityKind(category.entityKind, `categories.${category.name}.entityKind`),
+    songFilter: parseSongFilterState(category.songFilter, `categories.${category.name}.songFilter`),
   })),
   globalFilter: parseFilterState(payload.globalFilter, 'globalFilter'),
   origin,
@@ -402,6 +439,8 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
       name: asTrimmedString(category.name, `categories[${index}].name`),
       description: asTrimmedSearchString(category.description, `categories[${index}].description`),
       filter: createTemplateExportFilterState(parseFilterState(category.filter, `categories[${index}].filter`)),
+      entityKind: parseCategoryEntityKind(category.entityKind, `categories[${index}].entityKind`),
+      songFilter: parseSongFilterState(category.songFilter, `categories[${index}].songFilter`),
     }
   })
 

@@ -1,5 +1,5 @@
 import { mergeFilterStates } from '@/lib/filter-merge'
-import type { AniListListVisibility, FilterSort, FilterState } from '@/types'
+import { AniListListVisibility, type FilterSort, type FilterState } from '@/types'
 
 import type { AniListMediaSearchVariables, AniListMediaSort } from './anilist-types'
 
@@ -67,7 +67,12 @@ export const buildAniListMediaSearchVariables = ({
       page,
       perPage,
       search: search?.trim() || undefined,
-      onList: listVisibility === 'only' ? true : listVisibility === 'hide' ? false : undefined,
+      onList:
+        listVisibility === AniListListVisibility.Only
+          ? true
+          : listVisibility === AniListListVisibility.Hide
+            ? false
+            : undefined,
       season: pickSingleValue(mergedFilter.filter.seasons),
       countryOfOrigin: mergedFilter.filter.countryOfOrigin,
       tagIn: mergedFilter.filter.tags.length > 0 ? mergedFilter.filter.tags : undefined,

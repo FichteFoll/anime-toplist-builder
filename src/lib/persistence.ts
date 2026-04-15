@@ -4,11 +4,14 @@ import {
   animeTitleLanguages,
   defaultAnimeTitleLanguage,
   defaultThemePreference,
+  TemplateOrigin,
+  themeTypes,
   themePreferences,
-  type AnimeSelection,
   type AnimeTitleLanguage,
+  type CategorySelection,
+  type SongPerformance,
+  type SongSelection,
   type Template,
-  type TemplateOrigin,
   type TemplateSelectionsMap,
   type ThemePreference,
 } from '@/types'
@@ -18,6 +21,7 @@ import {
   normalizeImportedTemplate,
   parseTemplateImportPayload,
 } from '@/lib/template-validation'
+import { createAnimeSelection, normalizeSongEpisodes } from '@/lib/song-selection'
 
 const templatesStorageKey = 'anime-toplist-builder.templates.v1'
 const settingsStorageKey = 'anime-toplist-builder.settings.v1'
@@ -81,8 +85,14 @@ const isNullableAnimeFormat = (
 ): value is (typeof animeFormats)[number] | null =>
   value === null || (typeof value === 'string' && animeFormats.includes(value as (typeof animeFormats)[number]))
 
+const isThemeType = (value: unknown): value is (typeof themeTypes)[number] =>
+  typeof value === 'string' && themeTypes.includes(value as (typeof themeTypes)[number])
+
 const isTemplateOrigin = (value: unknown): value is TemplateOrigin =>
-  value === 'user' || value === 'imported-file' || value === 'imported-url' || value === 'predefined'
+  value === TemplateOrigin.User ||
+  value === TemplateOrigin.ImportedFile ||
+  value === TemplateOrigin.ImportedUrl ||
+  value === TemplateOrigin.Predefined
 
 const isHttpUrl = (value: unknown): value is string => {
   if (typeof value !== 'string') {
@@ -162,7 +172,7 @@ const parseStoredTemplate = (value: unknown): { template: Template; remoteUrl?: 
   }
 }
 
-const parseStoredAnimeSelection = (value: unknown): AnimeSelection | null => {
+const parseStoredAnimeSelection = (value: unknown): CategorySelection | null => {
   if (!isRecord(value)) {
     return null
   }
@@ -196,7 +206,7 @@ const parseStoredAnimeSelection = (value: unknown): AnimeSelection | null => {
     return null
   }
 
-  return {
+  return createAnimeSelection({
     mediaId: value.mediaId,
     title: {
       userPreferred: value.title.userPreferred,
@@ -213,7 +223,114 @@ const parseStoredAnimeSelection = (value: unknown): AnimeSelection | null => {
     season: value.season === undefined ? null : value.season,
     seasonYear: value.seasonYear === undefined ? null : value.seasonYear,
     format: value.format === undefined ? null : value.format,
+  })
+}
+
+const parseSongPerformances = (value: unknown): SongPerformance[] | undefined => {
+  if (value === undefined) {
+    return undefined
   }
+
+  if (!Array.isArray(value)) {
+    return undefined
+  }
+
+  const performances: SongPerformance[] = []
+
+  for (const entry of value) {
+    if (!isRecord(entry) || !isString(entry.artist)) {
+      continue
+    }
+
+    performances.push({
+      artist: entry.artist,
+      as: isNullableString(entry.as) ? entry.as ?? null : null,
+    })
+  }
+
+  return performances.length > 0 ? performances : undefined
+}
+
+const parseStoredSongSelection = (value: unknown): SongSelection | null => {
+  if (!isRecord(value) || value.kind !== 'song') {
+    return null
+  }
+
+  if (
+    typeof value.animeId !== 'number' ||
+    !Number.isInteger(value.animeId) ||
+    !isRecord(value.animeTitle) ||
+    !isString(value.animeTitle.userPreferred) ||
+    !isNullableString(value.animeTitle.romaji) ||
+    !isNullableString(value.animeTitle.english) ||
+    !isNullableString(value.animeTitle.native) ||
+    !isRecord(value.animeCoverImage) ||
+    !isString(value.animeCoverImage.large) ||
+    !isNullableString(value.animeCoverImage.medium) ||
+    !isNullableString(value.animeCoverImage.extraLarge) ||
+    !isNullableString(value.animeCoverImage.color) ||
+    !isRecord(value.song) ||
+    !(typeof value.song.id === 'number' && Number.isInteger(value.song.id)) ||
+    !isThemeType(value.song.type) ||
+    !isString(value.song.slug) ||
+    !isString(value.song.artist)
+  ) {
+    return null
+  }
+
+  if (value.song.title !== undefined && !isNullableString(value.song.title)) {
+    return null
+  }
+
+  if (value.song.titleNative !== undefined && !isNullableString(value.song.titleNative)) {
+    return null
+  }
+
+  if (value.song.videoLink !== undefined && !isNullableString(value.song.videoLink)) {
+    return null
+  }
+
+  if (value.song.episodes !== undefined && !isNullableString(value.song.episodes)) {
+    return null
+  }
+
+  return {
+    kind: 'song',
+    animeId: value.animeId,
+    animeTitle: {
+      userPreferred: value.animeTitle.userPreferred,
+      romaji: value.animeTitle.romaji ?? null,
+      english: value.animeTitle.english ?? null,
+      native: value.animeTitle.native ?? null,
+    },
+    animeCoverImage: {
+      large: value.animeCoverImage.large,
+      medium: value.animeCoverImage.medium ?? null,
+      extraLarge: value.animeCoverImage.extraLarge ?? null,
+      color: value.animeCoverImage.color ?? null,
+    },
+    song: {
+      id: value.song.id,
+      type: value.song.type,
+      slug: value.song.slug,
+      title: value.song.title ?? null,
+      titleNative: value.song.titleNative ?? null,
+      artist: value.song.artist,
+      performances: parseSongPerformances(value.song.performances),
+      videoLink: value.song.videoLink ?? null,
+      episodes: normalizeSongEpisodes(value.song.episodes ?? null),
+    },
+  }
+}
+
+const parseStoredSelection = (value: unknown): CategorySelection | null => {
+  const songSelection = parseStoredSongSelection(value)
+
+  if (songSelection) {
+    return songSelection
+  }
+
+  return parseStoredAnimeSelection(value)
 }
 
 export const loadStoredTemplates = (storage = getBrowserStorage()): LoadedTemplatesRecord => {
@@ -238,7 +355,7 @@ export const loadStoredTemplates = (storage = getBrowserStorage()): LoadedTempla
 
     templates.push(parsedTemplate.template)
 
-    if (parsedTemplate.remoteUrl && parsedTemplate.template.origin === 'imported-url') {
+    if (parsedTemplate.remoteUrl && parsedTemplate.template.origin === TemplateOrigin.ImportedUrl) {
       remoteTemplateUrls[parsedTemplate.template.id] = parsedTemplate.remoteUrl
     }
   }
@@ -262,7 +379,7 @@ export const saveStoredTemplates = (
         ...createTemplateExportPayload(template),
         origin: template.origin,
         remoteUrl:
-          template.origin === 'imported-url' ? remoteTemplateUrls[template.id] : undefined,
+          template.origin === TemplateOrigin.ImportedUrl ? remoteTemplateUrls[template.id] : undefined,
       })),
   }
 
@@ -322,7 +439,7 @@ export const loadStoredSelections = (storage = getBrowserStorage()): TemplateSel
         continue
       }
 
-      const selection = parseStoredAnimeSelection(selectionValue)
+      const selection = parseStoredSelection(selectionValue)
 
       if (selection) {
         categorySelections[categoryId] = selection

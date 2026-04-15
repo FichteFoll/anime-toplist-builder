@@ -1,4 +1,13 @@
-import type { Template, TemplateImportPayloadV1 } from '@/types'
+import {
+  AnimeFormat,
+  AnimeSeason,
+  AnimeSource,
+  FilterSortDirection,
+  FilterSortField,
+  TemplateOrigin,
+  type Template,
+  type TemplateImportPayloadV1,
+} from '@/types'
 
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 
@@ -11,8 +20,8 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
     globalFilter: {
       yearRange: { minimum: 2025, maximum: 2025 },
       sort: {
-        field: 'SCORE' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Score,
+        direction: FilterSortDirection.Desc,
       },
     },
     categories: [
@@ -26,7 +35,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         name: 'Film Of The Year',
         description: 'The strongest anime film of the year',
         filter: {
-          formats: ['MOVIE' as const, 'ONA' as const],
+          formats: [AnimeFormat.Movie, AnimeFormat.Ona],
           episodes: { maximum: 1 },
           duration: { minimum: 30 },
         },
@@ -47,7 +56,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'bestoriginalanime01',
         name: 'Best Original Anime',
         description: 'The strongest original anime of the year',
-        filter: { source: ['ORIGINAL' as const] },
+        filter: { source: [AnimeSource.Original] },
       },
       {
         id: 'bestanimation01',
@@ -159,8 +168,8 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
     description: 'My all-time favorite anime',
     globalFilter: {
       sort: {
-        field: 'SCORE' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Score,
+        direction: FilterSortDirection.Desc,
       },
     },
     categories: [
@@ -175,7 +184,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         name: 'Best Movie',
         description: 'Your strongest feature-length anime picks',
         filter: {
-          formats: ['MOVIE' as const, 'ONA' as const],
+          formats: [AnimeFormat.Movie, AnimeFormat.Ona],
           episodes: { maximum: 1 },
           duration: { minimum: 30 },
         },
@@ -185,7 +194,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         name: 'Best Short',
         description: 'Your strongest brief anime picks',
         filter: {
-          formats: ['TV_SHORT' as const, 'ONA' as const, 'MUSIC' as const],
+          formats: [AnimeFormat.TvShort, AnimeFormat.Ona, AnimeFormat.Music],
           duration: { maximum: 16 },
         },
       },
@@ -216,8 +225,8 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
     globalFilter: {
       yearRange: { minimum: 2021 },
       sort: {
-        field: 'TRENDING' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Trending,
+        direction: FilterSortDirection.Desc,
       },
     },
     categories: [
@@ -225,25 +234,25 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'winterpick01',
         name: 'Winter Pick',
         description: 'A standout title from the winter season',
-        filter: { seasons: ['WINTER' as const] },
+        filter: { seasons: [AnimeSeason.Winter] },
       },
       {
         id: 'springpick01',
         name: 'Spring Pick',
         description: 'A standout title from the spring season',
-        filter: { seasons: ['SPRING' as const] },
+        filter: { seasons: [AnimeSeason.Spring] },
       },
       {
         id: 'summerpick01',
         name: 'Summer Pick',
         description: 'A standout title from the summer season',
-        filter: { seasons: ['SUMMER' as const] },
+        filter: { seasons: [AnimeSeason.Summer] },
       },
       {
         id: 'fallpick01',
         name: 'Fall Pick',
         description: 'A standout title from the fall season',
-        filter: { seasons: ['FALL' as const] },
+        filter: { seasons: [AnimeSeason.Fall] },
       },
       {
         id: 'breakouthit01',
@@ -264,10 +273,10 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
     name: 'Genre Spotlight',
     description: 'Strong anime across major genre categories',
     globalFilter: {
-      formats: ['TV' as const, 'MOVIE' as const, 'OVA' as const],
+      formats: [AnimeFormat.Tv, AnimeFormat.Movie, AnimeFormat.Ova],
       sort: {
-        field: 'POPULARITY' as const,
-        direction: 'desc' as const,
+        field: FilterSortField.Popularity,
+        direction: FilterSortDirection.Desc,
       },
     },
     categories: [
@@ -312,5 +321,5 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
 ]
 
 export const predefinedTemplates: Template[] = predefinedTemplatePayloads.map((payload) =>
-  normalizeImportedTemplate(payload, 'predefined'),
+  normalizeImportedTemplate(payload, TemplateOrigin.Predefined),
 )

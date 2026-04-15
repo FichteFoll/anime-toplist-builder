@@ -1,4 +1,8 @@
-export type ToastTone = 'success' | 'error' | 'info'
+export enum ToastTone {
+  Success = 'success',
+  Error = 'error',
+  Info = 'info',
+}
 
 export interface ToastItem {
   id: string

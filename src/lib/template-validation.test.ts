@@ -9,7 +9,7 @@ import {
   parseTemplateImportPayload,
   stringifyTemplateExportPayload,
 } from '@/lib/template-validation'
-import { templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
+import { AnimeFormat, TemplateOrigin, templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
 
 describe('template validation', () => {
   it('parses and normalizes imported payload fields', () => {
@@ -78,6 +78,10 @@ describe('template validation', () => {
             source: [],
             sort: undefined,
           },
+          entityKind: 'anime',
+          songFilter: {
+            types: [],
+          },
         },
       ],
     })
@@ -127,11 +131,11 @@ describe('template validation', () => {
           },
         ],
       },
-      'imported-file',
+      TemplateOrigin.ImportedFile,
     )
 
     expect(isTemplateId(template.id)).toBe(true)
-    expect(template.origin).toBe('imported-file')
+    expect(template.origin).toBe(TemplateOrigin.ImportedFile)
     expect(template.description).toBe('Shared context')
     expect(template.categories).toHaveLength(1)
     expect(isCategoryId(template.categories[0]?.id)).toBe(true)
@@ -146,7 +150,7 @@ describe('template validation', () => {
         name: 'Export me',
         description: 'Export context',
         globalFilter: {
-          formats: ['TV', 'MOVIE'],
+          formats: [AnimeFormat.Tv, AnimeFormat.Movie],
           minimumTagRank: 40,
         },
         categories: [
@@ -160,7 +164,7 @@ describe('template validation', () => {
           },
         ],
       },
-      'user',
+      TemplateOrigin.User,
     )
 
     expect(createTemplateExportPayload(template)).toEqual({
@@ -170,7 +174,7 @@ describe('template validation', () => {
       description: 'Export context',
       globalFilter: {
         minimumTagRank: 40,
-        formats: ['MOVIE', 'TV'],
+        formats: [AnimeFormat.Movie, AnimeFormat.Tv],
       },
       categories: [
         {
@@ -179,6 +183,10 @@ describe('template validation', () => {
           description: 'Nice pacing',
           filter: {
             genres: ['Mystery'],
+          },
+          entityKind: 'anime',
+          songFilter: {
+            types: [],
           },
         },
       ],
@@ -213,7 +221,7 @@ describe('template validation', () => {
           seasons: [],
         },
       },
-      'user',
+      TemplateOrigin.User,
     )
 
     expect(stringifyTemplateExportPayload(template)).not.toContain('"seasons": []')
@@ -253,5 +261,39 @@ describe('template validation', () => {
     })
 
     expect(payload.description).toBe('')
+  })
+
+  it('parses song category fields and exports them', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'songtemplate01',
+      name: 'Song Template',
+      categories: [
+        {
+          id: 'songpick0001',
+          name: 'Best Opening',
+          entityKind: 'song',
+          songFilter: {
+            types: ['ED', 'OP'],
+          },
+        },
+      ],
+    })
+
+    expect(payload.categories[0]).toMatchObject({
+      entityKind: 'song',
+      songFilter: {
+        types: ['ED', 'OP'],
+      },
+    })
+
+    const normalized = normalizeImportedTemplate(payload, TemplateOrigin.User)
+
+    expect(createTemplateExportPayload(normalized).categories[0]).toMatchObject({
+      entityKind: 'song',
+      songFilter: {
+        types: ['ED', 'OP'],
+      },
+    })
   })
 })

@@ -4,37 +4,66 @@ import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigge
 
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
+import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { getSelectionCoverImage, resolveSongTitle, getSongContextLabel } from '@/lib/song-selection'
+import { useSettingsStore } from '@/stores/settings'
 import type {
   AniListMetadata,
-  AnimeSelection,
-  AnimeTitleLanguage,
   Category,
+  CategorySelection,
   FilterState,
 } from '@/types'
 
 const props = defineProps<{
   category: Category
-  selection: AnimeSelection | null
+  selection: CategorySelection | null
   globalFilter: FilterState
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
   canReorder: boolean
-  titleLanguage: AnimeTitleLanguage
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string, filter: FilterState }]
+  save: [value: { name: string, description: string, filter: FilterState, entityKind: Category['entityKind'], songFilter: Category['songFilter'] }]
   delete: [categoryId: string]
-  selectAnime: [selection: AnimeSelection]
+  selectSelection: [selection: CategorySelection]
   clearSelection: [categoryId: string]
 }>()
 
-const selectionTitle = computed(() =>
-  props.selection ? resolveAnimeTitle(props.selection.title, props.titleLanguage) : null,
+const settingsStore = useSettingsStore()
+
+const selectionTitle = computed(() => {
+  if (!props.selection) {
+    return null
+  }
+
+  return props.selection.kind === 'song'
+    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).primary
+    : resolveAnimeTitle(props.selection.title, settingsStore.titleLanguage)
+})
+const selectionAltTitle = computed(() => {
+  if (!props.selection) {
+    return null
+  }
+
+  return props.selection.kind === 'song'
+    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
+    : null
+})
+const selectionCoverImage = computed(() =>
+  props.selection ? getSelectionCoverImage(props.selection) : null,
+)
+const songArtistLine = computed(() =>
+  props.selection?.kind === 'song' && props.selection.song.artist.trim()
+    ? `by ${props.selection.song.artist.trim()}`
+    : null,
+)
+const songContextLine = computed(() =>
+  props.selection?.kind === 'song' ? getSongContextLabel(props.selection, settingsStore.titleLanguage) : null,
 )
 const deleteCategoryTooltip = computed(() => `Delete category ${props.category.name}`)
 </script>
@@ -77,17 +106,55 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         class="flex gap-4"
       >
         <img
-          :src="selection.coverImage.large"
+          :src="selectionCoverImage?.large"
           :alt="selectionTitle ?? 'Selected anime cover'"
           class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
         >
+
         <div class="min-w-0 space-y-2">
-          <p class="break-words text-base font-semibold text-app-text">
+          <TooltipRoot v-if="selectionAltTitle">
+            <TooltipTrigger as-child>
+              <p class="break-words text-base font-semibold text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
+                {{ selectionTitle }}
+              </p>
+            </TooltipTrigger>
+
+            <TooltipPortal>
+              <TooltipContent
+                class="z-50 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
+                :side-offset="8"
+              >
+                {{ selectionAltTitle }}
+                <TooltipArrow class="fill-app-surface" />
+              </TooltipContent>
+            </TooltipPortal>
+          </TooltipRoot>
+          <p
+            v-else
+            class="break-words text-base font-semibold text-app-text"
+          >
             {{ selectionTitle }}
           </p>
-          <p class="text-sm text-app-muted">
+
+          <p
+            v-if="selection.kind === 'anime'"
+            class="text-sm text-app-muted"
+          >
             {{ selection.seasonYear ?? 'Unknown year' }}
             <span v-if="selection.format"> · {{ selection.format }}</span>
+          </p>
+          <p
+            v-else
+            class="text-sm text-app-muted"
+          >
+            {{ songArtistLine }}
+          </p>
+
+          <p
+            v-if="selection.kind === 'song'"
+            class="text-xs leading-5 text-app-muted"
+          >
+            {{ songContextLine }}
           </p>
         </div>
       </div>
@@ -109,11 +176,19 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
 
     <div class="mt-5 flex flex-wrap gap-2">
       <CategoryMediaPickerDialog
+        v-if="category.entityKind === 'anime'"
         :category="category"
         :global-filter="globalFilter"
-        :selected-media-id="selection?.mediaId ?? null"
-        :title-language="titleLanguage"
-        @select="emit('selectAnime', $event)"
+        :selected-media-id="selection?.kind === 'anime' ? selection.mediaId : null"
+        @select="emit('selectSelection', $event)"
+        @clear="emit('clearSelection', category.id)"
+      />
+      <SongPickerDialog
+        v-else
+        :category="category"
+        :global-filter="globalFilter"
+        :selected-song="selection?.kind === 'song' ? selection : null"
+        @select="emit('selectSelection', $event)"
         @clear="emit('clearSelection', category.id)"
       />
       <button

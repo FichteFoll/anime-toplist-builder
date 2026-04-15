@@ -6,6 +6,7 @@ import {
   getCategoryFilterDisabledReasons,
 } from '@/lib/filter-editor'
 import { createEmptyFilterState } from '@/lib/filter-state'
+import { FilterSortDirection, FilterSortField } from '@/types'
 import type { FilterState } from '@/types'
 
 describe('filter editor helpers', () => {
@@ -51,7 +52,7 @@ describe('filter editor helpers', () => {
   it('counts only advanced filter fields in the advanced section', () => {
     const filter: FilterState = {
       ...createEmptyFilterState(),
-      sort: { field: 'POPULARITY', direction: 'desc' },
+      sort: { field: FilterSortField.Popularity, direction: FilterSortDirection.Desc },
       countryOfOrigin: 'JP',
       popularity: { minimum: 100 },
       tags: ['Action'],

@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
 import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
-import type { AniListSearchResponse, AniListSearchResult, Category } from '@/types'
+import { createEmptySongFilterState } from '@/lib/song-selection'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   searchAnimeMedia: vi.fn(),
@@ -65,11 +67,21 @@ vi.mock('reka-ui', () => ({
   },
 }))
 
+vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
+  default: {
+    props: ['result', 'titleLanguage', 'isSelected', 'showClearButton'],
+    emits: ['select', 'clear'],
+    template: '<div><button type="button" class="select-result" @click="$emit(\'select\', result)">select</button><button v-if="showClearButton !== false && isSelected" type="button" class="clear-result" @click="$emit(\'clear\')">Unselect</button></div>',
+  },
+}))
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
   description: '',
   filter: createEmptyFilterState(),
+  entityKind: CategoryEntityKind.Anime,
+  songFilter: createEmptySongFilterState(),
 }
 
 const createResult = (): AniListSearchResult => ({
@@ -87,20 +99,16 @@ const createResult = (): AniListSearchResult => ({
     color: '#475569',
   },
   description: null,
-  season: 'FALL',
+  season: AnimeSeason.Fall,
   seasonYear: 2002,
-  format: 'TV',
-  source: null,
-  genres: [],
-  tags: [],
-  popularity: null,
-  averageScore: null,
-  countryOfOrigin: null,
+  format: AnimeFormat.Tv,
   siteUrl: 'https://anilist.co/anime/42',
 })
 
 describe('CategoryMediaPickerDialog', () => {
   it('shows unselect for the selected result and clears it', async () => {
+    setActivePinia(createPinia())
+
     const response: AniListSearchResponse = {
       pageInfo: {
         currentPage: 1,
@@ -119,11 +127,11 @@ describe('CategoryMediaPickerDialog', () => {
         category,
         globalFilter: createEmptyFilterState(),
         selectedMediaId: 42,
-        titleLanguage: 'english',
       },
     });
 
     (wrapper.vm as unknown as { open: boolean }).open = true
+    await new Promise((resolve) => setTimeout(resolve, 0))
     await nextTick()
     await nextTick()
 

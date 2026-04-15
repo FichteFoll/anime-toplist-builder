@@ -1,4 +1,4 @@
-import type { AnimeTitleLanguage, AnimeTitle } from '@/types'
+import { AnimeTitleLanguage, type AnimeTitle } from '@/types'
 
 const normalizeTitle = (value: string | null | undefined) => {
   const trimmedValue = value?.trim()
@@ -9,11 +9,11 @@ const normalizeTitle = (value: string | null | undefined) => {
 export const resolveAnimeTitle = (title: AnimeTitle, titleLanguage: AnimeTitleLanguage) => {
   const preferredTitle = (() => {
     switch (titleLanguage) {
-      case 'romaji':
+      case AnimeTitleLanguage.Romaji:
         return title.romaji
-      case 'english':
+      case AnimeTitleLanguage.English:
         return title.english
-      case 'native':
+      case AnimeTitleLanguage.Native:
         return title.native
     }
   })()

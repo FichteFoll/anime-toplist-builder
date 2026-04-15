@@ -9,24 +9,22 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import TemplateManagementSection from '@/components/templates/TemplateManagementSection.vue'
-import { resolveAnimeTitle } from '@/lib/anime-title'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
+import { getSelectionDisplayLabel } from '@/lib/song-selection'
 import { createBlankCategory } from '@/lib/template-factories'
 import { useConfirmationDialog } from '@/composables/useConfirmationDialog'
-import { useTheme } from '@/composables/useTheme'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import type { AniListMetadata, AnimeSelection, FilterState } from '@/types'
+import { CategoryEntityKind, ThemeType, type AniListMetadata, type CategorySelection, type FilterState } from '@/types'
 
 const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
 const selectionsStore = useSelectionsStore()
 const toastStore = useToastStore()
 const aniListAuthStore = useAniListAuthStore()
-const { resolvedTheme, theme } = useTheme()
 const {
   isOpen: isConfirmationOpen,
   state: confirmationState,
@@ -65,6 +63,8 @@ const updateCategory = (
     name: string
     description: string
     filter: FilterState
+    entityKind: CategoryEntityKind
+    songFilter: { types: ThemeType[] }
   },
 ) => {
   templateStore.updateActiveTemplate((template) => {
@@ -77,7 +77,11 @@ const updateCategory = (
     category.name = value.name
     category.description = value.description
     category.filter = value.filter
+    category.entityKind = value.entityKind
+    category.songFilter = value.songFilter
   })
+
+  selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
 }
 
 const addCategory = (name: string) => {
@@ -109,7 +113,7 @@ const deleteCategory = (categoryId: string) => {
         ? `${customRuleCount} custom rule${customRuleCount === 1 ? '' : 's'}`
         : null,
       selection
-        ? `the saved selection "${resolveAnimeTitle(selection.title, settingsStore.titleLanguage)}"`
+        ? `the saved selection "${getSelectionDisplayLabel(selection, settingsStore.titleLanguage)}"`
         : null,
     ].filter((value): value is string => value !== null)
 
@@ -168,7 +172,7 @@ const clearAllSelections = () => {
   })
 }
 
-const selectCategoryAnime = (categoryId: string, selection: AnimeSelection) => {
+const selectCategorySelection = (categoryId: string, selection: CategorySelection) => {
   if (!activeTemplate.value) {
     return
   }
@@ -208,17 +212,10 @@ onMounted(async () => {
     <TooltipProvider :delay-duration="120">
       <div class="min-h-screen bg-app-bg text-app-text">
         <div class="mx-auto flex min-h-screen max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-          <AppHeader
-            v-model="theme"
-            v-model:title-language="settingsStore.titleLanguage"
-            :resolved-theme="resolvedTheme"
-          />
+          <AppHeader />
 
           <main class="flex-1 py-8">
-            <TemplateManagementSection
-              :resolved-theme="resolvedTheme"
-              :title-language="settingsStore.titleLanguage"
-            />
+            <TemplateManagementSection />
 
             <section class="mt-6">
               <div
@@ -236,12 +233,11 @@ onMounted(async () => {
                 :metadata="metadata"
                 :metadata-status="metadataStatus"
                 :metadata-error="metadataError"
-                :title-language="settingsStore.titleLanguage"
                 @add-category="addCategory"
                 @update-category="updateCategory"
                 @delete-category="deleteCategory"
                 @reorder-categories="reorderCategories"
-                @select-anime="selectCategoryAnime"
+                @select-selection="selectCategorySelection"
                 @clear-selection="clearCategorySelection"
                 @clear-all-selections="clearAllSelections"
               />

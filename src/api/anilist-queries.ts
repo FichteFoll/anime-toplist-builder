@@ -72,18 +72,6 @@ export const searchAnimeMediaQuery = `
         season
         seasonYear
         format
-        source
-        genres
-        tags {
-          id
-          name
-          description
-          rank
-          isAdult
-        }
-        popularity
-        averageScore
-        countryOfOrigin
         siteUrl
       }
     }
@@ -106,6 +94,31 @@ export const fetchAniListViewerQuery = `
   query FetchAniListViewer {
     Viewer {
       name
+    }
+  }
+`
+
+export const fetchAniListMediaByIdQuery = `
+  query FetchAniListMediaById($id: Int!) {
+    Media(id: $id, type: ANIME, isAdult: false) {
+      id
+      title {
+        userPreferred
+        romaji
+        english
+        native
+      }
+      coverImage {
+        large
+        medium
+        extraLarge
+        color
+      }
+      description(asHtml: false)
+      season
+      seasonYear
+      format
+      siteUrl
     }
   }
 `

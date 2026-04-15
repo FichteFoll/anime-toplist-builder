@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { AniListListVisibility } from '@/types'
+import { AniListListVisibility } from '@/types'
 
 export const usePickerFiltersStore = defineStore('picker-filters', () => {
   const listVisibility = ref<AniListListVisibility | null>(null)
 
-  const onlyOnList = computed(() => listVisibility.value === 'only')
-  const hideOnList = computed(() => listVisibility.value === 'hide')
+  const onlyOnList = computed(() => listVisibility.value === AniListListVisibility.Only)
+  const hideOnList = computed(() => listVisibility.value === AniListListVisibility.Hide)
 
   const setListVisibility = (value: AniListListVisibility | null) => {
     listVisibility.value = value

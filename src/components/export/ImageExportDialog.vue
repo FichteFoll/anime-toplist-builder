@@ -17,30 +17,29 @@ import {
   CATEGORIES_PER_ROW_PORTRAIT,
   renderTemplatePng,
 } from '@/lib/export-image'
+import { useTheme } from '@/composables/useTheme'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { useSettingsStore } from '@/stores/settings'
-import type {
-  AnimeTitleLanguage,
-  CategorySelectionMap,
+import {
   ExportImageLayout,
-  Template,
+  type CategorySelectionMap,
+  type Template,
 } from '@/types'
 
 const props = defineProps<{
   template: Template | null
   selectionByCategory: CategorySelectionMap
-  resolvedTheme: 'light' | 'dark'
-  titleLanguage: AnimeTitleLanguage
   defaultAuthor?: string
   defaultAuthorSource?: 'anilist' | 'manual'
 }>()
 
 const aniListAuthStore = useAniListAuthStore()
 const settingsStore = useSettingsStore()
+const { resolvedTheme } = useTheme()
 const isOpen = ref(false)
 const author = ref('')
 const hideAuthor = ref(false)
-const layout = ref<ExportImageLayout>('portrait')
+const layout = ref<ExportImageLayout>(ExportImageLayout.Portrait)
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
 const isRendering = ref(false)
@@ -51,7 +50,9 @@ let renderRequestId = 0
 const defaultAuthor = computed(() => props.defaultAuthor?.trim() || 'Anonymous')
 const resolvedAuthor = computed(() => author.value.trim() || defaultAuthor.value)
 const defaultLayout = computed<ExportImageLayout>(() =>
-  props.template && props.template.categories.length >= 12 ? 'landscape' : 'portrait',
+  props.template && props.template.categories.length >= 12
+    ? ExportImageLayout.Landscape
+    : ExportImageLayout.Portrait,
 )
 const showAniListBadge = computed(
   () =>
@@ -96,8 +97,8 @@ const generatePreview = async () => {
     const renderedImage = await renderTemplatePng({
       template: props.template,
       selectionByCategory: props.selectionByCategory,
-      theme: props.resolvedTheme,
-      titleLanguage: props.titleLanguage,
+      theme: resolvedTheme.value,
+      titleLanguage: settingsStore.titleLanguage,
       layout: layout.value,
       author: hideAuthor.value ? '' : resolvedAuthor.value,
       hideAuthor: hideAuthor.value,
@@ -162,8 +163,8 @@ watch(
   () => [
     props.template,
     props.selectionByCategory,
-    props.resolvedTheme,
-    props.titleLanguage,
+    resolvedTheme.value,
+    settingsStore.titleLanguage,
     layout.value,
     author.value,
     hideAuthor.value,
@@ -355,15 +356,17 @@ onBeforeUnmount(() => {
           </article>
         </div>
 
-        <div class="mt-6 flex justify-end">
-          <button
-            type="button"
-            class="shell-button shell-button-active"
-            :disabled="!previewBlob || isRendering"
-            @click="downloadPreview"
-          >
-            Download image
-          </button>
+        <div class="sticky bottom-0 -mx-6 mt-6 border-t border-app-border/70 bg-app-surface/95 px-6 pb-6 pt-4 backdrop-blur-sm">
+          <div class="flex justify-end">
+            <button
+              type="button"
+              class="shell-button shell-button-active"
+              :disabled="!previewBlob || isRendering"
+              @click="downloadPreview"
+            >
+              Download image
+            </button>
+          </div>
         </div>
       </DialogContent>
     </DialogPortal>
