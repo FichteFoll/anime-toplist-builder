@@ -34,7 +34,15 @@ const emit = defineEmits<{
   selectSong: [song: AnimeThemesSong]
 }>()
 
-const isCollapsed = ref(!props.selectedSong)
+const isCollapsed = ref(!props.detailAnime.id)
+watch(
+  () => props.detailAnime.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      isCollapsed.value = false
+    }
+  },
+)
 
 const filteredSongs = computed(() => {
   if (props.songFilterTypes.length === 0) {
@@ -48,15 +56,6 @@ const settingsStore = useSettingsStore()
 const selectedSongKey = computed(() => props.selectedSong ? getSongSelectionKey(props.selectedSong) : null)
 const detailPanelToggleLabel = computed(() => isCollapsed.value ? 'Show detail panel' : 'Hide detail panel')
 const detailPanelToggleIconClass = computed(() => isCollapsed.value ? 'rotate-180' : '')
-
-watch(
-  () => props.detailAnime.id,
-  (newId, oldId) => {
-    if (newId !== oldId) {
-      isCollapsed.value = false
-    }
-  },
-)
 </script>
 
 <template>
