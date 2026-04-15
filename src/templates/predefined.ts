@@ -4,6 +4,8 @@ import {
   AnimeSource,
   FilterSortDirection,
   FilterSortField,
+  CategoryEntityKind,
+  ThemeType,
   TemplateOrigin,
   type Template,
   type TemplateImportPayloadV1,
@@ -133,6 +135,7 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'bestanimesong01',
         name: 'Best Anime Song',
         description: 'The most memorable anime song of the year',
+        entityKind: CategoryEntityKind.Song,
       },
       {
         id: 'bestscore01',
@@ -143,11 +146,19 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
         id: 'bestopeningsequence01',
         name: 'Best Opening Sequence',
         description: 'The strongest opening sequence of the year',
+        entityKind: CategoryEntityKind.Song,
+        songFilter: {
+          types: [ThemeType.OP],
+        },
       },
       {
         id: 'bestendingsequence01',
         name: 'Best Ending Sequence',
         description: 'The strongest ending sequence of the year',
+        entityKind: CategoryEntityKind.Song,
+        songFilter: {
+          types: [ThemeType.ED],
+        },
       },
       {
         id: 'bestvoiceartistperformancejapanese01',
