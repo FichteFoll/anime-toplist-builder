@@ -247,11 +247,13 @@ watch(open, (isOpen) => {
           :description="category.description"
         />
 
-        <SongPickerStepper
-          :active-view="activeView"
-          :can-navigate-to-song-view="canNavigateToSongView"
-          @update:active-view="setActiveView"
-        />
+        <div class="-mx-5 px-5 -mt-5 pt-5 pb-4 border-b border-app-border/70 bg-app-surface/95 ">
+          <SongPickerStepper
+            :active-view="activeView"
+            :can-navigate-to-song-view="canNavigateToSongView"
+            @update:active-view="setActiveView"
+          />
+        </div>
 
         <div class="mt-5 flex min-h-0 flex-1">
           <AnimePickerBrowser

@@ -203,7 +203,7 @@ watch(() => pickerFiltersStore.listVisibility, (value, previousValue) => {
 </script>
 
 <template>
-  <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">
+  <div class="min-h-0 flex-1 overflow-y-auto">
     <PickerSearchToolbar
       v-model:search-draft="searchDraft"
       v-model:local-sort-field="localSortField"

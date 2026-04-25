@@ -61,6 +61,7 @@ const selectResult = (result: AniListSearchResult) => {
         />
 
         <AnimePickerBrowser
+          class="mt-5"
           :open="open"
           :category="category"
           :global-filter="globalFilter"
