@@ -11,7 +11,7 @@ import { createAnimeSelection, createEmptySongFilterState, createSongSelection }
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
-  name: 'CategoryMediaPickerDialog',
+  name: 'AnimePickerDialog',
   emits: ['clear', 'select'],
   template: `
     <div>
@@ -74,7 +74,7 @@ describe('CategoryCard', () => {
       global: {
         stubs: {
           CategoryEditDialog: true,
-          CategoryMediaPickerDialog: categoryMediaPickerStub,
+          AnimePickerDialog: categoryMediaPickerStub,
           SongPickerDialog: songPickerStub,
           DeleteIcon: true,
           DragHandleIcon: true,
@@ -121,7 +121,7 @@ describe('CategoryCard', () => {
       global: {
         stubs: {
           CategoryEditDialog: true,
-          CategoryMediaPickerDialog: categoryMediaPickerStub,
+          AnimePickerDialog: categoryMediaPickerStub,
           SongPickerDialog: songPickerStub,
           DeleteIcon: true,
           DragHandleIcon: true,
@@ -167,7 +167,7 @@ describe('CategoryCard', () => {
       global: {
         stubs: {
           CategoryEditDialog: true,
-          CategoryMediaPickerDialog: categoryMediaPickerStub,
+          AnimePickerDialog: categoryMediaPickerStub,
           SongPickerDialog: songPickerStub,
           DeleteIcon: true,
           DragHandleIcon: true,
