@@ -45,6 +45,7 @@ vi.mock('@/stores/picker-filters', () => ({
 }))
 
 vi.mock('reka-ui', () => ({
+  DialogClose: { template: '<div><slot /></div>' },
   DialogContent: { template: '<div><slot /></div>' },
   DialogOverlay: { template: '<div><slot /></div>' },
   DialogPortal: { template: '<div><slot /></div>' },

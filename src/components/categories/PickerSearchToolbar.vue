@@ -28,11 +28,11 @@ const localSortDirection = defineModel<FilterSortDirection>('localSortDirection'
       >
     </label>
 
-    <label class="space-y-2">
-      <span class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
+    <fieldset class="min-w-0 space-y-2 border-0 p-0 m-0">
+      <legend class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
         Sort
-      </span>
-      <div class="flex min-w-0 items-e gap-2">
+      </legend>
+      <div class="flex min-w-0 gap-2">
         <select
           v-model="localSortField"
           class="shell-input"
@@ -71,6 +71,6 @@ const localSortDirection = defineModel<FilterSortDirection>('localSortDirection'
           Desc
         </button>
       </div>
-    </label>
+    </fieldset>
   </div>
 </template>

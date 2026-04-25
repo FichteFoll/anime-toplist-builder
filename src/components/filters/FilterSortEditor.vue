@@ -54,7 +54,7 @@ const setDirection = (direction: FilterSortDirection) => {
     :label="label"
     :description="description"
   >
-    <div class="flex flex-nowrap justify-content-center items-end gap-2">
+    <div class="flex flex-nowrap items-end gap-2">
       <label class="min-w-0 flex-1 space-y-2">
         <span class="sr-only">Sort field</span>
         <select
