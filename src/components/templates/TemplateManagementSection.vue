@@ -68,8 +68,6 @@ const showError = (error: unknown) => {
 
 const createTemplate = () => {
   const template = templateStore.createTemplate()
-
-  toastStore.success('Created local template.', template.name)
 }
 
 const openRemoteImport = () => {
@@ -78,7 +76,6 @@ const openRemoteImport = () => {
 
 const openTemplate = (templateId: string) => {
   templateStore.setActiveTemplate(templateId)
-  toastStore.success('Template switched.')
 }
 
 const exportActiveTemplate = async () => {
@@ -178,7 +175,6 @@ const deleteActiveTemplate = () => {
       }
 
       selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
-      toastStore.success('Deleted template.', templateName)
     },
   })
 }
