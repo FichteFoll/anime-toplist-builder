@@ -128,3 +128,9 @@
 - `ImageExportDialog` renders the PNG preview in-browser and downloads the generated blob.
 - PNG export can fall back to placeholders when remote covers fail to load,
   including CORS-restricted images.
+
+## References
+
+Read these for more information about a specific topic.
+
+- Reka UI: https://www.reka-ui.com/llms.txt
