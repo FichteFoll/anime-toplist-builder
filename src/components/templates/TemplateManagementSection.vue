@@ -67,7 +67,7 @@ const showError = (error: unknown) => {
 }
 
 const createTemplate = () => {
-  const template = templateStore.createTemplate()
+  templateStore.createTemplate()
 }
 
 const openRemoteImport = () => {
