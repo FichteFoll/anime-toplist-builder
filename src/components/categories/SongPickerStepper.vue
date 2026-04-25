@@ -46,7 +46,7 @@ const updateStep = (step: number | undefined) => {
 
 <template>
   <StepperRoot
-    class="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-[clamp(2rem,6vw,6rem)] sm:after:absolute sm:after:left-1/2 sm:after:top-1/2 sm:after:block sm:after:h-px sm:after:w-[clamp(2rem,6vw,6rem)] sm:after:-translate-x-1/2 sm:after:-translate-y-1/2 sm:after:bg-app-border/70 sm:after:content-['']"
+    class="flex flex-col gap-3 sm:relative sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-[clamp(2rem,6vw,6rem)] sm:after:absolute sm:after:left-1/2 sm:after:top-1/2 sm:after:block sm:after:h-px sm:after:w-[clamp(2rem,6vw,6rem)] sm:after:-translate-x-1/2 sm:after:-translate-y-1/2 sm:after:bg-app-border/70 sm:after:content-['']"
     :model-value="viewToStep(activeView)"
     orientation="horizontal"
     :linear="false"
