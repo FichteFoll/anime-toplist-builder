@@ -123,6 +123,7 @@ const hydrateSelectedAnime = async () => {
 
 const loadSongsForAnime = async (result: AniListSearchResult, options?: { openSongView?: boolean }) => {
   const openSongView = options?.openSongView ?? true
+  const requestId = ++activeSongRequestId
 
   focusedAnimeId.value = result.id
   hydratedSelectedAnime.value = result
@@ -134,6 +135,10 @@ const loadSongsForAnime = async (result: AniListSearchResult, options?: { openSo
   const cached = loadCachedAnimeSongs(result.id)
 
   if (cached) {
+    if (requestId !== activeSongRequestId) {
+      return
+    }
+
     songsByAnimeId.value = {
       ...songsByAnimeId.value,
       [result.id]: cached.songs,
@@ -142,7 +147,6 @@ const loadSongsForAnime = async (result: AniListSearchResult, options?: { openSo
     return
   }
 
-  const requestId = ++activeSongRequestId
   songStatus.value = 'loading'
 
   try {
