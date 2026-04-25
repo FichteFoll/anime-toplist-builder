@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogContent,
   DialogOverlay,
   DialogPortal,
@@ -15,6 +14,7 @@ import {
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
 import {
@@ -169,7 +169,9 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,80rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
-        <div class="shrink-0 flex items-start justify-between gap-4 border-b border-app-border/70 pb-5">
+        <DialogCloseButton />
+
+        <div class="shrink-0 border-b border-app-border/70 pb-5 pr-24">
           <div class="max-w-3xl space-y-2">
             <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
               Edit Category
@@ -181,15 +183,6 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
               Update the category name, description, and filters for this card.
             </p>
           </div>
-
-          <DialogClose as-child>
-            <button
-              type="button"
-              class="shell-button"
-            >
-              Close
-            </button>
-          </DialogClose>
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto pr-1 pt-5">

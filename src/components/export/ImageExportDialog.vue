@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogOverlay,
@@ -11,6 +10,7 @@ import {
 } from 'reka-ui'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import { createPngExportFilename } from '@/lib/export-filename'
 import {
   CATEGORIES_PER_ROW_LANDSCAPE,
@@ -202,7 +202,9 @@ onBeforeUnmount(() => {
       <DialogContent
         class="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[min(96vw,76rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[2rem] border border-app-border/80 bg-app-surface p-6 shadow-shell sm:p-7"
       >
-        <div class="flex flex-col gap-4 border-b border-app-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
+        <DialogCloseButton />
+
+        <div class="flex flex-col gap-4 border-b border-app-border/70 pb-5 pr-24 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
               Image Export
@@ -214,15 +216,6 @@ onBeforeUnmount(() => {
               Set the author name, choose a layout, preview the rendered image, and download the final export.
             </DialogDescription>
           </div>
-
-          <DialogClose as-child>
-            <button
-              type="button"
-              class="shell-button self-start"
-            >
-              Close
-            </button>
-          </DialogClose>
         </div>
 
         <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">

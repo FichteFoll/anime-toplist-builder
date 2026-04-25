@@ -8,6 +8,7 @@ import {
 } from 'reka-ui'
 import { ref } from 'vue'
 
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
 import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
 import { createAnimeSelection } from '@/lib/song-selection'
@@ -54,11 +55,15 @@ const selectResult = (result: AniListSearchResult) => {
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(98vw,72rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
-        <PickerDialogHeader
-          eyebrow="Anime picker"
-          :title="category.name"
-          :description="category.description"
-        />
+        <DialogCloseButton />
+
+        <div class="border-b border-app-border/70 pb-5 pr-24">
+          <PickerDialogHeader
+            eyebrow="Anime picker"
+            :title="category.name"
+            :description="category.description"
+          />
+        </div>
 
         <AnimePickerBrowser
           class="mt-5"

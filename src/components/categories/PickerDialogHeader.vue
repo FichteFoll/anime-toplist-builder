@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogDescription,
   DialogTitle,
 } from 'reka-ui'
 
-defineProps<{
+withDefaults(defineProps<{
   eyebrow: string
   title: string
   description?: string | null
-}>()
+}>(), {
+  description: null,
+})
 </script>
 
 <template>
-  <div class="shrink-0 flex flex-col gap-5 border-b border-app-border/70 pb-5 lg:flex-row lg:items-start lg:justify-between">
+  <div class="shrink-0 flex flex-col gap-5">
     <div>
       <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
         {{ eyebrow }}
@@ -28,14 +29,5 @@ defineProps<{
         {{ description }}
       </DialogDescription>
     </div>
-
-    <DialogClose as-child>
-      <button
-        type="button"
-        class="shell-button self-start"
-      >
-        Close
-      </button>
-    </DialogClose>
   </div>
 </template>
