@@ -28,7 +28,7 @@
 - `src/lib`: pure helpers, validation, persistence adapters, id helpers, and filter logic.
 - `src/stores`: Pinia stores only.
   Keep serialization and validation outside stores.
-- `src/api`: AniList access and query building.
+- `src/api`: AniList and Animethemes access, plus query building.
   UI code should not build GraphQL payloads directly.
 - `src/components`: reusable UI primitives and composed interface pieces.
   Export UI lives under `src/components/export`.
@@ -47,7 +47,7 @@
 - Prefer bi-directional data transfer using the `defineModel` directive.
 - Prefer small pure helpers in `src/lib` for normalization, validation, and merge logic.
 - Do not introduce character, staff, or manga support.
-  The current product scope is anime only.
+  The current product scope is anime and anime-related song categories only.
 - Keep the app English-only unless the plan is explicitly updated.
 - Preserve static-hosting compatibility for GitHub Pages.
 
@@ -57,6 +57,7 @@
 - Template ids and category ids are stable internal identities.
   Category renames must never break stored selections.
 - Categories are keyed by internal ids, not display names.
+- Category entity kinds are stable and currently include anime and song categories.
 - When the app exports templates, it should keep stable ids in the payload.
   When it imports older or hand-written payloads without ids, it should generate ids during normalization.
 - Template origin matters.
@@ -91,6 +92,7 @@
 - Validate imported JSON before it reaches stores or UI state.
 - Check the payload version first and fail with a clear error for unsupported versions.
 - Normalize imported templates into internal `Template` objects with guaranteed ids.
+- Preserve category entity kinds and song filter payloads during normalization.
 - Export only validated template data.
 - Do not persist origin-specific runtime details inside exported template JSON unless the plan explicitly requires it.
 
@@ -107,7 +109,7 @@
   and performs fork-on-edit for protected origins.
 - `src/stores/selections.ts` persists anime selections separately from template structure,
   and can duplicate selections during template forking.
-- `src/api` contains AniList request code and query-variable building.
+- `src/api` contains AniList and Animethemes request code and query-variable building.
   Components should never assemble GraphQL payloads directly.
 - `src/lib/export-image.ts` renders PNG exports in the browser with canvas.
   Keep export logic browser-safe and static-hosting compatible.
@@ -118,8 +120,6 @@
 - `pnpm typecheck`
 - `pnpm build`
 - `pnpm test`
-- Manual QA checklist:
-  `plans/2026-04-04-initial-implementation/step-11-qa-checklist.md`
 
 ## Current Notes
 
