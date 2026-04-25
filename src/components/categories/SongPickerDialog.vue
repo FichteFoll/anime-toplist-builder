@@ -10,7 +10,7 @@ import { computed, ref, watch } from 'vue'
 
 import { fetchAniListMediaById, fetchAnimeSongs, normalizeAnimeThemesError, type AnimeThemesSong } from '@/api'
 import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
-import SongPickerAnimeView from '@/components/categories/SongPickerAnimeView.vue'
+import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
 import SongPreviewDialog from '@/components/categories/SongPreviewDialog.vue'
 import SongPickerSongView from '@/components/categories/SongPickerSongView.vue'
 import SongPickerStepper from '@/components/categories/SongPickerStepper.vue'
@@ -254,13 +254,15 @@ watch(open, (isOpen) => {
         />
 
         <div class="mt-5 flex min-h-0 flex-1">
-          <SongPickerAnimeView
+          <AnimePickerBrowser
             v-show="isAnimeView"
             :open="open"
             :category="category"
             :global-filter="globalFilter"
-            :focused-anime-id="focusedAnimeId"
-            @select-anime="loadSongsForAnime"
+            :selected-media-id="focusedAnimeId"
+            :show-clear-button="false"
+            empty-message="No anime matched the current effective filters and search term."
+            @select-result="loadSongsForAnime"
             @clear="emit('clear')"
           />
 

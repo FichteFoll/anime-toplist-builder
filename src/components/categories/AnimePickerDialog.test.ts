@@ -5,7 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
+import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
@@ -105,7 +105,7 @@ const createResult = (): AniListSearchResult => ({
   siteUrl: 'https://anilist.co/anime/42',
 })
 
-describe('CategoryMediaPickerDialog', () => {
+describe('AnimePickerDialog', () => {
   it('shows unselect for the selected result and clears it', async () => {
     setActivePinia(createPinia())
 
@@ -122,7 +122,7 @@ describe('CategoryMediaPickerDialog', () => {
 
     mocks.searchAnimeMedia.mockResolvedValue(response)
 
-    const wrapper = mount(CategoryMediaPickerDialog, {
+    const wrapper = mount(AnimePickerDialog, {
       props: {
         category,
         globalFilter: createEmptyFilterState(),

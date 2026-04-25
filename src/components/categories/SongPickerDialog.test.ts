@@ -93,11 +93,11 @@ vi.mock('@/components/categories/SongPickerSongView.vue', () => ({
   },
 }))
 
-vi.mock('@/components/categories/SongPickerAnimeView.vue', () => ({
+vi.mock('@/components/categories/AnimePickerBrowser.vue', () => ({
   default: {
-    props: ['open', 'category', 'globalFilter', 'focusedAnimeId'],
-    emits: ['selectAnime', 'clear'],
-    template: '<div><button type="button" class="select-result" @click="$emit(\'selectAnime\', { id: 42, title: { userPreferred: \'Haibane Renmei\', romaji: \'Haibane Renmei\', english: null, native: null }, coverImage: { large: \'https://img.example/haibane-large.jpg\', medium: null, extraLarge: null, color: \'#475569\' }, description: \'A quiet synopsis.\', season: \'FALL\', seasonYear: 2002, format: \'TV\', siteUrl: \'https://anilist.co/anime/42\' })">select</button><button v-if="false" type="button" class="clear-result" @click="$emit(\'clear\')">Unselect</button><span class="anime-view-hydrated">A quiet synopsis. 2002</span></div>',
+    props: ['open', 'category', 'globalFilter', 'selectedMediaId', 'showClearButton', 'emptyMessage'],
+    emits: ['selectResult', 'clear'],
+    template: '<div><button type="button" class="select-result" @click="$emit(\'selectResult\', { id: 42, title: { userPreferred: \'Haibane Renmei\', romaji: \'Haibane Renmei\', english: null, native: null }, coverImage: { large: \'https://img.example/haibane-large.jpg\', medium: null, extraLarge: null, color: \'#475569\' }, description: \'A quiet synopsis.\', season: \'FALL\', seasonYear: 2002, format: \'TV\', siteUrl: \'https://anilist.co/anime/42\' })">select</button><button v-if="false" type="button" class="clear-result" @click="$emit(\'clear\')">Unselect</button><span class="anime-view-hydrated">A quiet synopsis. 2002</span></div>',
   },
 }))
 

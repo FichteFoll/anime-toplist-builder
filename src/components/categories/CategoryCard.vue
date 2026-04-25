@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
-import CategoryMediaPickerDialog from '@/components/categories/CategoryMediaPickerDialog.vue'
+import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
@@ -175,7 +175,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
     </div>
 
     <div class="mt-5 flex flex-wrap gap-2">
-      <CategoryMediaPickerDialog
+      <AnimePickerDialog
         v-if="category.entityKind === 'anime'"
         :category="category"
         :global-filter="globalFilter"
