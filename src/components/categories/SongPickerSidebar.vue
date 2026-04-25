@@ -12,6 +12,7 @@ import {
 import type { AnimeThemesSong } from '@/api'
 import CaretIcon from '@/components/icons/CaretIcon.vue'
 import PlayIcon from '@/components/icons/PlayIcon.vue'
+import { sanitizeAnimeDescriptionHtml } from '@/lib/anime-description'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
@@ -98,7 +99,8 @@ const detailPanelToggleIconClass = computed(() => isCollapsed.value ? 'rotate-18
               v-if="detailAnime.description"
               class="line-clamp-3 text-sm leading-6 text-app-muted"
             >
-              {{ detailAnime.description }}
+              <!-- eslint-disable vue/no-v-html -->
+              <span v-html="sanitizeAnimeDescriptionHtml(detailAnime.description)" />
             </p>
           </div>
         </div>
