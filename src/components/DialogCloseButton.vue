@@ -17,7 +17,7 @@ withDefaults(defineProps<{
     <button
       type="button"
       :aria-label="ariaLabel"
-      :class="['absolute right-5 top-5 z-10 shell-button', buttonClass]"
+      :class="['absolute right-5 top-5 z-10', !buttonClass && 'shell-button', buttonClass]"
     >
       {{ label }}
     </button>
