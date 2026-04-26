@@ -9,7 +9,8 @@ import {
 import { computed, ref, watch } from 'vue'
 
 import { fetchAniListMediaById, fetchAnimeSongs, normalizeAnimeThemesError, type AnimeThemesSong } from '@/api'
-import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
+import DialogHeader from '@/components/DialogHeader.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
 import SongPreviewDialog from '@/components/categories/SongPreviewDialog.vue'
 import SongPickerSongView from '@/components/categories/SongPickerSongView.vue'
@@ -245,11 +246,15 @@ watch(open, (isOpen) => {
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(98vw,78rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell">
-        <PickerDialogHeader
-          eyebrow="Song picker"
-          :title="category.name"
-          :description="category.description"
-        />
+        <DialogCloseButton />
+
+        <div class="border-b border-app-border/70 pb-5 pr-24">
+          <DialogHeader
+            eyebrow="Song picker"
+            :title="category.name"
+            :description="category.description"
+          />
+        </div>
 
         <div class="-mx-5 px-5 -mt-5 pt-5 pb-4 border-b border-app-border/70 bg-app-surface/95 ">
           <SongPickerStepper

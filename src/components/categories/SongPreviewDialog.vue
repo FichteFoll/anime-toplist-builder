@@ -2,13 +2,14 @@
 import {
   DialogContent,
   DialogDescription,
-  DialogClose,
   DialogOverlay,
   DialogPortal,
   DialogRoot,
   DialogTitle,
 } from 'reka-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -69,7 +70,9 @@ onBeforeUnmount(() => {
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 w-fit max-w-[94vw] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell max-h-[calc(100dvh-2rem)] overflow-hidden">
-        <div class="flex items-start justify-between gap-4">
+        <DialogCloseButton />
+
+        <div class="flex items-start justify-between gap-4 pr-24">
           <div>
             <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
               {{ title }}
@@ -78,15 +81,6 @@ onBeforeUnmount(() => {
               {{ description }}
             </DialogDescription>
           </div>
-
-          <DialogClose as-child>
-            <button
-              type="button"
-              class="shell-button self-start"
-            >
-              Close
-            </button>
-          </DialogClose>
         </div>
 
         <div

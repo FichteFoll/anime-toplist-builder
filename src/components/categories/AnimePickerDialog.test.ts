@@ -75,6 +75,14 @@ vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
   },
 }))
 
+vi.mock('@/components/categories/PickerFilterSummary.vue', () => ({
+  default: {
+    props: ['activeFilterSummary', 'canUseListFilters', 'onlyOnList', 'hideOnList'],
+    emits: ['toggleListVisibility'],
+    template: '<div class="filter-summary">summary</div>',
+  },
+}))
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
@@ -142,5 +150,34 @@ describe('AnimePickerDialog', () => {
     await unselectButton!.trigger('click')
 
     expect(wrapper.emitted('clear')).toEqual([[]])
+  })
+
+  it('hides the filter summary when nothing is active and AniList is disconnected', async () => {
+    setActivePinia(createPinia())
+
+    mocks.searchAnimeMedia.mockResolvedValue({
+      pageInfo: {
+        currentPage: 1,
+        hasNextPage: false,
+        lastPage: 1,
+        perPage: 15,
+        total: 0,
+      },
+      results: [],
+    } satisfies AniListSearchResponse)
+
+    const wrapper = mount(AnimePickerDialog, {
+      props: {
+        category,
+        globalFilter: createEmptyFilterState(),
+      },
+    })
+
+    ;(wrapper.vm as unknown as { open: boolean }).open = true
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await nextTick()
+    await nextTick()
+
+    expect(wrapper.find('.filter-summary').exists()).toBe(false)
   })
 })

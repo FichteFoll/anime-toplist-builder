@@ -93,6 +93,7 @@ const pickerSort = computed<FilterSort | undefined>(() => {
 const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
 const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 0)
 const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
+const showFilterSummary = computed(() => activeFilterSummary.value.length > 0 || canUseListFilters.value)
 
 const resetSearchState = () => {
   isResettingState.value = true
@@ -214,6 +215,7 @@ watch(() => pickerFiltersStore.listVisibility, (value, previousValue) => {
     />
 
     <PickerFilterSummary
+      v-if="showFilterSummary"
       :active-filter-summary="activeFilterSummary"
       :can-use-list-filters="canUseListFilters"
       :only-on-list="pickerFiltersStore.onlyOnList"

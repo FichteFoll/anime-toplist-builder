@@ -88,8 +88,6 @@ const addCategory = (name: string) => {
   templateStore.updateActiveTemplate((template) => {
     template.categories.push(createBlankCategory(name))
   })
-
-  toastStore.success('Added category.', name)
 }
 
 const deleteCategory = (categoryId: string) => {
@@ -126,7 +124,6 @@ const deleteCategory = (categoryId: string) => {
           template.categories = template.categories.filter((entry) => entry.id !== categoryId)
         })
         selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
-        toastStore.success('Deleted category.', category.name)
       },
     })
 
@@ -137,7 +134,6 @@ const deleteCategory = (categoryId: string) => {
     template.categories = template.categories.filter((entry) => entry.id !== categoryId)
   })
   selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
-  toastStore.success('Deleted category.', category.name)
 }
 
 const reorderCategories = ({ fromIndex, toIndex }: { fromIndex: number, toIndex: number }) => {
@@ -167,7 +163,6 @@ const clearAllSelections = () => {
     confirmLabel: 'Clear all selections',
     onConfirm: () => {
       selectionsStore.clearSelectionsForTemplate(templateId)
-      toastStore.success('All selections cleared for the active template.')
     },
   })
 }

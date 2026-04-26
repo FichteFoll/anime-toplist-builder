@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogOverlay,
   DialogPortal,
   DialogRoot,
-  DialogTitle,
   DialogTrigger,
 } from 'reka-ui'
 
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
+import DialogHeader from '@/components/DialogHeader.vue'
 import { animeTitleLanguages, type AnimeTitleLanguage } from '@/types'
 
 const titleLanguageLabels: Record<AnimeTitleLanguage, string> = {
@@ -38,34 +37,22 @@ const model = defineModel<AnimeTitleLanguage>({ required: true })
       <DialogContent
         class="fixed left-1/2 top-1/2 z-50 w-[min(92vw,34rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] border border-app-border/80 bg-app-surface p-6 shadow-shell"
       >
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <DialogTitle class="text-2xl font-semibold tracking-tight text-app-text">
-              Settings
-            </DialogTitle>
-            <DialogDescription class="mt-2 text-sm leading-6 text-app-muted">
-              Keep global display preferences here so search results and saved selections use the same title language.
-            </DialogDescription>
-          </div>
+        <DialogCloseButton
+          aria-label="Close settings"
+          button-class="h-10 w-10 rounded-full border border-app-border/70 bg-app-bg/60 p-0 text-app-muted transition hover:border-app-accent/50 hover:text-app-text focus:outline-none focus:ring-2 focus:ring-app-accent/40"
+        />
 
-          <DialogClose
-            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-app-border/70 bg-app-bg/60 text-app-muted transition hover:border-app-accent/50 hover:text-app-text focus:outline-none focus:ring-2 focus:ring-app-accent/40"
-            aria-label="Close settings"
-          >
-            <span aria-hidden="true">×</span>
-          </DialogClose>
+        <div class="pr-24">
+          <DialogHeader
+            title="Settings"
+            description="Keep global display preferences here so search results and saved selections use the same title language."
+          />
         </div>
 
         <section class="mt-6 space-y-3">
-          <div>
-            <h3 class="text-sm font-medium text-app-text">
-              Anime title language
-            </h3>
-            <p class="mt-1 text-sm leading-6 text-app-muted">
-              Applies across the app and will be reused by image export.
-            </p>
-          </div>
-
+          <h2 class="text-sm font-medium uppercase tracking-[0.2em] text-app-muted">
+            Anime title language
+          </h2>
           <div class="grid gap-2">
             <label
               v-for="language in animeTitleLanguages"

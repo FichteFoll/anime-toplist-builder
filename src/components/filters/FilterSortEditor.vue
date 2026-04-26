@@ -54,11 +54,11 @@ const setDirection = (direction: FilterSortDirection) => {
     :label="label"
     :description="description"
   >
-    <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-      <label class="space-y-2">
+    <div class="flex flex-nowrap items-end gap-2">
+      <label class="min-w-0 flex-1 space-y-2">
         <span class="sr-only">Sort field</span>
         <select
-          class="shell-input"
+          class="shell-input w-full min-w-0"
           :value="model?.field ?? ''"
           @change="setField(($event.target as HTMLSelectElement).value as FilterSortField | '')"
         >
@@ -75,21 +75,19 @@ const setDirection = (direction: FilterSortDirection) => {
         </select>
       </label>
 
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="direction in filterSortDirections"
-          :key="direction"
-          type="button"
-          class="shell-button"
-          :class="model?.direction === direction ? 'shell-button-active' : ''"
-          :disabled="!model"
-          :aria-pressed="model?.direction === direction"
-          :aria-label="direction === FilterSortDirection.Asc ? 'Use ascending sort order' : 'Use descending sort order'"
-          @click="setDirection(direction)"
-        >
-          {{ direction === FilterSortDirection.Asc ? 'Ascending' : 'Descending' }}
-        </button>
-      </div>
+      <button
+        v-for="direction in filterSortDirections"
+        :key="direction"
+        type="button"
+        class="shrink-0 shell-button"
+        :class="model?.direction === direction ? 'shell-button-active' : ''"
+        :disabled="!model"
+        :aria-pressed="model?.direction === direction"
+        :aria-label="direction === FilterSortDirection.Asc ? 'Use ascending sort order' : 'Use descending sort order'"
+        @click="setDirection(direction)"
+      >
+        {{ direction === FilterSortDirection.Asc ? 'Asc' : 'Desc' }}
+      </button>
     </div>
   </FilterField>
 </template>

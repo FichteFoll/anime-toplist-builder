@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from 'reka-ui'
 
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import type { AniListMetadata, FilterState } from '@/types'
@@ -40,7 +41,9 @@ const model = defineModel<FilterState>({ required: true })
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm" />
       <DialogContent class="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(96vw,68rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2rem] border border-app-border/80 bg-app-surface p-5 shadow-shell overflow-hidden">
-        <div class="shrink-0 space-y-2 border-b border-app-border/70 pb-5">
+        <DialogCloseButton />
+
+        <div class="shrink-0 space-y-2 border-b border-app-border/70 pb-5 pr-24">
           <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
             Template-wide filter
           </p>
