@@ -10,7 +10,7 @@ import { ref } from 'vue'
 
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
-import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
+import DialogHeader from '@/components/DialogHeader.vue'
 import { createAnimeSelection } from '@/lib/song-selection'
 import type { AniListSearchResult, AnimeSelection, Category, FilterState } from '@/types'
 
@@ -58,7 +58,7 @@ const selectResult = (result: AniListSearchResult) => {
         <DialogCloseButton />
 
         <div class="border-b border-app-border/70 pb-5 pr-24">
-          <PickerDialogHeader
+          <DialogHeader
             eyebrow="Anime picker"
             :title="category.name"
             :description="category.description"

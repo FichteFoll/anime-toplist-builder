@@ -5,10 +5,11 @@ import {
 } from 'reka-ui'
 
 withDefaults(defineProps<{
-  eyebrow: string
+  eyebrow?: string | null
   title: string
   description?: string | null
 }>(), {
+  eyebrow: null,
   description: null,
 })
 </script>
@@ -16,10 +17,13 @@ withDefaults(defineProps<{
 <template>
   <div class="shrink-0 flex flex-col gap-5">
     <div>
-      <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+      <p
+        v-if="eyebrow"
+        class="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-app-muted"
+      >
         {{ eyebrow }}
       </p>
-      <DialogTitle class="mt-3 text-xl font-semibold tracking-tight text-app-text">
+      <DialogTitle class="text-xl font-semibold tracking-tight text-app-text">
         {{ title }}
       </DialogTitle>
       <DialogDescription

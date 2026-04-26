@@ -10,7 +10,7 @@ import { computed, ref, watch } from 'vue'
 
 import { fetchAniListMediaById, fetchAnimeSongs, normalizeAnimeThemesError, type AnimeThemesSong } from '@/api'
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
-import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
+import DialogHeader from '@/components/DialogHeader.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
 import SongPreviewDialog from '@/components/categories/SongPreviewDialog.vue'
 import SongPickerSongView from '@/components/categories/SongPickerSongView.vue'
@@ -249,7 +249,7 @@ watch(open, (isOpen) => {
         <DialogCloseButton />
 
         <div class="border-b border-app-border/70 pb-5 pr-24">
-          <PickerDialogHeader
+          <DialogHeader
             eyebrow="Song picker"
             :title="category.name"
             :description="category.description"

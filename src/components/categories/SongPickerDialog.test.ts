@@ -66,7 +66,7 @@ vi.mock('@/components/categories/AnimePickerResultCard.vue', () => ({
   },
 }))
 
-vi.mock('@/components/categories/PickerDialogHeader.vue', () => ({
+vi.mock('@/components/DialogHeader.vue', () => ({
   default: { template: '<div />' },
 }))
 

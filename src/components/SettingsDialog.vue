@@ -8,7 +8,7 @@ import {
 } from 'reka-ui'
 
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
-import PickerDialogHeader from '@/components/categories/PickerDialogHeader.vue'
+import DialogHeader from '@/components/DialogHeader.vue'
 import { animeTitleLanguages, type AnimeTitleLanguage } from '@/types'
 
 const titleLanguageLabels: Record<AnimeTitleLanguage, string> = {
@@ -43,14 +43,16 @@ const model = defineModel<AnimeTitleLanguage>({ required: true })
         />
 
         <div class="pr-24">
-          <PickerDialogHeader
-            eyebrow="Settings"
-            title="Anime title language"
+          <DialogHeader
+            title="Settings"
             description="Keep global display preferences here so search results and saved selections use the same title language."
           />
         </div>
 
         <section class="mt-6 space-y-3">
+          <h2 class="text-sm font-medium uppercase tracking-[0.2em] text-app-muted">
+            Anime title language
+          </h2>
           <div class="grid gap-2">
             <label
               v-for="language in animeTitleLanguages"
