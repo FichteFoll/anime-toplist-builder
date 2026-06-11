@@ -7,11 +7,12 @@ while still keeping the anime relation visible in category editing,
 selection state,
 and generated PNG export.
 
-The first target relations are:
+This plan now focuses on:
 
 - `character` in an anime
-- `staff` credited on an anime
 - `voice-actor` tied to a character role in an anime
+
+`staff` is deferred to a separate follow-up plan.
 
 ## Current Architecture Baseline
 
@@ -23,6 +24,13 @@ The app already supports a non-anime category type (`song`) with the following p
 - picker flows are split into dedicated dialogs that reuse shared picker shell components
 - export rendering branches by selection kind
 - mismatched selections are pruned defensively by store logic
+
+The code base also already includes:
+
+- template import and export validation for `anime` and `song`
+- persisted selection parsing for `anime` and `song`
+- category edit UX for switching between `anime` and `song`
+- song-specific picker, summary, and export helpers
 
 This plan extends those existing patterns to related entities.
 
@@ -49,7 +57,6 @@ Extend `CategoryEntityKind` beyond:
 with:
 
 - `character`
-- `staff`
 - `voice-actor`
 
 Each category should continue to store:
@@ -64,7 +71,6 @@ even when the current entity kind does not actively use it.
 Likely additions:
 
 - `characterFilter`
-- `staffFilter`
 - `voiceActorFilter`
 
 ## Selection Model
@@ -74,7 +80,6 @@ Extend the discriminated `CategorySelection` union with relation-aware variants.
 Likely variants:
 
 - `CharacterSelection`
-- `StaffSelection`
 - `VoiceActorSelection`
 
 Each selection variant should store enough data to render cards,
@@ -89,7 +94,7 @@ Each variant should include:
 - relation metadata specific to the variant,
   such as role,
   character,
-  or credit language
+  or voice credit metadata
 
 ## Search And Editing UX
 
@@ -106,7 +111,7 @@ Each variant should include:
 
 - `anime` uses the existing anime picker.
 - `song` uses the dedicated song picker.
-- `character`, `staff`, and `voice-actor` should use dedicated relation pickers,
+- `character` and `voice-actor` should use dedicated relation pickers,
   with the anime context kept explicit in the UI.
 - Prefer anime-first narrowing flows for related entities,
   so the user picks an anime before choosing the relation.
@@ -133,7 +138,7 @@ Each variant should include:
 
 - `anime` categories keep the current layout.
 - `song` categories keep the current text-first relation layout.
-- `character`, `staff`, and `voice-actor` categories always render an inset image.
+- `character` and `voice-actor` categories always render an inset image.
 - `voice-actor` categories render two inset images.
 
 ### Information density
@@ -164,8 +169,8 @@ Requirements:
 
 ### Phase 1: shared groundwork
 
-1. Extend `CategoryEntityKind` and category type definitions.
-2. Add normalized default state for all new per-kind category filters.
+1. Extend `CategoryEntityKind` and category type definitions for `character` and `voice-actor`.
+2. Add normalized default state for the new per-kind category filters.
 3. Extend template validation,
    import,
    export,
@@ -223,3 +228,7 @@ Requirements:
   persistence,
   picker behavior,
   and export branches
+
+## Deferred Follow-Up
+
+`staff` is handled in `plans/2026-06-11-staff-related-entity-follow-up-plan.md`.
