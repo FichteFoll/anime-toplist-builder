@@ -70,4 +70,5 @@ The dialog explains that copying works through the browser's own
   then song title and artist if needed,
   while the song slug is preserved.
 - If rendering fails,
-  the dialog shows the error and keeps the previous preview.
+  the dialog shows the error and discards the preview,
+  so the download button stays disabled until a render succeeds.
