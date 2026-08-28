@@ -1,8 +1,15 @@
 # Anime Toplist Builder
 
-Anime Toplist Builder is a statically hosted Vue 3 app for building anime ranking templates.
-It lets you manage templates, search AniList, persist local progress,
-and export the current list as a themed PNG image.
+Anime Toplist Builder is a statically hosted Vue 3 app for building anime ranking lists.
+Pick a template,
+filter what each category may contain,
+choose your anime or anime songs,
+and export the result as a themed PNG image.
+
+Everything runs in the browser.
+Templates,
+selections,
+and preferences stay on your device.
 
 ## Screenshots
 
@@ -16,28 +23,41 @@ and export the current list as a themed PNG image.
 
 ## Features
 
-- Template management for predefined,
+- Predefined,
   local,
   file-imported,
-  and remote URL templates.
-- Fork-on-edit behavior for protected templates,
-  including predefined templates and imported remote templates.
-- Shared global filters plus category-specific filters,
-  with deterministic merge rules and strict validation.
-- Persistent anime selections keyed by stable template and category ids.
-- Client-side AniList metadata loading and search.
-- Optional AniList login
-  that allows usage of `Hide my anime` and `Only my anime` filters.
-- Remote template startup hydration via `#template=<id-or-url>`,
-  plus last-opened template persistence.
-- Theme toggle,
-  title-language preferences,
-  and toast feedback for template and selection actions.
-- Browser-side PNG export that follows the current theme,
-  category order,
-  selected title language,
-  and author name.
-- Template JSON export and import with explicit schema validation.
+  and URL-imported templates,
+  with fork-on-edit for protected ones.
+- Shared global and per-category filters against the AniList API.
+- Anime categories and anime song categories,
+  the latter backed by AnimeThemes.
+- Persistent selections per template,
+  keyed by stable ids.
+- Optional AniList login for the `Hide My Anime` and `Only Show My Anime` filters.
+- Template sharing by JSON file or `#template=` link.
+- Browser-side PNG export in portrait or landscape,
+  following the active theme.
+
+## Documentation
+
+Behavior is documented in [`docs/`](./docs/index.md),
+which is kept up to date with the code.
+
+- [Getting started](./docs/guide/getting-started.md)
+- [Templates](./docs/guide/templates.md)
+- [Categories](./docs/guide/categories.md)
+- [Filters](./docs/guide/filters.md)
+- [Picking anime](./docs/guide/picking-anime.md)
+  and [picking songs](./docs/guide/picking-songs.md)
+- [Image export](./docs/guide/image-export.md)
+- [Account and settings](./docs/guide/account-and-settings.md)
+- Reference:
+  [data model](./docs/reference/data-model.md),
+  [persistence](./docs/reference/persistence.md),
+  [template JSON](./docs/reference/template-json.md),
+  [architecture](./docs/reference/architecture.md),
+  [configuration](./docs/reference/configuration.md),
+  [limitations](./docs/reference/limitations.md)
 
 ## Stack
 
@@ -50,92 +70,24 @@ and export the current list as a themed PNG image.
   tooltips,
   and other primitives.
 - SortableJS for category reordering.
-- Vitest and Vue Test Utils for unit and component testing.
+- Vitest and Vue Test Utils for tests.
 - ESLint for linting.
 - `pnpm` for package and script management.
 
 ## Setup
 
-1. Install dependencies with `pnpm install`.
-2. Start the dev server with `pnpm dev`.
-3. Open the local Vite URL shown in the terminal.
+1. `pnpm install`
+2. `pnpm dev`
 
-## Available Commands
+Verification:
+`pnpm lint`,
+`pnpm typecheck`,
+`pnpm test`,
+`pnpm build`.
 
-- `pnpm dev`: start the local development server.
-- `pnpm build`: create the production build in `dist/`.
-- `pnpm preview`: serve the production build locally.
-- `pnpm typecheck`: run `vue-tsc --noEmit`.
-- `pnpm lint`: run ESLint across the repo.
-- `pnpm test`: run the Vitest suite.
+Environment variables,
+AniList app registration,
+and the GitHub Pages deployment are documented in
+[configuration](./docs/reference/configuration.md).
 
-## Environment Notes
-
-The app is fully client-side.
-AniList requests run in the browser,
-so no server secrets are required.
-
-Useful optional environment variables:
-
-- `VITE_APP_NAME`:
-  app name shown in the UI.
-- `VITE_REPOSITORY_URL`:
-  repository link shown in the footer.
-- `VITE_ANILIST_URL`:
-  AniList link shown in the footer.
-- `VITE_ANILIST_CLIENT_ID`:
-  AniList OAuth application client id used for optional login.
-- `VITE_BASE_PATH`:
-  base path for GitHub Pages or other subpath hosting.
-- `VITE_DEFAULT_TEMPLATE_ID`:
-  default template id used when there is no URL hash and no persisted last-opened template.
-- `VITE_EXPORT_SITE_URL`:
-  link embedded into PNG exports.
-
-AniList login uses the browser-side implicit grant flow.
-Create a client at <https://anilist.co/settings/developer>
-and use the deployed app root as the redirect URI,
-including the trailing slash and any GitHub Pages subpath,
-for example `https://<host>/<base-path>/`.
-AniList returns the access token in the URL fragment,
-the app parses it client-side,
-stores only the token session in `sessionStorage`,
-and clears the callback fragment immediately.
-
-## Development Notes
-
-- Template structure and anime selections are persisted separately.
-- Category ids are stable internal identities.
-  Renaming or reordering a category must not drop saved selections.
-- Imported remote templates are stored locally and tracked by remote URL.
-- Imported or predefined protected templates are forked before in-place edits.
-- Removing a template also removes its stored selections.
-- Global template edits and category edits share the same filter model.
-- Remote templates can be loaded directly by hash,
-  for example `#template=https%3A%2F%2Fexample.com%2Ftemplate.json`.
-- PNG export runs in the browser canvas.
-  Remote image hosts without suitable CORS headers may fall back to placeholders.
-- AniList-authenticated picker filters are shared UI state only.
-  They do not persist into templates or category filters.
-
-## Build And Deployment
-
-The app targets static hosting,
-including GitHub Pages.
-
-1. Set `VITE_BASE_PATH` to the repository subpath when deploying under Pages.
-2. Run `pnpm build`.
-3. Publish the generated `dist/` directory with the existing Pages workflow.
-
-## Known Issues and Constraints
-
-- AniList currently exposes a single `tagRank` argument for tag queries,
-  so the app collapses merged tag thresholds to the strictest rank.
-  See `plans/2026-04-04-initial-implementation/step-4-deviations.md`.
-- On FireFox, we use Sortable's fallback drag mode for category reordering.
-  This avoids the browser's oversized native drag preview for the card.
-- PNG export can fall back to placeholders when remote covers fail to load,
-  including CORS-restricted images.
-- The multi-select comboboxes exhibit some unexpected UX,
-  for example the position swapping from the top to the bottom of the input
-  or the scroll position being reset when an item is selected.
+Contributor conventions live in [`AGENTS.md`](./AGENTS.md).
