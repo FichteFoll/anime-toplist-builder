@@ -36,7 +36,9 @@
 - `src/composables`: reusable stateful Vue helpers.
 - `src/templates`: predefined template definitions only.
 - `src/config`: app-wide configuration constants.
-- `plans/`: planning artifacts and step deviation notes.
+- `docs/`: living documentation of intended behavior.
+- `plans/`: local scratch space for in-progress plans.
+  Not tracked in the repository.
 
 ## Coding Conventions
 
@@ -128,6 +130,21 @@
 - `ImageExportDialog` renders the PNG preview in-browser and downloads the generated blob.
 - PNG export can fall back to placeholders when remote covers fail to load,
   including CORS-restricted images.
+
+## Documentation
+
+- `docs/` is the living documentation of how the app is supposed to behave.
+  Update it in the same change as any user-visible behavior change.
+- `docs/guide/` describes usage,
+  `docs/reference/` describes data,
+  storage,
+  and configuration.
+  `AGENTS.md` stays authoritative for contributor conventions.
+- Where a document and the code disagree,
+  the code is the truth and the document is a bug to fix.
+- `plans/` is untracked local scratch space for plans that are still open.
+  Do not archive completed plans in the repository;
+  fold what they established into `docs/` instead.
 
 ## References
 
