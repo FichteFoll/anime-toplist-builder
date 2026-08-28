@@ -102,7 +102,7 @@ const categoryCardStub = defineComponent({
   `,
 })
 
-const categories: Category[] = [
+const categories: Array<Category> = [
   {
     id: 'gridopening01',
     name: 'Best Opening',

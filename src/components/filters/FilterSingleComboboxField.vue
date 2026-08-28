@@ -21,7 +21,7 @@ export interface FilterOption {
 const props = defineProps<{
   label: string
   description?: string
-  options: FilterOption[]
+  options: Array<FilterOption>
   placeholder?: string
   disabledReason?: string
   clearLabel: string

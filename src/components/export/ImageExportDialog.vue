@@ -65,10 +65,10 @@ const defaultLayout = computed<ExportImageLayout>(() =>
 )
 const showAniListBadge = computed(
   () =>
-    !hideAuthor.value &&
-    props.defaultAuthorSource === 'anilist' &&
-    aniListAuthStore.isAuthenticated &&
-    resolvedAuthor.value === defaultAuthor.value,
+    !hideAuthor.value
+    && props.defaultAuthorSource === 'anilist'
+    && aniListAuthStore.isAuthenticated
+    && resolvedAuthor.value === defaultAuthor.value,
 )
 const isOpen = computed({
   get: () => openModel.value ?? internalOpen.value,

@@ -46,7 +46,7 @@ interface StoredTemplatesRecordV1 {
 }
 
 interface LoadedTemplatesRecord {
-  templates: Template[]
+  templates: Array<Template>
   remoteTemplateUrls: Record<string, string>
 }
 
@@ -89,10 +89,10 @@ const isThemeType = (value: unknown): value is (typeof themeTypes)[number] =>
   typeof value === 'string' && themeTypes.includes(value as (typeof themeTypes)[number])
 
 const isTemplateOrigin = (value: unknown): value is TemplateOrigin =>
-  value === TemplateOrigin.User ||
-  value === TemplateOrigin.ImportedFile ||
-  value === TemplateOrigin.ImportedUrl ||
-  value === TemplateOrigin.Predefined
+  value === TemplateOrigin.User
+  || value === TemplateOrigin.ImportedFile
+  || value === TemplateOrigin.ImportedUrl
+  || value === TemplateOrigin.Predefined
 
 const isHttpUrl = (value: unknown): value is string => {
   if (typeof value !== 'string') {
@@ -178,18 +178,18 @@ const parseStoredAnimeSelection = (value: unknown): CategorySelection | null => 
   }
 
   if (
-    typeof value.mediaId !== 'number' ||
-    !Number.isInteger(value.mediaId) ||
-    !isRecord(value.title) ||
-    !isString(value.title.userPreferred) ||
-    !isNullableString(value.title.romaji) ||
-    !isNullableString(value.title.english) ||
-    !isNullableString(value.title.native) ||
-    !isRecord(value.coverImage) ||
-    !isString(value.coverImage.large) ||
-    !isNullableString(value.coverImage.medium) ||
-    !isNullableString(value.coverImage.extraLarge) ||
-    !isNullableString(value.coverImage.color)
+    typeof value.mediaId !== 'number'
+    || !Number.isInteger(value.mediaId)
+    || !isRecord(value.title)
+    || !isString(value.title.userPreferred)
+    || !isNullableString(value.title.romaji)
+    || !isNullableString(value.title.english)
+    || !isNullableString(value.title.native)
+    || !isRecord(value.coverImage)
+    || !isString(value.coverImage.large)
+    || !isNullableString(value.coverImage.medium)
+    || !isNullableString(value.coverImage.extraLarge)
+    || !isNullableString(value.coverImage.color)
   ) {
     return null
   }
@@ -226,7 +226,7 @@ const parseStoredAnimeSelection = (value: unknown): CategorySelection | null => 
   })
 }
 
-const parseSongPerformances = (value: unknown): SongPerformance[] | undefined => {
+const parseSongPerformances = (value: unknown): Array<SongPerformance> | undefined => {
   if (value === undefined) {
     return undefined
   }
@@ -235,7 +235,7 @@ const parseSongPerformances = (value: unknown): SongPerformance[] | undefined =>
     return undefined
   }
 
-  const performances: SongPerformance[] = []
+  const performances: Array<SongPerformance> = []
 
   for (const entry of value) {
     if (!isRecord(entry) || !isString(entry.artist)) {
@@ -257,23 +257,23 @@ const parseStoredSongSelection = (value: unknown): SongSelection | null => {
   }
 
   if (
-    typeof value.animeId !== 'number' ||
-    !Number.isInteger(value.animeId) ||
-    !isRecord(value.animeTitle) ||
-    !isString(value.animeTitle.userPreferred) ||
-    !isNullableString(value.animeTitle.romaji) ||
-    !isNullableString(value.animeTitle.english) ||
-    !isNullableString(value.animeTitle.native) ||
-    !isRecord(value.animeCoverImage) ||
-    !isString(value.animeCoverImage.large) ||
-    !isNullableString(value.animeCoverImage.medium) ||
-    !isNullableString(value.animeCoverImage.extraLarge) ||
-    !isNullableString(value.animeCoverImage.color) ||
-    !isRecord(value.song) ||
-    !(typeof value.song.id === 'number' && Number.isInteger(value.song.id)) ||
-    !isThemeType(value.song.type) ||
-    !isString(value.song.slug) ||
-    !isString(value.song.artist)
+    typeof value.animeId !== 'number'
+    || !Number.isInteger(value.animeId)
+    || !isRecord(value.animeTitle)
+    || !isString(value.animeTitle.userPreferred)
+    || !isNullableString(value.animeTitle.romaji)
+    || !isNullableString(value.animeTitle.english)
+    || !isNullableString(value.animeTitle.native)
+    || !isRecord(value.animeCoverImage)
+    || !isString(value.animeCoverImage.large)
+    || !isNullableString(value.animeCoverImage.medium)
+    || !isNullableString(value.animeCoverImage.extraLarge)
+    || !isNullableString(value.animeCoverImage.color)
+    || !isRecord(value.song)
+    || !(typeof value.song.id === 'number' && Number.isInteger(value.song.id))
+    || !isThemeType(value.song.type)
+    || !isString(value.song.slug)
+    || !isString(value.song.artist)
   ) {
     return null
   }
@@ -343,7 +343,7 @@ export const loadStoredTemplates = (storage = getBrowserStorage()): LoadedTempla
     }
   }
 
-  const templates: Template[] = []
+  const templates: Array<Template> = []
   const remoteTemplateUrls: Record<string, string> = {}
 
   for (const entry of value.templates) {
@@ -367,7 +367,7 @@ export const loadStoredTemplates = (storage = getBrowserStorage()): LoadedTempla
 }
 
 export const saveStoredTemplates = (
-  templates: Template[],
+  templates: Array<Template>,
   remoteTemplateUrls: Record<string, string>,
   storage = getBrowserStorage(),
 ) => {

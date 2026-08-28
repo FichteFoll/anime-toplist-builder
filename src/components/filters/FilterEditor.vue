@@ -45,13 +45,13 @@ watch(model, () => {
 const staticCountryOptions = ['CN', 'JP', 'KR', 'TW']
 const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' })
 
-const createEnumOptions = (values: readonly string[]): FilterOption[] =>
+const createEnumOptions = (values: ReadonlyArray<string>): Array<FilterOption> =>
   values.map((value) => ({
     value,
     label: formatAnimeFormatLabel(value),
   }))
 
-const mergedOptions = (values: string[], currentValues: string[]): FilterOption[] =>
+const mergedOptions = (values: Array<string>, currentValues: Array<string>): Array<FilterOption> =>
   [...new Set([...values, ...currentValues])]
     .sort((left, right) => left.localeCompare(right))
     .map((value) => ({
@@ -76,7 +76,7 @@ const advancedFilterCount = computed(() => countAdvancedFilterFields(model.value
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
 const countriesOfOriginModel = computed({
   get: () => model.value.countriesOfOrigin,
-  set: (value: string[]) => updateFilter({ countriesOfOrigin: value }),
+  set: (value: Array<string>) => updateFilter({ countriesOfOrigin: value }),
 })
 const sourceValue = computed({
   get: () => model.value.source[0] ?? undefined,
@@ -84,23 +84,23 @@ const sourceValue = computed({
 })
 const genresModel = computed({
   get: () => model.value.genres,
-  set: (value: string[]) => updateFilter({ genres: value }),
+  set: (value: Array<string>) => updateFilter({ genres: value }),
 })
 const excludedGenresModel = computed({
   get: () => model.value.excludedGenres,
-  set: (value: string[]) => updateFilter({ excludedGenres: value }),
+  set: (value: Array<string>) => updateFilter({ excludedGenres: value }),
 })
 const formatsModel = computed({
   get: () => model.value.formats,
-  set: (value: string[]) => updateFilter({ formats: value as AnimeFormat[] }),
+  set: (value: Array<string>) => updateFilter({ formats: value as Array<AnimeFormat> }),
 })
 const tagNamesModel = computed({
   get: () => model.value.tags,
-  set: (value: string[]) => updateFilter({ tags: value }),
+  set: (value: Array<string>) => updateFilter({ tags: value }),
 })
 const excludedTagNamesModel = computed({
   get: () => model.value.excludedTags,
-  set: (value: string[]) => updateFilter({ excludedTags: value }),
+  set: (value: Array<string>) => updateFilter({ excludedTags: value }),
 })
 const sortModel = computed<FilterSort | undefined>({
   get: () => model.value.sort,

@@ -12,8 +12,8 @@ const specialThemeTypeLabels: Partial<Record<string, string>> = {
 }
 
 export const formatAnimeFormatLabel = (value: string) =>
-  specialFormatLabels[value] ??
-  value
+  specialFormatLabels[value]
+  ?? value
     .toLowerCase()
     .replaceAll('_', ' ')
     .replace(/\b\w/g, (letter) => letter.toUpperCase())

@@ -23,7 +23,7 @@ const createToast = (input: ToastInput): ToastItem => ({
 })
 
 export const useToastStore = defineStore('toasts', () => {
-  const items = ref<ToastItem[]>([])
+  const items = ref<Array<ToastItem>>([])
 
   const visibleItems = computed(() => items.value.filter((item) => item.open))
 

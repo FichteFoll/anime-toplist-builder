@@ -182,9 +182,9 @@ watch(currentPage, (page, previousPage) => {
 
 watch(pickerSort, (value, previousValue) => {
   if (
-    !props.open ||
-    isResettingState.value ||
-    (value?.field === previousValue?.field && value?.direction === previousValue?.direction)
+    !props.open
+    || isResettingState.value
+    || (value?.field === previousValue?.field && value?.direction === previousValue?.direction)
   ) {
     return
   }

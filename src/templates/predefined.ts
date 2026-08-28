@@ -13,7 +13,7 @@ import {
 
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 
-const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
+const predefinedTemplatePayloads: Array<TemplateImportPayloadV1> = [
   {
     version: 1 as const,
     id: 'cr-anime-awards-2025',
@@ -331,6 +331,6 @@ const predefinedTemplatePayloads: TemplateImportPayloadV1[] = [
   },
 ]
 
-export const predefinedTemplates: Template[] = predefinedTemplatePayloads.map((payload) =>
+export const predefinedTemplates: Array<Template> = predefinedTemplatePayloads.map((payload) =>
   normalizeImportedTemplate(payload, TemplateOrigin.Predefined),
 )

@@ -22,10 +22,10 @@ export const createEmptyFilterState = (): FilterState => ({
   source: [],
 })
 
-const sortStrings = <T extends string>(values: T[]) =>
+const sortStrings = <T extends string>(values: Array<T>) =>
   [...values].sort((left, right) => left.localeCompare(right))
 
-const normalizeStringArray = <T extends string>(values: T[]) => sortStrings(Array.from(new Set(values)))
+const normalizeStringArray = <T extends string>(values: Array<T>) => sortStrings(Array.from(new Set(values)))
 
 const mergeRange = (
   globalRange: NumericRange | undefined,
@@ -52,16 +52,16 @@ const mergeRange = (
             maximum: normalizedMaximum,
           },
     hasConflict:
-      normalizedMinimum !== undefined &&
-      normalizedMaximum !== undefined &&
-      normalizedMinimum > normalizedMaximum,
+      normalizedMinimum !== undefined
+      && normalizedMaximum !== undefined
+      && normalizedMinimum > normalizedMaximum,
   }
 }
 
 const mergeStringArray = <T extends string>(
-  globalValues: T[],
-  categoryValues: T[],
-): { values: T[]; hasConflict: boolean } => {
+  globalValues: Array<T>,
+  categoryValues: Array<T>,
+): { values: Array<T>; hasConflict: boolean } => {
   const normalizedGlobalValues = normalizeStringArray(globalValues)
   const normalizedCategoryValues = normalizeStringArray(categoryValues)
 
@@ -88,15 +88,15 @@ const mergeStringArray = <T extends string>(
   }
 }
 
-const normalizeSelection = (values: string[]) =>
+const normalizeSelection = (values: Array<string>) =>
   normalizeStringArray(values.map((value) => value.trim()).filter((value) => value.length > 0))
 
 const mergeSelectionFilters = (
-  globalIncluded: string[],
-  globalExcluded: string[],
-  categoryIncluded: string[],
-  categoryExcluded: string[],
-): { included: string[]; excluded: string[]; hasConflict: boolean } => {
+  globalIncluded: Array<string>,
+  globalExcluded: Array<string>,
+  categoryIncluded: Array<string>,
+  categoryExcluded: Array<string>,
+): { included: Array<string>; excluded: Array<string>; hasConflict: boolean } => {
   const normalizedGlobalIncluded = normalizeSelection(globalIncluded)
   const normalizedGlobalExcluded = normalizeSelection(globalExcluded)
   const normalizedCategoryIncluded = normalizeSelection(categoryIncluded)
@@ -123,9 +123,9 @@ const mergeSelectionFilters = (
 
   const included = normalizedGlobalIncluded.filter((value) => categoryIncludedAfterExclude.includes(value))
   const hasConflict =
-    included.length === 0 ||
-    normalizedGlobalIncluded.some((value) => excluded.includes(value)) ||
-    normalizedCategoryIncluded.some((value) => normalizedGlobalExcluded.includes(value))
+    included.length === 0
+    || normalizedGlobalIncluded.some((value) => excluded.includes(value))
+    || normalizedCategoryIncluded.some((value) => normalizedGlobalExcluded.includes(value))
 
   return {
     included,
@@ -177,15 +177,15 @@ export const mergeFilterStates = (
       sort: categoryFilter.sort ?? globalFilter.sort,
     },
     hasConflicts:
-      yearRange.hasConflict ||
-      episodes.hasConflict ||
-      duration.hasConflict ||
-      popularity.hasConflict ||
-      seasons.hasConflict ||
-      countriesOfOrigin.hasConflict ||
-      tags.hasConflict ||
-      genres.hasConflict ||
-      formats.hasConflict ||
-      source.hasConflict,
+      yearRange.hasConflict
+      || episodes.hasConflict
+      || duration.hasConflict
+      || popularity.hasConflict
+      || seasons.hasConflict
+      || countriesOfOrigin.hasConflict
+      || tags.hasConflict
+      || genres.hasConflict
+      || formats.hasConflict
+      || source.hasConflict,
   }
 }

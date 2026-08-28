@@ -45,6 +45,15 @@
 - Use TypeScript throughout.
 - In Vue SFCs, keep the `<script>` block before `<template>`.
 - In Vue templates, follow Vue's recommended attribute order.
+- Write array types as `Array<T>`,
+  not `T[]`.
+- Break lines before binary operators,
+  not after them.
+  Assignment operators are the exception and stay at the end of the line.
+  ESLint reports both as warnings,
+  auto-fixable with `eslint --fix`.
+  `pnpm lint` runs with `--max-warnings 0`,
+  so warnings still have to be resolved before a change is done.
 - Make components re-usable and encapsulate functionality to keep per-component context minimal and isolated.
 - Prefer bi-directional data transfer using the `defineModel` directive.
 - Prefer small pure helpers in `src/lib` for normalization, validation, and merge logic.

@@ -24,7 +24,7 @@ export enum ThemeType {
 export const themeTypes = [ThemeType.OP, ThemeType.IN, ThemeType.ED] as const
 
 export interface SongFilterState {
-  types: ThemeType[]
+  types: Array<ThemeType>
 }
 
 export enum TemplateOrigin {
@@ -54,7 +54,7 @@ export interface Template {
   id: TemplateId
   name: string
   description: string
-  categories: Category[]
+  categories: Array<Category>
   globalFilter: FilterState
   origin: TemplateOrigin
   version: TemplateVersion
@@ -67,7 +67,7 @@ export interface TemplateImportCategoryPayloadV1 {
   filter?: Partial<FilterState>
   entityKind?: CategoryEntityKind
   songFilter?: {
-    types?: ThemeType[]
+    types?: Array<ThemeType>
   }
 }
 
@@ -76,7 +76,7 @@ export interface TemplateImportPayloadV1 {
   id?: TemplateId
   name: string
   description?: string
-  categories: TemplateImportCategoryPayloadV1[]
+  categories: Array<TemplateImportCategoryPayloadV1>
   globalFilter?: Partial<FilterState>
 }
 
@@ -106,6 +106,6 @@ export interface TemplateExportPayloadV1 {
   id: TemplateId
   name: string
   description: string
-  categories: TemplateExportCategoryPayloadV1[]
+  categories: Array<TemplateExportCategoryPayloadV1>
   globalFilter: TemplateExportFilterStateV1
 }

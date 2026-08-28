@@ -60,7 +60,7 @@ export interface AnimeThemesSong {
   title?: string | null
   titleNative?: string | null
   artist: string
-  performances?: SongPerformance[]
+  performances?: Array<SongPerformance>
   videoLink?: string | null
   videoHeight?: number | null
   episodes?: string | null
@@ -70,7 +70,7 @@ export interface AnimeThemesAnimeSongs {
   animeId: number
   animeTitle: AnimeTitle
   animeCoverImage: AnimeCoverImage
-  songs: AnimeThemesSong[]
+  songs: Array<AnimeThemesSong>
 }
 
 const isThemeType = (value: unknown): value is ThemeType =>
@@ -96,7 +96,7 @@ const createFallbackAnimeTitle = (
   }
 }
 
-const pickPreviewVideo = (videos: AnimeThemesVideoNodeResponse[]) => {
+const pickPreviewVideo = (videos: Array<AnimeThemesVideoNodeResponse>) => {
   const video = videos.find((item) => normalizeText(item.link))
 
   return {
@@ -115,7 +115,7 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
     return null
   }
 
-  const performances: SongPerformance[] = []
+  const performances: Array<SongPerformance> = []
 
   for (const performance of theme.song?.performances ?? []) {
     const artist = normalizeText(performance.artist?.name?.main)
@@ -161,7 +161,7 @@ export const fetchAnimeSongs = async ({
   animeCoverImage,
 }: FetchAnimeSongsOptions): Promise<AnimeThemesAnimeSongs> => {
   try {
-    const data = await requestAnimeThemes<AnimeThemesQueryData, { anilistIds: number[] }>(themesQuery, {
+    const data = await requestAnimeThemes<AnimeThemesQueryData, { anilistIds: Array<number> }>(themesQuery, {
       anilistIds: [animeId],
     })
 

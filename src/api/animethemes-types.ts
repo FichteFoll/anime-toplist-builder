@@ -30,7 +30,7 @@ export interface AnimeThemesVideoNodeResponse {
 }
 
 export interface AnimeThemesVideoConnectionResponse {
-  nodes?: AnimeThemesVideoNodeResponse[] | null
+  nodes?: Array<AnimeThemesVideoNodeResponse> | null
 }
 
 export interface AnimeThemesEntryResponse {
@@ -44,7 +44,7 @@ export interface AnimeThemesSongTitleResponse {
 }
 
 export interface AnimeThemesSongResponse {
-  performances?: AnimeThemesPerformanceResponse[] | null
+  performances?: Array<AnimeThemesPerformanceResponse> | null
   title?: AnimeThemesSongTitleResponse | null
 }
 
@@ -52,7 +52,7 @@ export interface AnimeThemeResponse {
   id?: number | null
   type?: string | null
   slug?: string | null
-  animethemeentries?: AnimeThemesEntryResponse[] | null
+  animethemeentries?: Array<AnimeThemesEntryResponse> | null
   song?: AnimeThemesSongResponse | null
 }
 
@@ -64,9 +64,9 @@ export interface AnimeThemesAnimeTitleResponse {
 
 export interface AnimeThemesAnimeResponse {
   title?: AnimeThemesAnimeTitleResponse | null
-  animethemes?: AnimeThemeResponse[] | null
+  animethemes?: Array<AnimeThemeResponse> | null
 }
 
 export interface AnimeThemesQueryData {
-  findAnimeByExternalSite?: AnimeThemesAnimeResponse[] | null
+  findAnimeByExternalSite?: Array<AnimeThemesAnimeResponse> | null
 }

@@ -33,10 +33,10 @@ const isNonEmptyString = (value: unknown): value is string =>
 const hasValidSessionFields = (
   value: Record<string, unknown>,
 ): value is Record<string, unknown> & { accessToken: string, username: string, expiresAt: number } =>
-  isNonEmptyString(value.accessToken) &&
-  isNonEmptyString(value.username) &&
-  typeof value.expiresAt === 'number' &&
-  Number.isFinite(value.expiresAt)
+  isNonEmptyString(value.accessToken)
+  && isNonEmptyString(value.username)
+  && typeof value.expiresAt === 'number'
+  && Number.isFinite(value.expiresAt)
 
 const decodeBase64Url = (value: string) => {
   const normalizedValue = value.replaceAll('-', '+').replaceAll('_', '/')
@@ -145,8 +145,8 @@ export const loadStoredAniListAuthSession = (
     }
 
     if (
-      parsedValue.schemaVersion !== anilistAuthStorageSchemaVersion ||
-      (parsedValue.avatarUrl !== null && parsedValue.avatarUrl !== undefined && !isNonEmptyString(parsedValue.avatarUrl))
+      parsedValue.schemaVersion !== anilistAuthStorageSchemaVersion
+      || (parsedValue.avatarUrl !== null && parsedValue.avatarUrl !== undefined && !isNonEmptyString(parsedValue.avatarUrl))
     ) {
       return null
     }

@@ -204,7 +204,7 @@ const drawWrappedText = (
   }
 
   const words = text.trim().split(/\s+/).filter(Boolean)
-  const lines: string[] = []
+  const lines: Array<string> = []
   let currentLine = ''
   let index = 0
 
@@ -590,12 +590,12 @@ export const renderTemplatePng = async ({
   const headerTopPadding = 32
   const headerBottomPadding = 24
   const headerHeight =
-    headerTopPadding +
-    headerTitleLineHeight * headerTitleLines +
-    (headerDescriptionLines > 0 ? 10 + headerDescriptionLineHeight * headerDescriptionLines : 0) +
-    12 +
-    headerMetaLineHeight * headerMetaLines +
-    headerBottomPadding
+    headerTopPadding
+    + headerTitleLineHeight * headerTitleLines
+    + (headerDescriptionLines > 0 ? 10 + headerDescriptionLineHeight * headerDescriptionLines : 0)
+    + 12
+    + headerMetaLineHeight * headerMetaLines
+    + headerBottomPadding
   const height = SIDE_MARGIN + headerHeight + 28 + gridHeight + footerHeight + SIDE_MARGIN
   const { canvas, context } = createCanvas(width, height)
   const aniListBadgeIcon = showAniListBadge ? await loadImage(anilistBadgeSvgDataUri) : null

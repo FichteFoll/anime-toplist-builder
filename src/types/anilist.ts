@@ -24,7 +24,7 @@ export enum AniListAuthStatus {
 export interface AniListError {
   kind: AniListErrorKind
   message: string
-  details: string[]
+  details: Array<string>
   retryable: boolean
   status?: number
 }
@@ -38,8 +38,8 @@ export interface AniListTag {
 }
 
 export interface AniListMetadata {
-  genres: string[]
-  tags: AniListTag[]
+  genres: Array<string>
+  tags: Array<AniListTag>
 }
 
 export interface AniListViewer {
@@ -75,5 +75,5 @@ export interface AniListPageInfo {
 
 export interface AniListSearchResponse {
   pageInfo: AniListPageInfo
-  results: AniListSearchResult[]
+  results: Array<AniListSearchResult>
 }

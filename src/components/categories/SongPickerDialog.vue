@@ -55,7 +55,7 @@ const songPreview = ref<{ open: boolean, title: string, description: string, vid
   videoUrl: '',
   videoHeight: null,
 })
-const songsByAnimeId = ref<Record<number, AnimeThemesSong[]>>({})
+const songsByAnimeId = ref<Record<number, Array<AnimeThemesSong>>>({})
 const hydratedSelectedAnime = ref<AniListSearchResult | null>(null)
 const aniListAuthStore = useAniListAuthStore()
 const settingsStore = useSettingsStore()

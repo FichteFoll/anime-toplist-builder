@@ -11,9 +11,9 @@ import type { AniListSearchResult, SongSelection, ThemeType } from '@/types'
 
 const props = defineProps<{
   detailAnime: AniListSearchResult
-  songs: AnimeThemesSong[]
+  songs: Array<AnimeThemesSong>
   selectedSong?: SongSelection | null
-  songFilterTypes: ThemeType[]
+  songFilterTypes: Array<ThemeType>
   songErrorMessage: string | null
   songStatus: 'idle' | 'loading' | 'ready' | 'error'
 }>()

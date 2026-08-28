@@ -18,7 +18,7 @@ const normalizeText = (value: string | null | undefined) => {
   return normalizedValue ? normalizedValue : null
 }
 
-const joinWithFinalAmpersand = (values: string[]) => {
+const joinWithFinalAmpersand = (values: Array<string>) => {
   if (values.length <= 1) {
     return values[0] ?? ''
   }
@@ -74,7 +74,7 @@ export const createSongSelection = ({
     title?: string | null
     titleNative?: string | null
     artist: string
-    performances?: SongPerformance[]
+    performances?: Array<SongPerformance>
     videoLink?: string | null
     episodes?: string | null
   }
@@ -89,7 +89,7 @@ export const createSongSelection = ({
   },
 })
 
-export const formatSongArtist = (performances: SongPerformance[]) => {
+export const formatSongArtist = (performances: Array<SongPerformance>) => {
   const displayEntries = performances
     .map((performance) => {
       const artist = normalizeText(performance.artist)

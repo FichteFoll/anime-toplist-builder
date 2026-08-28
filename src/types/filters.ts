@@ -89,15 +89,15 @@ export interface FilterState {
   yearRange?: NumericRange
   episodes?: NumericRange
   duration?: NumericRange
-  seasons: AnimeSeason[]
-  countriesOfOrigin: string[]
-  tags: string[]
-  excludedTags: string[]
-  genres: string[]
-  excludedGenres: string[]
-  formats: AnimeFormat[]
+  seasons: Array<AnimeSeason>
+  countriesOfOrigin: Array<string>
+  tags: Array<string>
+  excludedTags: Array<string>
+  genres: Array<string>
+  excludedGenres: Array<string>
+  formats: Array<AnimeFormat>
   popularity?: NumericRange
-  source: AnimeSource[]
+  source: Array<AnimeSource>
   minimumTagRank?: number
   sort?: FilterSort
 }

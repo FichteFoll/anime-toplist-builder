@@ -22,7 +22,7 @@ export interface FilterOption {
 const props = defineProps<{
   label: string
   description?: string
-  options: FilterOption[]
+  options: Array<FilterOption>
   emptyMessage?: string
   placeholder?: string
   clearLabel: string
@@ -31,12 +31,12 @@ const props = defineProps<{
   enableExclusion?: boolean
 }>()
 
-const model = defineModel<string[]>({ required: true })
-const excludedModel = defineModel<string[]>('excludedValues')
+const model = defineModel<Array<string>>({ required: true })
+const excludedModel = defineModel<Array<string>>('excludedValues')
 
-const normalizeValues = (values: string[], sort = true) => {
+const normalizeValues = (values: Array<string>, sort = true) => {
   const seen = new Set<string>()
-  const normalizedValues: string[] = []
+  const normalizedValues: Array<string> = []
 
   for (const rawValue of values) {
     const value = rawValue.trim()
@@ -52,7 +52,7 @@ const normalizeValues = (values: string[], sort = true) => {
   return sort ? normalizedValues.sort((left, right) => left.localeCompare(right)) : normalizedValues
 }
 
-const mergePreservingOrder = (currentValues: string[], nextValues: string[]) => {
+const mergePreservingOrder = (currentValues: Array<string>, nextValues: Array<string>) => {
   const nextValueSet = new Set(nextValues)
   const currentValueSet = new Set(currentValues)
   const mergedValues = currentValues.filter((value) => nextValueSet.has(value))
@@ -66,14 +66,14 @@ const mergePreservingOrder = (currentValues: string[], nextValues: string[]) => 
   return mergedValues
 }
 
-const areSameValues = (left: string[], right: string[]) =>
+const areSameValues = (left: Array<string>, right: Array<string>) =>
   left.length === right.length && left.every((value, index) => value === right[index])
 
 const searchTerm = ref('')
 const ignoreNextComboboxUpdate = ref(false)
-const selectedValues = ref<string[]>([])
-const excludedValues = ref<string[]>([])
-const pendingPropState = ref<{ model: string[]; excluded: string[] } | null>(null)
+const selectedValues = ref<Array<string>>([])
+const excludedValues = ref<Array<string>>([])
+const pendingPropState = ref<{ model: Array<string>; excluded: Array<string> } | null>(null)
 
 const normalizedSearchTerm = computed(() => searchTerm.value.trim().toLocaleLowerCase())
 
@@ -153,15 +153,15 @@ const emptyStateMessage = computed(() => {
   return 'No results match your search.'
 })
 
-const emitValues = (values: string[] | undefined) => {
+const emitValues = (values: Array<string> | undefined) => {
   model.value = normalizeValues(values ?? [])
 }
 
-const emitExcludedValues = (values: string[] | undefined) => {
+const emitExcludedValues = (values: Array<string> | undefined) => {
   excludedModel.value = normalizeValues(values ?? [])
 }
 
-const setPendingPropState = (nextModelValues: string[], nextExcludedValues: string[]) => {
+const setPendingPropState = (nextModelValues: Array<string>, nextExcludedValues: Array<string>) => {
   pendingPropState.value = {
     model: normalizeValues(nextModelValues),
     excluded: normalizeValues(nextExcludedValues),
@@ -174,8 +174,8 @@ const syncInternalStateFromProps = () => {
 
   if (pendingPropState.value !== null) {
     if (
-      areSameValues(nextModelValues, pendingPropState.value.model) &&
-      areSameValues(nextExcludedValues, pendingPropState.value.excluded)
+      areSameValues(nextModelValues, pendingPropState.value.model)
+      && areSameValues(nextExcludedValues, pendingPropState.value.excluded)
     ) {
       pendingPropState.value = null
       return
@@ -211,7 +211,7 @@ const applySelectionChange = (mutate: () => void) => {
   syncSelectionToProps()
 }
 
-const updateValuesFromCombobox = (values: string[] | undefined) => {
+const updateValuesFromCombobox = (values: Array<string> | undefined) => {
   if (ignoreNextComboboxUpdate.value) {
     ignoreNextComboboxUpdate.value = false
     searchTerm.value = ''

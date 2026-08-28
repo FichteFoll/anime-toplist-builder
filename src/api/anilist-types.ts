@@ -6,7 +6,7 @@ export interface GraphQlErrorResponse {
 
 export interface GraphQlResponse<TData> {
   data?: TData
-  errors?: GraphQlErrorResponse[]
+  errors?: Array<GraphQlErrorResponse>
 }
 
 export type AniListMediaSort =
@@ -29,13 +29,13 @@ export interface AniListMediaSearchVariables {
   search?: string
   onList?: boolean
   season?: AnimeSeason
-  countryOfOriginIn?: string[]
-  tagIn?: string[]
-  tagNotIn?: string[]
+  countryOfOriginIn?: Array<string>
+  tagIn?: Array<string>
+  tagNotIn?: Array<string>
   minimumTagRank?: number
-  genreIn?: string[]
-  genreNotIn?: string[]
-  formatIn?: AnimeFormat[]
+  genreIn?: Array<string>
+  genreNotIn?: Array<string>
+  formatIn?: Array<AnimeFormat>
   source?: AnimeSource
   startDateGreater?: number
   startDateLesser?: number
@@ -45,7 +45,7 @@ export interface AniListMediaSearchVariables {
   durationLesser?: number
   popularityGreater?: number
   popularityLesser?: number
-  sort?: AniListMediaSort[]
+  sort?: Array<AniListMediaSort>
 }
 
 interface AniListPageInfoResponse {
@@ -92,7 +92,7 @@ export interface AniListMediaResponse {
 export interface AniListMediaSearchData {
   Page: {
     pageInfo: AniListPageInfoResponse
-    media: AniListMediaResponse[]
+    media: Array<AniListMediaResponse>
   }
 }
 
@@ -101,8 +101,8 @@ export interface AniListMediaByIdData {
 }
 
 export interface AniListMetadataData {
-  GenreCollection?: string[] | null
-  MediaTagCollection?: AniListTagResponse[] | null
+  GenreCollection?: Array<string> | null
+  MediaTagCollection?: Array<AniListTagResponse> | null
 }
 
 export interface AniListViewerData {

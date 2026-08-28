@@ -65,7 +65,7 @@ const parseResponseJson = async <TData>(response: Response) => {
   }
 }
 
-const normalizeGraphQlErrors = (messages: string[], status?: number): AniListError => ({
+const normalizeGraphQlErrors = (messages: Array<string>, status?: number): AniListError => ({
   kind: status && status >= 400 ? AniListErrorKind.Http : AniListErrorKind.GraphQl,
   message: messages[0] ?? 'AnimeThemes returned an unexpected error.',
   details: messages.slice(1),

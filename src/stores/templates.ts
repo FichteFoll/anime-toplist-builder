@@ -23,8 +23,8 @@ import { useSelectionsStore } from './selections'
 import { useSettingsStore } from './settings'
 
 export const useTemplateStore = defineStore('templates', () => {
-  const localTemplates = ref<Template[]>([])
-  const registeredTemplates = ref<Template[]>([])
+  const localTemplates = ref<Array<Template>>([])
+  const registeredTemplates = ref<Array<Template>>([])
   const activeTemplateId = ref<TemplateId | null>(null)
   const pendingStartupTemplateUrl = ref<string | null>(null)
   const remoteTemplateUrls = ref<Record<string, string>>({})
@@ -183,7 +183,7 @@ export const useTemplateStore = defineStore('templates', () => {
     persistLocalTemplates()
   }
 
-  const registerTemplates = (templatesToRegister: Template[]) => {
+  const registerTemplates = (templatesToRegister: Array<Template>) => {
     registeredTemplates.value = templatesToRegister.map(cloneTemplate)
 
     if (activeTemplateId.value && templatesById.value.has(activeTemplateId.value)) {

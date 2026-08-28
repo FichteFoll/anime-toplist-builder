@@ -11,12 +11,12 @@ export interface FilterOption {
 const props = defineProps<{
   label: string
   description?: string
-  options: FilterOption[]
+  options: Array<FilterOption>
   emptyMessage?: string
   disabledReason?: string
 }>()
 
-const model = defineModel<string[]>({ required: true })
+const model = defineModel<Array<string>>({ required: true })
 
 const normalizedOptions = computed(() => {
   const optionMap = new Map(props.options.map((option) => [option.value, option]))

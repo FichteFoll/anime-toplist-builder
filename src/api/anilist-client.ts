@@ -79,7 +79,7 @@ const parseResponseJson = async <TData>(response: Response) => {
   }
 }
 
-const normalizeGraphQlErrors = (messages: string[], status?: number): AniListError => ({
+const normalizeGraphQlErrors = (messages: Array<string>, status?: number): AniListError => ({
   kind:
     status === 401 || status === 403
       ? AniListErrorKind.Auth

@@ -3,7 +3,7 @@ type BluetoothServiceUUID = number | string
 interface BluetoothLEScanFilter {
   name?: string
   namePrefix?: string
-  services?: BluetoothServiceUUID[]
+  services?: Array<BluetoothServiceUUID>
 }
 
 interface BluetoothDevice {

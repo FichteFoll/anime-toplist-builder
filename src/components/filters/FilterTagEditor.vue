@@ -5,16 +5,16 @@ import FilterMultiComboboxField, { type FilterOption } from '@/components/filter
 import type { AniListTag } from '@/types'
 
 const props = defineProps<{
-  metadataTags: AniListTag[]
+  metadataTags: Array<AniListTag>
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
   disabledReason?: string
 }>()
 
-const model = defineModel<string[]>({ required: true })
-const excludedModel = defineModel<string[]>('excludedValues', { required: true })
+const model = defineModel<Array<string>>({ required: true })
+const excludedModel = defineModel<Array<string>>('excludedValues', { required: true })
 
-const options = computed<FilterOption[]>(() => {
+const options = computed<Array<FilterOption>>(() => {
   const optionMap = new Map(props.metadataTags.map((tag) => [tag.name, tag]))
 
   for (const value of model.value) {

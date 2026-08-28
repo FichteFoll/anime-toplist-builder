@@ -80,7 +80,7 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>(['JP', 'KR'])
+        const model = ref<Array<string>>(['JP', 'KR'])
 
         return { model }
       },
@@ -109,7 +109,7 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>([])
+        const model = ref<Array<string>>([])
 
         return { model }
       },
@@ -142,8 +142,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>([])
-        const excludedValues = ref<string[]>([])
+        const model = ref<Array<string>>([])
+        const excludedValues = ref<Array<string>>([])
 
         return { excludedValues, model }
       },
@@ -188,8 +188,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>(['Action'])
-        const excludedValues = ref<string[]>([])
+        const model = ref<Array<string>>(['Action'])
+        const excludedValues = ref<Array<string>>([])
 
         return { excludedValues, model }
       },
@@ -227,8 +227,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>([])
-        const excludedValues = ref<string[]>(['Action'])
+        const model = ref<Array<string>>([])
+        const excludedValues = ref<Array<string>>(['Action'])
 
         return { excludedValues, model }
       },
@@ -261,8 +261,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>([])
-        const excludedValues = ref<string[]>(['Action'])
+        const model = ref<Array<string>>([])
+        const excludedValues = ref<Array<string>>(['Action'])
 
         return { excludedValues, model }
       },
@@ -293,8 +293,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>(['Action', 'Drama'])
-        const excludedValues = ref<string[]>(['Action'])
+        const model = ref<Array<string>>(['Action', 'Drama'])
+        const excludedValues = ref<Array<string>>(['Action'])
 
         return { excludedValues, model }
       },
@@ -333,8 +333,8 @@ describe('FilterMultiComboboxField', () => {
     const Parent = {
       components: { FilterMultiComboboxField },
       setup() {
-        const model = ref<string[]>(['Action', 'Drama'])
-        const excludedValues = ref<string[]>([])
+        const model = ref<Array<string>>(['Action', 'Drama'])
+        const excludedValues = ref<Array<string>>([])
 
         return { excludedValues, model }
       },

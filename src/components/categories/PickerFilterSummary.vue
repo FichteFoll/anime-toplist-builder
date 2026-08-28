@@ -2,7 +2,7 @@
 import { AniListListVisibility } from '@/types'
 
 defineProps<{
-  activeFilterSummary: string[]
+  activeFilterSummary: Array<string>
   canUseListFilters: boolean
   onlyOnList: boolean
   hideOnList: boolean

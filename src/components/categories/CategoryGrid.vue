@@ -14,7 +14,7 @@ import type {
 } from '@/types'
 
 const props = defineProps<{
-  categories: Category[]
+  categories: Array<Category>
   selectionByCategory: Record<string, CategorySelection | null>
   globalFilter: FilterState
   title: string

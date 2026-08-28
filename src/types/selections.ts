@@ -42,7 +42,7 @@ export interface SongSelection {
     title?: string | null
     titleNative?: string | null
     artist: string
-    performances?: SongPerformance[]
+    performances?: Array<SongPerformance>
     videoLink?: string | null
     episodes?: string | null
   }

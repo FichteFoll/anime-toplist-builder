@@ -23,7 +23,7 @@ const exportImage = vi.hoisted(() => {
     reject: (reason: Error) => void
   }
 
-  const pendingRenders: PendingRender[] = []
+  const pendingRenders: Array<PendingRender> = []
 
   return {
     pendingRenders,
@@ -123,7 +123,7 @@ const findDownloadButton = (wrapper: ReturnType<typeof mountDialog>) =>
   wrapper.find('.shell-button-active').element
 
 const collectAncestorsUpTo = (element: Element, boundary: Element) => {
-  const ancestors: Element[] = []
+  const ancestors: Array<Element> = []
 
   for (let current = element.parentElement; current; current = current.parentElement) {
     ancestors.push(current)

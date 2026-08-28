@@ -64,7 +64,7 @@ const updateCategory = (
     description: string
     filter: FilterState
     entityKind: CategoryEntityKind
-    songFilter: { types: ThemeType[] }
+    songFilter: { types: Array<ThemeType> }
   },
 ) => {
   templateStore.updateActiveTemplate((template) => {

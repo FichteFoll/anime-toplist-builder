@@ -17,9 +17,9 @@ import type { SongSelection, ThemeType } from '@/types'
 
 const props = defineProps<{
   animeId: number
-  songs: AnimeThemesSong[]
+  songs: Array<AnimeThemesSong>
   selectedSong?: SongSelection | null
-  songFilterTypes: ThemeType[]
+  songFilterTypes: Array<ThemeType>
 }>()
 
 const emit = defineEmits<{

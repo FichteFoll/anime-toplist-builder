@@ -106,7 +106,7 @@ export const useSelectionsStore = defineStore('selections', () => {
     return true
   }
 
-  const pruneSelectionsForTemplates = (templates: Template[]) => {
+  const pruneSelectionsForTemplates = (templates: Array<Template>) => {
     const nextSelections: TemplateSelectionsMap = {}
 
     for (const template of templates) {

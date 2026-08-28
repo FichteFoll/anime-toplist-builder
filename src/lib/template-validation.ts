@@ -40,9 +40,9 @@ const hasOwn = (value: JsonRecord, key: string) => Object.hasOwn(value, key)
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-const sortStrings = (values: string[]) => [...values].sort((left, right) => left.localeCompare(right))
+const sortStrings = (values: Array<string>) => [...values].sort((left, right) => left.localeCompare(right))
 
-const uniqueStrings = (values: string[]) => Array.from(new Set(values))
+const uniqueStrings = (values: Array<string>) => Array.from(new Set(values))
 
 const asTrimmedString = (value: unknown, path: string) => {
   if (typeof value !== 'string') {
@@ -86,7 +86,7 @@ const asStringOrStringArray = (value: unknown, path: string) =>
 const asEnumArray = <T extends string>(
   value: unknown,
   path: string,
-  allowedValues: readonly T[],
+  allowedValues: ReadonlyArray<T>,
 ) => {
   const items = asOptionalStringArray(value, path)
 
@@ -98,7 +98,7 @@ const asEnumArray = <T extends string>(
     }
   }
 
-  return items as T[]
+  return items as Array<T>
 }
 
 const asOptionalInteger = (
@@ -160,7 +160,7 @@ const asOptionalCountRange = (value: unknown, path: string): NumericRange | unde
   return range
 }
 
-const asTagFilters = (value: unknown, path: string): string[] => {
+const asTagFilters = (value: unknown, path: string): Array<string> => {
   if (value === undefined) {
     return []
   }

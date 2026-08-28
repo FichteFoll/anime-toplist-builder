@@ -27,9 +27,9 @@ const toAniListYearCeiling = (year: number) => (year + 1) * 10000
 
 const withValue = <T>(value: T | undefined) => (value === undefined ? undefined : value)
 
-const pickSingleValue = <T>(values: T[]) => (values.length > 0 ? values[0] : undefined)
+const pickSingleValue = <T>(values: Array<T>) => (values.length > 0 ? values[0] : undefined)
 
-export const buildAniListMediaSort = (sort: FilterSort | undefined): AniListMediaSort[] | undefined => {
+export const buildAniListMediaSort = (sort: FilterSort | undefined): Array<AniListMediaSort> | undefined => {
   if (!sort) {
     return undefined
   }

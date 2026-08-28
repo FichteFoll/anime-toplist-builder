@@ -1,4 +1,5 @@
 import js from '@eslint/js'
+import stylistic from '@stylistic/eslint-plugin'
 import globals from 'globals'
 import pluginVue from 'eslint-plugin-vue'
 import tseslint from 'typescript-eslint'
@@ -23,6 +24,13 @@ export default [
       },
       parser: tseslint.parser,
     },
+    plugins: {
+      '@stylistic': stylistic,
+    },
+    rules: {
+      '@typescript-eslint/array-type': ['warn', { default: 'generic', readonly: 'generic' }],
+      '@stylistic/operator-linebreak': ['warn', 'before', { overrides: { '=': 'after' } }],
+    },
   },
   {
     files: ['**/*.vue'],
@@ -40,6 +48,9 @@ export default [
         extraFileExtensions: ['.vue'],
       },
     },
+    plugins: {
+      '@stylistic': stylistic,
+    },
     rules: {
       'vue/block-order': [
         'error',
@@ -47,6 +58,10 @@ export default [
           order: ['script', 'template', 'style'],
         },
       ],
+      '@typescript-eslint/array-type': ['warn', { default: 'generic', readonly: 'generic' }],
+      '@stylistic/operator-linebreak': ['warn', 'before', { overrides: { '=': 'after' } }],
+      // Core and stylistic rules do not reach `<template>` expressions.
+      'vue/operator-linebreak': ['warn', 'before', { overrides: { '=': 'after' } }],
     },
   },
   {
