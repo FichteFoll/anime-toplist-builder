@@ -12,8 +12,8 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1(typescript@5.8.3)(vue@3.5.32(typescript@5.8.3))
       reka-ui:
-        specifier: ^2.9.3
-        version: 2.9.3(vue@3.5.32(typescript@5.8.3))
+        specifier: ^2.10.4
+        version: 2.10.4(vue@3.5.32(typescript@5.8.3))
       sortablejs:
         specifier: ^1.15.7
         version: 1.15.7
@@ -1483,8 +1483,8 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
-  reka-ui@2.9.3:
-    resolution: {integrity: sha512-C9lCVxsSC7uYD0Nbgik1+14FNndHNprZmf0zGQt0ZDYIt5KxXV3zD0hEqNcfRUsEEJvVmoRsUkJnASBVBeaaUw==}
+  reka-ui@2.10.4:
+    resolution: {integrity: sha512-kbS5GAbkHkYj0EVKAg5ZPEPndhBjeUFSa1Aq5m5ftQwyHnB1v5tw8X6fcwfKH/ry3StPXblMWM1DW82MVS71cw==}
     peerDependencies:
       vue: '>= 3.4.0'
 
@@ -3201,7 +3201,7 @@ snapshots:
     dependencies:
       picomatch: 2.3.2
 
-  reka-ui@2.9.3(vue@3.5.32(typescript@5.8.3)):
+  reka-ui@2.10.4(vue@3.5.32(typescript@5.8.3)):
     dependencies:
       '@floating-ui/dom': 1.7.6
       '@floating-ui/vue': 1.1.11(vue@3.5.32(typescript@5.8.3))
