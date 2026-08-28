@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, CategoryEntityKind, type AnimeSelection, type Category } from '@/types'
+import { AnimeFormat, AnimeSeason, CategoryEntityKind, TemplateOrigin, type AnimeSelection, type Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
   sortableDestroy: vi.fn(),
@@ -119,6 +119,17 @@ const mountCategoryGrid = () =>
       categories,
       selectionByCategory: {},
       globalFilter: createEmptyFilterState(),
+      title: 'Test template',
+      description: 'Template description',
+      activeTemplate: {
+        id: 'template-1',
+        name: 'Test template',
+        description: 'Template description',
+        categories,
+        globalFilter: createEmptyFilterState(),
+        origin: TemplateOrigin.User,
+        version: 1,
+      },
       metadata: null,
       metadataStatus: 'idle',
       metadataError: null,
@@ -126,6 +137,7 @@ const mountCategoryGrid = () =>
     global: {
       stubs: {
         CategoryCard: categoryCardStub,
+        TemplateEditDialog: true,
       },
     },
   })
@@ -176,6 +188,8 @@ describe('CategoryGrid', () => {
 
     expect(wrapper.text()).toContain('Open categories')
     expect(wrapper.text()).toContain('1 not yet selected')
+    expect(wrapper.text()).toContain('Test template')
+    expect(wrapper.text()).toContain('Template description')
     expect(wrapper.text()).not.toContain('Filled slots')
     expect(wrapper.text()).not.toContain('Reordering')
   })

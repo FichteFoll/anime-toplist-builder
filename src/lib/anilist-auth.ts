@@ -2,17 +2,18 @@ import { appConfig } from '@/config/app'
 import type { AniListAuthSession } from '@/types'
 
 const anilistAuthStorageKey = 'anime-toplist-builder.anilist-auth'
-const anilistAuthStorageSchemaVersion = 1 as const
+const anilistAuthStorageSchemaVersion = 2 as const
 const anilistOAuthStateStorageKey = 'anime-toplist-builder.anilist-oauth-state.v1'
 const expClaimToMilliseconds = 1000
 const expiryGracePeriodMs = 30_000
 
 type BrowserStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
-interface StoredAniListAuthRecordV1 {
+interface StoredAniListAuthRecordV2 {
   schemaVersion: typeof anilistAuthStorageSchemaVersion
   accessToken: string
   username: string
+  avatarUrl: string | null
   expiresAt: number
 }
 
@@ -28,6 +29,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
+
+const hasValidSessionFields = (
+  value: Record<string, unknown>,
+): value is Record<string, unknown> & { accessToken: string, username: string, expiresAt: number } =>
+  isNonEmptyString(value.accessToken) &&
+  isNonEmptyString(value.username) &&
+  typeof value.expiresAt === 'number' &&
+  Number.isFinite(value.expiresAt)
 
 const decodeBase64Url = (value: string) => {
   const normalizedValue = value.replaceAll('-', '+').replaceAll('_', '/')
@@ -118,13 +127,26 @@ export const loadStoredAniListAuthSession = (
   try {
     const parsedValue = JSON.parse(serializedValue) as unknown
 
+    if (!isRecord(parsedValue)) {
+      return null
+    }
+
+    if (!hasValidSessionFields(parsedValue)) {
+      return null
+    }
+
+    if (parsedValue.schemaVersion === 1) {
+      return {
+        accessToken: parsedValue.accessToken,
+        username: parsedValue.username,
+        avatarUrl: null,
+        expiresAt: parsedValue.expiresAt,
+      }
+    }
+
     if (
-      !isRecord(parsedValue) ||
       parsedValue.schemaVersion !== anilistAuthStorageSchemaVersion ||
-      !isNonEmptyString(parsedValue.accessToken) ||
-      !isNonEmptyString(parsedValue.username) ||
-      typeof parsedValue.expiresAt !== 'number' ||
-      !Number.isFinite(parsedValue.expiresAt)
+      (parsedValue.avatarUrl !== null && parsedValue.avatarUrl !== undefined && !isNonEmptyString(parsedValue.avatarUrl))
     ) {
       return null
     }
@@ -132,6 +154,7 @@ export const loadStoredAniListAuthSession = (
     return {
       accessToken: parsedValue.accessToken,
       username: parsedValue.username,
+      avatarUrl: parsedValue.avatarUrl ?? null,
       expiresAt: parsedValue.expiresAt,
     }
   } catch {
@@ -149,8 +172,9 @@ export const saveStoredAniListAuthSession = (
       schemaVersion: anilistAuthStorageSchemaVersion,
       accessToken: session.accessToken,
       username: session.username,
+      avatarUrl: session.avatarUrl,
       expiresAt: session.expiresAt,
-    } satisfies StoredAniListAuthRecordV1),
+    } satisfies StoredAniListAuthRecordV2),
   )
 }
 

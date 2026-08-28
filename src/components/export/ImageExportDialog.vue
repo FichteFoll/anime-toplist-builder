@@ -31,12 +31,19 @@ const props = defineProps<{
   selectionByCategory: CategorySelectionMap
   defaultAuthor?: string
   defaultAuthorSource?: 'anilist' | 'manual'
+  hideTrigger?: boolean
+  triggerClass?: string
+  triggerAriaLabel?: string
+  triggerTitle?: string
+  triggerLabel?: string
 }>()
+
+const openModel = defineModel<boolean>('open')
 
 const aniListAuthStore = useAniListAuthStore()
 const settingsStore = useSettingsStore()
 const { resolvedTheme } = useTheme()
-const isOpen = ref(false)
+const internalOpen = ref(false)
 const author = ref('')
 const hideAuthor = ref(false)
 const layout = ref<ExportImageLayout>(ExportImageLayout.Portrait)
@@ -61,6 +68,13 @@ const showAniListBadge = computed(
     aniListAuthStore.isAuthenticated &&
     resolvedAuthor.value === defaultAuthor.value,
 )
+const isOpen = computed({
+  get: () => openModel.value ?? internalOpen.value,
+  set: (value: boolean) => {
+    internalOpen.value = value
+    openModel.value = value
+  },
+})
 
 const filename = computed(() =>
   props.template
@@ -187,13 +201,20 @@ onBeforeUnmount(() => {
 
 <template>
   <DialogRoot v-model:open="isOpen">
-    <DialogTrigger as-child>
+    <DialogTrigger
+      v-if="!hideTrigger"
+      as-child
+    >
       <button
         type="button"
-        class="shell-button"
+        :class="triggerClass || 'shell-button'"
         :disabled="!template"
+        :aria-label="triggerAriaLabel ?? 'Export image'"
+        :title="triggerTitle"
       >
-        Export image
+        <slot name="trigger">
+          {{ triggerLabel ?? 'Export image' }}
+        </slot>
       </button>
     </DialogTrigger>
 

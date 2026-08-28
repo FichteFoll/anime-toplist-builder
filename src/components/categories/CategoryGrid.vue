@@ -3,17 +3,23 @@ import Sortable from 'sortablejs'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import CategoryCard from '@/components/categories/CategoryCard.vue'
+import EditIcon from '@/components/icons/EditIcon.vue'
+import TemplateEditDialog from '@/components/templates/TemplateEditDialog.vue'
 import type {
   AniListMetadata,
   Category,
   CategorySelection,
   FilterState,
+  Template,
 } from '@/types'
 
 const props = defineProps<{
   categories: Category[]
   selectionByCategory: Record<string, CategorySelection | null>
   globalFilter: FilterState
+  title: string
+  description?: string
+  activeTemplate?: Template | null
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
@@ -21,21 +27,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   addCategory: [name: string]
-  updateCategory: [
-    categoryId: string,
-    value: {
-      name: string
-      description: string
-      filter: FilterState
-      entityKind: Category['entityKind']
-      songFilter: Category['songFilter']
-    },
-  ]
+  updateCategory: [categoryId: string, value: {
+    name: string
+    description: string
+    filter: FilterState
+    entityKind: Category['entityKind']
+    songFilter: Category['songFilter']
+  }]
   deleteCategory: [categoryId: string]
   reorderCategories: [value: { fromIndex: number, toIndex: number }]
   selectSelection: [categoryId: string, selection: CategorySelection]
   clearSelection: [categoryId: string]
   clearAllSelections: []
+  updateTemplate: [value: { name: string, description: string, filter: FilterState }]
+  deleteTemplate: []
 }>()
 
 const gridRef = ref<HTMLElement | null>(null)
@@ -128,24 +133,45 @@ onBeforeUnmount(() => {
   <section class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
     <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 md:flex-row md:items-start md:justify-between">
       <div class="max-w-4xl">
-        <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
           Categories
+        </p>
+        <h2 class="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+          {{ title }}
         </h2>
+        <p
+          v-if="description"
+          class="mt-3 max-w-none text-sm leading-6 text-app-muted"
+        >
+          {{ description }}
+        </p>
         <p class="mt-3 max-w-none text-sm leading-6 text-app-muted">
-          Edit category names and filters for each card,
-          drag by the handle to reorder,
-          and make your selections.
+          Edit category names and filters for each card, drag by the handle to reorder, and make your selections.
         </p>
       </div>
 
-      <button
-        type="button"
-        class="shell-button"
-        :disabled="selectedCategoryCount === 0"
-        @click="emit('clearAllSelections')"
-      >
-        Clear all selections
-      </button>
+      <div class="flex flex-wrap gap-2">
+        <TemplateEditDialog
+          v-if="activeTemplate"
+          :template="activeTemplate"
+          trigger-class="shell-button gap-2"
+          @save="emit('updateTemplate', $event)"
+          @delete="emit('deleteTemplate')"
+        >
+          <template #trigger>
+            <EditIcon class="h-4 w-4" />
+            <span>Edit template</span>
+          </template>
+        </TemplateEditDialog>
+        <button
+          type="button"
+          class="shell-button"
+          :disabled="selectedCategoryCount === 0"
+          @click="emit('clearAllSelections')"
+        >
+          Clear all selections
+        </button>
+      </div>
     </div>
 
     <div class="mt-5 grid gap-4 rounded-[1.5rem] bg-app-bg/60 p-4 md:grid-cols-2">

@@ -33,6 +33,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
   const status = ref<AniListAuthStatus>(AniListAuthStatus.Disconnected)
   const accessToken = ref<string | null>(null)
   const username = ref<string | null>(null)
+  const avatarUrl = ref<string | null>(null)
   const expiresAt = ref<number | null>(null)
   const pendingOAuthCallback = ref<AniListOAuthCallbackPayload | null>(null)
   const isHydrated = ref(false)
@@ -45,6 +46,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
   const applySession = (session: AniListAuthSession) => {
     accessToken.value = session.accessToken
     username.value = session.username
+    avatarUrl.value = session.avatarUrl
     expiresAt.value = session.expiresAt
     status.value = AniListAuthStatus.Connected
   }
@@ -52,6 +54,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
   const clearSessionState = () => {
     accessToken.value = null
     username.value = null
+    avatarUrl.value = null
     expiresAt.value = null
     status.value = AniListAuthStatus.Disconnected
   }
@@ -159,9 +162,10 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
 
     try {
       const viewer = await fetchAuthenticatedAniListViewer(callback.accessToken)
-      const nextSession: AniListAuthSession = {
+        const nextSession: AniListAuthSession = {
         accessToken: callback.accessToken,
         username: viewer.name,
+        avatarUrl: viewer.avatarUrl,
         expiresAt: callback.expiresAt,
       }
 
@@ -210,6 +214,7 @@ export const useAniListAuthStore = defineStore('anilist-auth', () => {
     status,
     accessToken,
     username,
+    avatarUrl,
     expiresAt,
     pendingOAuthCallback,
     isHydrated,

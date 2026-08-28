@@ -44,11 +44,13 @@ export interface AniListMetadata {
 
 export interface AniListViewer {
   name: string
+  avatarUrl: string | null
 }
 
 export interface AniListAuthSession {
   accessToken: string
   username: string
+  avatarUrl: string | null
   expiresAt: number
 }
 

@@ -8,7 +8,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import AppToastViewport from '@/components/AppToastViewport.vue'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
-import TemplateManagementSection from '@/components/templates/TemplateManagementSection.vue'
+import type { FilterState } from '@/types'
 import { countConfiguredFilterFields } from '@/lib/filter-editor'
 import { getSelectionDisplayLabel } from '@/lib/song-selection'
 import { createBlankCategory } from '@/lib/template-factories'
@@ -18,7 +18,7 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import { CategoryEntityKind, ThemeType, type AniListMetadata, type CategorySelection, type FilterState } from '@/types'
+import { CategoryEntityKind, ThemeType, type AniListMetadata, type CategorySelection } from '@/types'
 
 const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
@@ -167,6 +167,38 @@ const clearAllSelections = () => {
   })
 }
 
+const updateTemplateDetails = (value: { name: string, description: string, filter: FilterState }) => {
+  templateStore.updateActiveTemplate((template) => {
+    template.name = value.name
+    template.description = value.description
+    template.globalFilter = value.filter
+  })
+}
+
+const deleteActiveTemplate = () => {
+  if (!activeTemplate.value) {
+    toastStore.error('No active template to delete.')
+    return
+  }
+
+  const templateId = activeTemplate.value.id
+  const templateName = activeTemplate.value.name
+
+  requestConfirmation({
+    title: 'Delete template',
+    description: `Delete "${templateName}"? This removes the local template and its stored selections.`,
+    confirmLabel: 'Delete template',
+    onConfirm: () => {
+      if (!templateStore.removeLocalTemplate(templateId)) {
+        toastStore.error('Template delete failed.')
+        return
+      }
+
+      selectionsStore.pruneSelectionsForTemplates(templateStore.templates)
+    },
+  })
+}
+
 const selectCategorySelection = (categoryId: string, selection: CategorySelection) => {
   if (!activeTemplate.value) {
     return
@@ -203,16 +235,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ConfigProvider>
+  <!--
+    `scroll-body` is disabled because the page already reserves the scrollbar
+    gutter in `style.css`. Reka's default compensation would add a body padding
+    on top of that and shift the page while a dialog or menu is open.
+  -->
+  <ConfigProvider :scroll-body="false">
     <TooltipProvider :delay-duration="120">
       <div class="min-h-screen bg-app-bg text-app-text">
-        <div class="mx-auto flex min-h-screen max-w-screen-2xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto flex min-h-screen max-w-screen-2xl flex-col px-4 pb-6 sm:px-6 lg:px-8">
           <AppHeader />
 
           <main class="flex-1 py-8">
-            <TemplateManagementSection />
-
-            <section class="mt-6">
+            <section>
               <div
                 v-if="!activeTemplate"
                 class="rounded-[2rem] border border-dashed border-app-border/70 bg-app-surface/70 p-6 text-sm text-app-muted"
@@ -225,6 +260,9 @@ onMounted(async () => {
                 :categories="activeTemplate.categories"
                 :selection-by-category="activeTemplateSelections"
                 :global-filter="activeTemplate.globalFilter"
+                :title="activeTemplate.name"
+                :description="activeTemplate.description || undefined"
+                :active-template="activeTemplate"
                 :metadata="metadata"
                 :metadata-status="metadataStatus"
                 :metadata-error="metadataError"
@@ -235,6 +273,8 @@ onMounted(async () => {
                 @select-selection="selectCategorySelection"
                 @clear-selection="clearCategorySelection"
                 @clear-all-selections="clearAllSelections"
+                @update-template="updateTemplateDetails"
+                @delete-template="deleteActiveTemplate"
               />
             </section>
           </main>

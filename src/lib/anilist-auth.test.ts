@@ -3,13 +3,16 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   clearAniListOAuthState,
   clearAniListOAuthCallbackFragment,
+  clearStoredAniListAuthSession,
   createAniListAuthorizationUrl,
   createAniListOAuthState,
   getAniListTokenExpiresAt,
   isAniListTokenExpired,
+  loadStoredAniListAuthSession,
   loadAniListOAuthState,
   parseAniListOAuthCallback,
   saveAniListOAuthState,
+  saveStoredAniListAuthSession,
 } from './anilist-auth'
 
 const createJwt = (payload: Record<string, unknown>) => {
@@ -88,6 +91,72 @@ describe('anilist auth helpers', () => {
 
     clearAniListOAuthState(storage)
     expect(storage.removeItem).toHaveBeenCalledWith(expect.any(String))
+  })
+
+  it('loads auth sessions from both v1 and v2 records', () => {
+    const storage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    }
+
+    storage.getItem.mockReturnValueOnce(JSON.stringify({
+      schemaVersion: 1,
+      accessToken: 'token-v1',
+      username: 'viewer-v1',
+      expiresAt: 123,
+    }))
+
+    expect(loadStoredAniListAuthSession(storage)).toEqual({
+      accessToken: 'token-v1',
+      username: 'viewer-v1',
+      avatarUrl: null,
+      expiresAt: 123,
+    })
+
+    storage.getItem.mockReturnValueOnce(JSON.stringify({
+      schemaVersion: 2,
+      accessToken: 'token-v2',
+      username: 'viewer-v2',
+      avatarUrl: 'https://cdn.test/avatar.png',
+      expiresAt: 456,
+    }))
+
+    expect(loadStoredAniListAuthSession(storage)).toEqual({
+      accessToken: 'token-v2',
+      username: 'viewer-v2',
+      avatarUrl: 'https://cdn.test/avatar.png',
+      expiresAt: 456,
+    })
+  })
+
+  it('saves and clears v2 auth sessions with avatar data', () => {
+    const storage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    }
+
+    saveStoredAniListAuthSession({
+      accessToken: 'token',
+      username: 'viewer',
+      avatarUrl: 'https://cdn.test/avatar.png',
+      expiresAt: 789,
+    }, storage)
+
+    expect(storage.setItem).toHaveBeenCalledWith(
+      'anime-toplist-builder.anilist-auth',
+      JSON.stringify({
+        schemaVersion: 2,
+        accessToken: 'token',
+        username: 'viewer',
+        avatarUrl: 'https://cdn.test/avatar.png',
+        expiresAt: 789,
+      }),
+    )
+
+    clearStoredAniListAuthSession(storage)
+    expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist-builder.anilist-auth')
   })
 
   it('treats near-expired tokens as expired', () => {

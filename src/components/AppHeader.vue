@@ -1,88 +1,225 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import {
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogRoot,
+  ToolbarRoot,
+} from 'reka-ui'
+import { computed, ref } from 'vue'
 
-import AniListIcon from '@/components/icons/AniListIcon.vue'
-import SettingsDialog from '@/components/SettingsDialog.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
+import AppAccountMenu from '@/components/AppAccountMenu.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+import ToolbarIconButton from '@/components/ToolbarIconButton.vue'
+import ImageExportDialog from '@/components/export/ImageExportDialog.vue'
+import CameraIcon from '@/components/icons/CameraIcon.vue'
+import MenuIcon from '@/components/icons/MenuIcon.vue'
+import DialogCloseButton from '@/components/DialogCloseButton.vue'
+import TemplateActionsMenu from '@/components/templates/TemplateActionsMenu.vue'
+import TemplateRemoteImportDialog from '@/components/templates/TemplateRemoteImportDialog.vue'
+import TemplateSwitcherMenu from '@/components/templates/TemplateSwitcherMenu.vue'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
-import { useSettingsStore } from '@/stores/settings'
-import { useTheme } from '@/composables/useTheme'
+import { useTemplateManagement } from '@/components/templates/useTemplateManagement'
 
 const aniListAuthStore = useAniListAuthStore()
-const settingsStore = useSettingsStore()
-const { theme } = useTheme()
+const {
+  activeTemplate,
+  activeTemplateSelections,
+  confirmationState,
+  confirmAction,
+  createTemplate,
+  deleteActiveTemplate,
+  exportActiveTemplate,
+  fileInput,
+  importFromFile,
+  importFromRemoteUrl,
+  isConfirmationOpen,
+  isImportingRemote,
+  isRemoteImportOpen,
+  openRemoteImport,
+  remoteUrlInput,
+  triggerFileImport,
+} = useTemplateManagement()
 
-const connectionLabel = computed(() => {
-  if (aniListAuthStore.isAuthenticated && aniListAuthStore.username) {
-    return aniListAuthStore.username
-  }
+const isMobileMenuOpen = ref(false)
+const isImageExportOpen = ref(false)
 
-  return ''
-})
+const activeTemplateName = computed(() => activeTemplate.value?.name ?? 'No active template')
 </script>
 
 <template>
-  <header
-    class="rounded-[2rem] border border-app-border/70 bg-gradient-to-br from-app-surface via-app-surface to-app-elevated/80 p-6 shadow-shell sm:p-8"
-  >
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-      <div class="max-w-3xl">
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Award-style Anime Toplist Builder
-        </h1>
-        <p class="mt-4 max-w-2xl text-sm leading-6 text-app-muted sm:text-base">
-          Use a predefined template or make your own, adjust common and category-specific filters, and select your anime for each category.
-        </p>
-      </div>
+  <header class="sticky top-0 z-30">
+    <ToolbarRoot
+      as="div"
+      class="rounded-b-[2rem] rounded-t-none border border-t-0 border-app-border/70 bg-app-surface/85 px-6 py-3 shadow-shell backdrop-blur-xl sm:px-7"
+    >
+      <div class="flex items-center gap-2 lg:hidden">
+        <button
+          type="button"
+          class="shell-button inline-flex h-11 w-11 shrink-0 items-center justify-center p-0"
+          aria-label="Open toolbar menu"
+          @click="isMobileMenuOpen = true"
+        >
+          <MenuIcon class="h-5 w-5" />
+        </button>
 
-      <div class="flex flex-col gap-3 sm:items-end">
-        <div class="flex flex-wrap gap-2 sm:justify-end">
-          <div
-            v-if="aniListAuthStore.isAuthenticated"
-            class="inline-flex items-center gap-2 rounded-full border border-app-border/80 bg-app-bg/50 px-3 py-2 text-sm text-app-muted"
-          >
-            <AniListIcon class="h-4 w-4 shrink-0" />
-            <span class="max-w-48 truncate">{{ connectionLabel }}</span>
-          </div>
-          <TooltipRoot v-if="aniListAuthStore.isConfigured && !aniListAuthStore.isAuthenticated">
-            <TooltipTrigger as-child>
-              <span class="inline-flex">
-                <button
-                  type="button"
-                  class="shell-button"
-                  :disabled="aniListAuthStore.status === 'connecting'"
-                  @click="aniListAuthStore.connect()"
-                >
-                  {{ aniListAuthStore.status === 'connecting' ? 'Connecting...' : 'Connect AniList' }}
-                </button>
-              </span>
-            </TooltipTrigger>
-
-            <TooltipPortal>
-              <TooltipContent
-                class="max-w-xs rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                :side-offset="8"
-              >
-                Connect your AniList account
-                to narrow search results to your anime list
-                and show your verified account name in image exports.
-                <TooltipArrow class="fill-app-surface" />
-              </TooltipContent>
-            </TooltipPortal>
-          </TooltipRoot>
-          <button
-            v-else-if="aniListAuthStore.isAuthenticated"
-            type="button"
-            class="shell-button"
-            @click="aniListAuthStore.disconnect()"
-          >
-            Disconnect AniList
-          </button>
-          <SettingsDialog v-model="settingsStore.titleLanguage" />
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-semibold tracking-tight text-app-text">
+            {{ activeTemplateName }}
+          </p>
         </div>
-        <ThemeToggle v-model="theme" />
+
+        <ToolbarIconButton
+          label="Export image"
+          :disabled="!activeTemplate"
+          @click="isImageExportOpen = true"
+        >
+          <CameraIcon class="h-5 w-5" />
+        </ToolbarIconButton>
+
+        <AppAccountMenu />
       </div>
-    </div>
+
+      <div class="hidden items-center gap-3 lg:flex">
+        <div class="min-w-0 shrink-0 max-w-64">
+          <p class="truncate text-base font-semibold tracking-tight text-app-text">
+            Anime Toplist Builder
+          </p>
+        </div>
+
+        <TemplateSwitcherMenu
+          class="min-w-0"
+          @create="createTemplate"
+          @import-file="triggerFileImport"
+          @import-remote="openRemoteImport"
+        />
+
+        <TemplateActionsMenu
+          :active-template="activeTemplate"
+          @export-json="exportActiveTemplate"
+          @create="createTemplate"
+          @import-file="triggerFileImport"
+          @import-remote="openRemoteImport"
+          @delete-template="deleteActiveTemplate"
+        />
+
+        <div class="ml-auto flex items-center gap-2">
+          <ToolbarIconButton
+            label="Export image"
+            :disabled="!activeTemplate"
+            @click="isImageExportOpen = true"
+          >
+            <CameraIcon class="h-5 w-5" />
+          </ToolbarIconButton>
+
+          <AppAccountMenu />
+        </div>
+      </div>
+    </ToolbarRoot>
+
+    <ImageExportDialog
+      v-model:open="isImageExportOpen"
+      :template="activeTemplate"
+      :selection-by-category="activeTemplateSelections"
+      :default-author="aniListAuthStore.username ?? undefined"
+      :default-author-source="aniListAuthStore.isAuthenticated ? 'anilist' : 'manual'"
+      hide-trigger
+    />
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept="application/json,.json"
+      class="hidden"
+      @change="importFromFile"
+    >
+
+    <TemplateRemoteImportDialog
+      v-model:open="isRemoteImportOpen"
+      :remote-url="remoteUrlInput"
+      :is-importing="isImportingRemote"
+      @update:remote-url="remoteUrlInput = $event"
+      @submit="importFromRemoteUrl()"
+    />
+
+    <DialogRoot v-model:open="isMobileMenuOpen">
+      <DialogPortal>
+        <DialogOverlay class="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm lg:hidden" />
+        <DialogContent class="fixed inset-y-0 left-0 z-50 flex w-[min(88vw,24rem)] flex-col border-r border-app-border/80 bg-app-surface p-5 shadow-shell lg:hidden">
+          <DialogCloseButton />
+
+          <div class="pr-14">
+            <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">
+              Anime Toplist Builder
+            </p>
+            <h2 class="mt-3 text-xl font-semibold tracking-tight text-app-text">
+              {{ activeTemplateName }}
+            </h2>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-3">
+            <TemplateSwitcherMenu
+              @create="createTemplate(); isMobileMenuOpen = false"
+              @import-file="triggerFileImport(); isMobileMenuOpen = false"
+              @import-remote="openRemoteImport(); isMobileMenuOpen = false"
+            />
+
+            <button
+              type="button"
+              class="shell-button justify-start"
+              :disabled="!activeTemplate"
+              @click="exportActiveTemplate(); isMobileMenuOpen = false"
+            >
+              Export template JSON
+            </button>
+            <button
+              type="button"
+              class="shell-button justify-start"
+              :disabled="!activeTemplate"
+              @click="isImageExportOpen = true; isMobileMenuOpen = false"
+            >
+              Export image
+            </button>
+            <button
+              type="button"
+              class="shell-button justify-start"
+              @click="createTemplate(); isMobileMenuOpen = false"
+            >
+              Create blank template
+            </button>
+            <button
+              type="button"
+              class="shell-button justify-start"
+              @click="triggerFileImport(); isMobileMenuOpen = false"
+            >
+              Import template from file
+            </button>
+            <button
+              type="button"
+              class="shell-button justify-start"
+              @click="openRemoteImport(); isMobileMenuOpen = false"
+            >
+              Import template from URL
+            </button>
+            <button
+              type="button"
+              class="shell-button justify-start border-red-500/40 bg-red-500/10 text-app-text hover:border-red-400/60 hover:bg-red-500/20"
+              :disabled="!activeTemplate"
+              @click="deleteActiveTemplate(); isMobileMenuOpen = false"
+            >
+              Delete template
+            </button>
+          </div>
+        </DialogContent>
+      </DialogPortal>
+    </DialogRoot>
+
+    <ConfirmationDialog
+      v-model:open="isConfirmationOpen"
+      :title="confirmationState?.title ?? 'Confirm action'"
+      :description="confirmationState?.description ?? ''"
+      :confirm-label="confirmationState?.confirmLabel ?? 'Confirm'"
+      @confirm="confirmAction"
+    />
   </header>
 </template>

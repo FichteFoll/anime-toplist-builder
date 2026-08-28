@@ -108,5 +108,9 @@ export interface AniListMetadataData {
 export interface AniListViewerData {
   Viewer: {
     name: string
+    avatar?: {
+      large?: string | null
+      medium?: string | null
+    } | null
   }
 }

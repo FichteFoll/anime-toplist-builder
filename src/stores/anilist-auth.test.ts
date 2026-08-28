@@ -78,4 +78,44 @@ describe('anilist auth store', () => {
     expect(mocks.errorSpy).toHaveBeenCalledWith('AniList login failed.', 'AniList login state was invalid.')
     expect(storage.removeItem).toHaveBeenCalledWith('anime-toplist-builder.anilist-oauth-state.v1')
   })
+
+  it('stores viewer avatar details after a successful oauth callback', async () => {
+    const accessToken = 'header.payload.signature'
+    const storage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    }
+
+    vi.stubGlobal('window', {
+      location: {
+        pathname: '/app/',
+        search: '',
+        hash: `#access_token=${accessToken}&expires_in=60&state=expected-state`,
+      },
+      history: {
+        replaceState: vi.fn(),
+      },
+      sessionStorage: storage,
+    })
+
+    storage.getItem.mockReturnValue('expected-state')
+    mocks.fetchAuthenticatedAniListViewer.mockResolvedValue({
+      name: 'viewer-name',
+      avatarUrl: 'https://cdn.test/avatar.png',
+    })
+
+    const store = useAniListAuthStore()
+    store.initialize()
+
+    await store.completeOAuthCallback()
+
+    expect(store.username).toBe('viewer-name')
+    expect(store.avatarUrl).toBe('https://cdn.test/avatar.png')
+    expect(storage.setItem).toHaveBeenCalledWith(
+      'anime-toplist-builder.anilist-auth',
+      expect.stringContaining('"avatarUrl":"https://cdn.test/avatar.png"'),
+    )
+    expect(mocks.successSpy).toHaveBeenCalledWith('AniList connected.', 'viewer-name')
+  })
 })

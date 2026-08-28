@@ -94,6 +94,10 @@ export const fetchAniListViewerQuery = `
   query FetchAniListViewer {
     Viewer {
       name
+      avatar {
+        large
+        medium
+      }
     }
   }
 `

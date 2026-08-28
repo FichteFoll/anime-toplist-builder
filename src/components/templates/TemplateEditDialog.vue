@@ -18,20 +18,33 @@ import type { FilterState, Template } from '@/types'
 
 const props = defineProps<{
   template: Template
+  hideTrigger?: boolean
+  triggerClass?: string
+  triggerAriaLabel?: string
+  triggerLabel?: string
 }>()
+
+const openModel = defineModel<boolean>('open')
 
 const emit = defineEmits<{
   save: [value: { name: string, description: string, filter: FilterState }]
   delete: []
 }>()
 
-const open = ref(false)
+const internalOpen = ref(false)
 const draftName = ref(props.template.name)
 const draftDescription = ref(props.template.description)
 const draftFilter = ref(cloneFilter(props.template.globalFilter))
 
 const hasValidName = computed(() => isNonBlankName(draftName.value))
 const canDeleteTemplate = computed(() => props.template.origin !== 'predefined' && props.template.origin !== 'imported-url')
+const open = computed({
+  get: () => openModel.value ?? internalOpen.value,
+  set: (value: boolean) => {
+    internalOpen.value = value
+    openModel.value = value
+  },
+})
 
 function cloneFilter(filter: FilterState): FilterState {
   if (typeof structuredClone === 'function') {
@@ -92,14 +105,19 @@ const requestDelete = () => {
 
 <template>
   <DialogRoot v-model:open="open">
-    <DialogTrigger as-child>
+    <DialogTrigger
+      v-if="!hideTrigger"
+      as-child
+    >
       <button
         type="button"
-        class="shell-button"
+        :class="triggerClass || 'shell-button'"
         :disabled="!template"
-        :aria-label="`Open template editor for ${template.name}`"
+        :aria-label="triggerAriaLabel ?? `Open template editor for ${template.name}`"
       >
-        Edit template
+        <slot name="trigger">
+          {{ triggerLabel ?? 'Edit template' }}
+        </slot>
       </button>
     </DialogTrigger>
 

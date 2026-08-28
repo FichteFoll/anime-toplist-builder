@@ -140,6 +140,7 @@ export const fetchAuthenticatedAniListViewer = async (accessToken: string): Prom
 
   return {
     name: data.Viewer.name,
+    avatarUrl: data.Viewer.avatar?.large ?? data.Viewer.avatar?.medium ?? null,
   }
 }
 
