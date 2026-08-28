@@ -5,8 +5,13 @@ export interface GraphQlResponse<TData> {
   }>
 }
 
+export interface AnimeThemesArtistNameResponse {
+  main?: string | null
+  native?: string | null
+}
+
 export interface AnimeThemesArtistResponse {
-  name?: string | null
+  name?: AnimeThemesArtistNameResponse | null
 }
 
 export interface AnimeThemesPerformanceResponse {
@@ -33,10 +38,14 @@ export interface AnimeThemesEntryResponse {
   videos?: AnimeThemesVideoConnectionResponse | null
 }
 
+export interface AnimeThemesSongTitleResponse {
+  romaji?: string | null
+  native?: string | null
+}
+
 export interface AnimeThemesSongResponse {
   performances?: AnimeThemesPerformanceResponse[] | null
-  title?: string | null
-  titleNative?: string | null
+  title?: AnimeThemesSongTitleResponse | null
 }
 
 export interface AnimeThemeResponse {
@@ -47,8 +56,14 @@ export interface AnimeThemeResponse {
   song?: AnimeThemesSongResponse | null
 }
 
+export interface AnimeThemesAnimeTitleResponse {
+  romaji?: string | null
+  english?: string | null
+  native?: string | null
+}
+
 export interface AnimeThemesAnimeResponse {
-  name?: string | null
+  title?: AnimeThemesAnimeTitleResponse | null
   animethemes?: AnimeThemeResponse[] | null
 }
 

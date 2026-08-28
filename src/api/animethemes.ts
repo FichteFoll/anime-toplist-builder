@@ -5,6 +5,7 @@ import { formatSongArtist, normalizeSongEpisodes } from '@/lib/song-selection'
 import { normalizeAnimeThemesError, requestAnimeThemes } from './animethemes-client'
 import type {
   AnimeThemeResponse,
+  AnimeThemesAnimeTitleResponse,
   AnimeThemesQueryData,
   AnimeThemesVideoNodeResponse,
 } from './animethemes-types'
@@ -12,7 +13,11 @@ import type {
 const themesQuery = `
   query ThemesQuery($anilistIds: [Int!]) {
     findAnimeByExternalSite(site: ANILIST, id: $anilistIds) {
-      name
+      title {
+        romaji
+        english
+        native
+      }
       animethemes {
         id
         type
@@ -32,12 +37,16 @@ const themesQuery = `
         song {
           performances {
             artist {
-              name
+              name {
+                main
+              }
             }
             as
           }
-          title
-          titleNative
+          title {
+            romaji
+            native
+          }
         }
       }
     }
@@ -73,12 +82,19 @@ const normalizeText = (value: string | null | undefined) => {
   return normalizedValue ? normalizedValue : null
 }
 
-const createFallbackAnimeTitle = (name: string): AnimeTitle => ({
-  userPreferred: name,
-  romaji: null,
-  english: null,
-  native: null,
-})
+const createFallbackAnimeTitle = (
+  title: AnimeThemesAnimeTitleResponse | null | undefined,
+  animeId: number,
+): AnimeTitle => {
+  const romaji = normalizeText(title?.romaji)
+
+  return {
+    userPreferred: romaji ?? `Anime ${animeId}`,
+    romaji,
+    english: normalizeText(title?.english),
+    native: normalizeText(title?.native),
+  }
+}
 
 const pickPreviewVideo = (videos: AnimeThemesVideoNodeResponse[]) => {
   const video = videos.find((item) => normalizeText(item.link))
@@ -102,7 +118,7 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
   const performances: SongPerformance[] = []
 
   for (const performance of theme.song?.performances ?? []) {
-    const artist = normalizeText(performance.artist?.name)
+    const artist = normalizeText(performance.artist?.name?.main)
 
     if (!artist) {
       continue
@@ -123,8 +139,8 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
     id,
     type: theme.type,
     slug,
-    title: normalizeText(theme.song?.title),
-    titleNative: normalizeText(theme.song?.titleNative),
+    title: normalizeText(theme.song?.title?.romaji),
+    titleNative: normalizeText(theme.song?.title?.native),
     artist: formatSongArtist(performances),
     performances: performances.length > 0 ? performances : undefined,
     videoLink: previewVideo.link,
@@ -150,11 +166,10 @@ export const fetchAnimeSongs = async ({
     })
 
     const anime = data.findAnimeByExternalSite?.[0]
-    const fallbackName = normalizeText(anime?.name) ?? `Anime ${animeId}`
 
     return {
       animeId,
-      animeTitle: animeTitle ?? createFallbackAnimeTitle(fallbackName),
+      animeTitle: animeTitle ?? createFallbackAnimeTitle(anime?.title, animeId),
       animeCoverImage: animeCoverImage ?? {
         large: '',
         medium: null,
