@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 
 import ImageExportDialog from '@/components/export/ImageExportDialog.vue'
+import SpinnerIcon from '@/components/icons/SpinnerIcon.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
 import {
@@ -14,12 +16,30 @@ import {
   type Template,
 } from '@/types'
 
+// The render is deferred so that the in-flight state stays observable.
+const exportImage = vi.hoisted(() => {
+  type PendingRender = {
+    resolve: (value: { blob: Blob }) => void
+    reject: (reason: Error) => void
+  }
+
+  const pendingRenders: PendingRender[] = []
+
+  return {
+    pendingRenders,
+    renderTemplatePng: vi.fn(
+      () =>
+        new Promise<{ blob: Blob }>((resolve, reject) => {
+          pendingRenders.push({ resolve, reject })
+        }),
+    ),
+  }
+})
+
 vi.mock('@/lib/export-image', () => ({
   CATEGORIES_PER_ROW_LANDSCAPE: 5,
   CATEGORIES_PER_ROW_PORTRAIT: 3,
-  renderTemplatePng: vi.fn(async () => ({
-    blob: new Blob(['x'], { type: 'image/png' }),
-  })),
+  renderTemplatePng: exportImage.renderTemplatePng,
 }))
 
 vi.mock('reka-ui', () => ({
@@ -68,14 +88,33 @@ const template: Template = {
   version: templateSchemaVersion,
 }
 
-const mountDialog = () =>
+const mountDialog = (open = true) =>
   mount(ImageExportDialog, {
     props: {
-      open: true,
+      open,
       template,
       selectionByCategory: {},
     },
   })
+
+const settlePendingRenders = async () => {
+  for (const pendingRender of exportImage.pendingRenders.splice(0)) {
+    pendingRender.resolve({ blob: new Blob(['x'], { type: 'image/png' }) })
+  }
+
+  await flushPromises()
+}
+
+const failPendingRenders = async () => {
+  for (const pendingRender of exportImage.pendingRenders.splice(0)) {
+    pendingRender.reject(new Error('Image export failed.'))
+  }
+
+  await flushPromises()
+}
+
+const hasSpinner = (wrapper: ReturnType<typeof mountDialog>) =>
+  wrapper.findComponent(SpinnerIcon).exists()
 
 const findDialogContent = (wrapper: ReturnType<typeof mountDialog>) =>
   wrapper.find('.shadow-shell').element
@@ -108,6 +147,8 @@ describe('ImageExportDialog', () => {
     })) as unknown as typeof window.matchMedia
     URL.createObjectURL = vi.fn(() => 'blob:preview')
     URL.revokeObjectURL = vi.fn()
+    exportImage.pendingRenders.length = 0
+    exportImage.renderTemplatePng.mockClear()
   })
 
   it('keeps the download footer outside the scrolling region', () => {
@@ -137,5 +178,64 @@ describe('ImageExportDialog', () => {
     const wrapper = mountDialog()
 
     expect(wrapper.findAll('.overflow-y-auto')).toHaveLength(1)
+  })
+
+  it('shows the spinner on open until the first render settles', async () => {
+    const wrapper = mountDialog(false)
+
+    await wrapper.setProps({ open: true })
+    await nextTick()
+
+    expect(hasSpinner(wrapper)).toBe(true)
+
+    await settlePendingRenders()
+
+    expect(hasSpinner(wrapper)).toBe(false)
+  })
+
+  it('does not show the spinner while an option change re-renders', async () => {
+    const wrapper = mountDialog(false)
+
+    await wrapper.setProps({ open: true })
+    await settlePendingRenders()
+
+    await wrapper.find('input[type="checkbox"]').setValue(true)
+    await nextTick()
+
+    expect(exportImage.pendingRenders).toHaveLength(1)
+    expect(hasSpinner(wrapper)).toBe(false)
+  })
+
+  // A failed first render leaves the placeholder on screen with no preview,
+  // which is the only path where an option-driven re-render can be told apart
+  // from the initial one by the spinner alone.
+  it('does not show the spinner for an option change with the placeholder visible', async () => {
+    const wrapper = mountDialog(false)
+
+    await wrapper.setProps({ open: true })
+    await failPendingRenders()
+
+    expect(wrapper.find('img').exists()).toBe(false)
+    expect(hasSpinner(wrapper)).toBe(false)
+
+    await wrapper.find('input[type="checkbox"]').setValue(true)
+    await nextTick()
+
+    expect(exportImage.pendingRenders).toHaveLength(1)
+    expect(wrapper.text()).toContain('Rendering the image preview...')
+    expect(hasSpinner(wrapper)).toBe(false)
+  })
+
+  it('shows the spinner again after reopening the dialog', async () => {
+    const wrapper = mountDialog(false)
+
+    await wrapper.setProps({ open: true })
+    await settlePendingRenders()
+
+    await wrapper.setProps({ open: false })
+    await wrapper.setProps({ open: true })
+    await nextTick()
+
+    expect(hasSpinner(wrapper)).toBe(true)
   })
 })

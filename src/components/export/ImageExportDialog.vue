@@ -11,6 +11,7 @@ import {
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
+import SpinnerIcon from '@/components/icons/SpinnerIcon.vue'
 import { createPngExportFilename } from '@/lib/export-filename'
 import {
   CATEGORIES_PER_ROW_LANDSCAPE,
@@ -50,6 +51,7 @@ const layout = ref<ExportImageLayout>(ExportImageLayout.Portrait)
 const previewUrl = ref<string | null>(null)
 const previewBlob = ref<Blob | null>(null)
 const isRendering = ref(false)
+const isGeneratingInitialPreview = ref(false)
 const renderError = ref<string | null>(null)
 
 let renderRequestId = 0
@@ -137,6 +139,7 @@ const generatePreview = async () => {
   } finally {
     if (currentRequestId === renderRequestId) {
       isRendering.value = false
+      isGeneratingInitialPreview.value = false
     }
   }
 }
@@ -158,10 +161,21 @@ const downloadPreview = () => {
 
 watch(isOpen, (open) => {
   if (!open) {
+    // Discard the preview and any in-flight render, so that reopening the
+    // dialog always starts a fresh initial render instead of showing a
+    // preview that may no longer match the template.
+    renderRequestId += 1
+    isRendering.value = false
+    isGeneratingInitialPreview.value = false
+    previewBlob.value = null
+    revokePreviewUrl()
+    renderError.value = null
+
     return
   }
 
   resetExportForm()
+  isGeneratingInitialPreview.value = true
   void generatePreview()
 })
 
@@ -364,9 +378,15 @@ onBeforeUnmount(() => {
 
               <div
                 v-else
-                class="mt-4 flex min-h-72 items-center justify-center rounded-[1rem] border border-dashed border-app-border/70 bg-app-bg/40 px-6 py-12 text-center text-sm leading-6 text-app-muted"
+                class="mt-4 flex min-h-72 flex-col items-center justify-center gap-3 rounded-[1rem] border border-dashed border-app-border/70 bg-app-bg/40 px-6 py-12 text-center text-sm leading-6 text-app-muted"
               >
-                {{ isRendering ? 'Rendering the image preview...' : 'The image preview updates automatically.' }}
+                <SpinnerIcon
+                  v-if="isGeneratingInitialPreview"
+                  class="h-7 w-7 animate-spin text-app-accent"
+                />
+                <p>
+                  {{ isRendering ? 'Rendering the image preview...' : 'The image preview updates automatically.' }}
+                </p>
               </div>
             </article>
           </div>
