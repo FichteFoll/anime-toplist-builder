@@ -182,4 +182,36 @@ describe('mergeFilterStates', () => {
     expect(result.filter.tags).toEqual(['Time Travel'])
     expect(result.filter.minimumTagRank).toBe(35)
   })
+
+  it('intersects the countries of origin', () => {
+    const result = mergeFilterStates(
+      {
+        ...createEmptyFilterState(),
+        countriesOfOrigin: ['JP', 'CN'],
+      },
+      {
+        ...createEmptyFilterState(),
+        countriesOfOrigin: ['JP'],
+      },
+    )
+
+    expect(result.hasConflicts).toBe(false)
+    expect(result.filter.countriesOfOrigin).toEqual(['JP'])
+  })
+
+  it('flags an empty country of origin intersection as a conflict', () => {
+    const result = mergeFilterStates(
+      {
+        ...createEmptyFilterState(),
+        countriesOfOrigin: ['JP'],
+      },
+      {
+        ...createEmptyFilterState(),
+        countriesOfOrigin: ['CN'],
+      },
+    )
+
+    expect(result.hasConflicts).toBe(true)
+    expect(result.filter.countriesOfOrigin).toEqual([])
+  })
 })

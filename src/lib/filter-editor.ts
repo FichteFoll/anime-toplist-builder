@@ -15,7 +15,7 @@ export const getCategoryFilterDisabledReasons = (
   episodes: hasRangeValue(globalFilter.episodes) ? inheritedFieldReason : undefined,
   duration: hasRangeValue(globalFilter.duration) ? inheritedFieldReason : undefined,
   seasons: globalFilter.seasons.length > 0 ? inheritedFieldReason : undefined,
-  countryOfOrigin: globalFilter.countryOfOrigin ? inheritedFieldReason : undefined,
+  countriesOfOrigin: globalFilter.countriesOfOrigin.length > 0 ? inheritedFieldReason : undefined,
   tags: globalFilter.tags.length > 0 || globalFilter.excludedTags.length > 0 ? inheritedFieldReason : undefined,
   genres: globalFilter.genres.length > 0 || globalFilter.excludedGenres.length > 0 ? inheritedFieldReason : undefined,
   formats: globalFilter.formats.length > 0 ? inheritedFieldReason : undefined,
@@ -46,7 +46,7 @@ export const countConfiguredFilterFields = (filter: FilterState) => {
     count += 1
   }
 
-  if (filter.countryOfOrigin) {
+  if (filter.countriesOfOrigin.length > 0) {
     count += 1
   }
 
@@ -88,7 +88,7 @@ export const countAdvancedFilterFields = (filter: FilterState) => {
     count += 1
   }
 
-  if (filter.countryOfOrigin) {
+  if (filter.countriesOfOrigin.length > 0) {
     count += 1
   }
 

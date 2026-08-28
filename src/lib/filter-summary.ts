@@ -36,8 +36,8 @@ const filterSummaryFormatters = {
   duration: (range: FilterState['duration']) => formatRangeLabel('Duration', range),
   seasons: (seasons: FilterState['seasons']) =>
     seasons.length > 0 ? `Season: ${seasons.map(toTitleLabel).join(', ')}` : null,
-  countryOfOrigin: (countryOfOrigin: FilterState['countryOfOrigin']) =>
-    countryOfOrigin ? `Country: ${countryOfOrigin}` : null,
+  countriesOfOrigin: (countriesOfOrigin: FilterState['countriesOfOrigin']) =>
+    countriesOfOrigin.length > 0 ? `Country: ${countriesOfOrigin.join(', ')}` : null,
   genres: (genres: FilterState['genres']) => (genres.length > 0 ? `Genres: ${genres.join(', ')}` : null),
   excludedGenres: (excludedGenres: FilterState['excludedGenres']) =>
     excludedGenres.length > 0 ? `Excluded genres: ${excludedGenres.join(', ')}` : null,
@@ -61,7 +61,7 @@ export const buildActiveFilterSummary = (filter: FilterState) => {
     filterSummaryFormatters.episodes(filter.episodes),
     filterSummaryFormatters.duration(filter.duration),
     filterSummaryFormatters.seasons(filter.seasons),
-    filterSummaryFormatters.countryOfOrigin(filter.countryOfOrigin),
+    filterSummaryFormatters.countriesOfOrigin(filter.countriesOfOrigin),
     filterSummaryFormatters.genres(filter.genres),
     filterSummaryFormatters.excludedGenres(filter.excludedGenres),
     filterSummaryFormatters.formats(filter.formats),

@@ -66,7 +66,7 @@ interface FilterState {
   duration?: NumericRange
   popularity?: NumericRange
   seasons: AnimeSeason[]
-  countryOfOrigin?: string
+  countriesOfOrigin: string[]
   tags: string[]
   excludedTags: string[]
   genres: string[]

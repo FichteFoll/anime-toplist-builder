@@ -26,6 +26,10 @@ and serializes these payloads.
   unknown enum values are rejected,
   array fields default to empty,
   and string collections are deduplicated and ordered deterministically.
+- A payload's legacy `countryOfOrigin`,
+  as a string or as an array,
+  is still accepted and normalized into `countriesOfOrigin`,
+  which is the key exports write.
 - Exports always contain stable template and category ids,
   so re-importing an export preserves the selections keyed to those ids.
 - Exports do not contain origin-specific runtime details,

@@ -80,19 +80,8 @@ const asOptionalStringArray = (value: unknown, path: string) => {
   return sortStrings(uniqueStrings(items))
 }
 
-const asOptionalSingleString = (value: unknown, path: string) => {
-  if (value === undefined) {
-    return undefined
-  }
-
-  if (Array.isArray(value)) {
-    const items = asOptionalStringArray(value, path)
-
-    return items[0]
-  }
-
-  return asTrimmedString(value, path)
-}
+const asStringOrStringArray = (value: unknown, path: string) =>
+  typeof value === 'string' ? asOptionalStringArray([value], path) : asOptionalStringArray(value, path)
 
 const asEnumArray = <T extends string>(
   value: unknown,
@@ -263,7 +252,10 @@ const parseFilterState = (value: unknown, path: string): FilterState => {
     episodes: asOptionalCountRange(value.episodes, `${path}.episodes`),
     duration: asOptionalCountRange(value.duration, `${path}.duration`),
     seasons: asEnumArray<AnimeSeason>(value.seasons, `${path}.seasons`, animeSeasons),
-    countryOfOrigin: asOptionalSingleString(value.countryOfOrigin, `${path}.countryOfOrigin`),
+    countriesOfOrigin: asStringOrStringArray(
+      value.countriesOfOrigin ?? value.countryOfOrigin,
+      `${path}.countriesOfOrigin`,
+    ),
     tags: asTagFilters(value.tags, `${path}.tags`),
     excludedTags: asTagFilters(value.excludedTags, `${path}.excludedTags`),
     genres: asOptionalStringArray(value.genres, `${path}.genres`),
@@ -310,7 +302,7 @@ const createTemplateExportFilterState = (filter: FilterState): TemplateExportFil
   ...(filter.episodes === undefined ? {} : { episodes: filter.episodes }),
   ...(filter.duration === undefined ? {} : { duration: filter.duration }),
   ...(filter.seasons.length === 0 ? {} : { seasons: filter.seasons }),
-  ...(filter.countryOfOrigin === undefined ? {} : { countryOfOrigin: filter.countryOfOrigin }),
+  ...(filter.countriesOfOrigin.length === 0 ? {} : { countriesOfOrigin: filter.countriesOfOrigin }),
   ...(filter.tags.length === 0 ? {} : { tags: filter.tags }),
   ...(filter.excludedTags.length === 0 ? {} : { excludedTags: filter.excludedTags }),
   ...(filter.genres.length === 0 ? {} : { genres: filter.genres }),

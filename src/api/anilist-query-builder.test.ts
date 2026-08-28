@@ -11,7 +11,7 @@ describe('buildAniListMediaSearchVariables', () => {
       globalFilter: {
         ...createEmptyFilterState(),
         seasons: [AnimeSeason.Winter, AnimeSeason.Spring],
-        countryOfOrigin: 'CN',
+        countriesOfOrigin: ['JP', 'CN'],
         tags: ['Action'],
         excludedTags: ['Romance'],
         minimumTagRank: 40,
@@ -37,7 +37,7 @@ describe('buildAniListMediaSearchVariables', () => {
       perPage: 20,
       onList: false,
       season: AnimeSeason.Spring,
-      countryOfOrigin: 'CN',
+      countryOfOriginIn: ['CN', 'JP'],
       tagIn: ['Action'],
       tagNotIn: ['Romance'],
       minimumTagRank: 60,

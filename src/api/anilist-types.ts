@@ -29,7 +29,7 @@ export interface AniListMediaSearchVariables {
   search?: string
   onList?: boolean
   season?: AnimeSeason
-  countryOfOrigin?: string
+  countryOfOriginIn?: string[]
   tagIn?: string[]
   tagNotIn?: string[]
   minimumTagRank?: number

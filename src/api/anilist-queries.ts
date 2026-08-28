@@ -5,7 +5,7 @@ export const searchAnimeMediaQuery = `
     $search: String
     $onList: Boolean
     $season: MediaSeason
-    $countryOfOrigin: CountryCode
+    $countryOfOriginIn: [CountryCode]
     $tagIn: [String]
     $tagNotIn: [String]
     $minimumTagRank: Int
@@ -37,7 +37,7 @@ export const searchAnimeMediaQuery = `
         search: $search
         onList: $onList
         season: $season
-        countryOfOrigin: $countryOfOrigin
+        countryOfOrigin_in: $countryOfOriginIn
         tag_in: $tagIn
         tag_not_in: $tagNotIn
         minimumTagRank: $minimumTagRank

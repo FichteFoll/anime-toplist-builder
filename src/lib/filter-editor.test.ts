@@ -53,7 +53,7 @@ describe('filter editor helpers', () => {
     const filter: FilterState = {
       ...createEmptyFilterState(),
       sort: { field: FilterSortField.Popularity, direction: FilterSortDirection.Desc },
-      countryOfOrigin: 'JP',
+      countriesOfOrigin: ['JP'],
       popularity: { minimum: 100 },
       tags: ['Action'],
       excludedTags: [],

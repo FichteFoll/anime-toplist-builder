@@ -13,6 +13,7 @@ export interface MergeFilterStateResult {
 
 export const createEmptyFilterState = (): FilterState => ({
   seasons: [],
+  countriesOfOrigin: [],
   tags: [],
   excludedTags: [],
   genres: [],
@@ -54,24 +55,6 @@ const mergeRange = (
       normalizedMinimum !== undefined &&
       normalizedMaximum !== undefined &&
       normalizedMinimum > normalizedMaximum,
-  }
-}
-
-const mergeSingleValue = <T extends string>(
-  globalValue: T | undefined,
-  categoryValue: T | undefined,
-): { value?: T; hasConflict: boolean } => {
-  if (globalValue === undefined) {
-    return { value: categoryValue, hasConflict: false }
-  }
-
-  if (categoryValue === undefined) {
-    return { value: globalValue, hasConflict: false }
-  }
-
-  return {
-    value: globalValue === categoryValue ? globalValue : undefined,
-    hasConflict: globalValue !== categoryValue,
   }
 }
 
@@ -160,7 +143,7 @@ export const mergeFilterStates = (
   const duration = mergeRange(globalFilter.duration, categoryFilter.duration)
   const popularity = mergeRange(globalFilter.popularity, categoryFilter.popularity)
   const seasons = mergeStringArray<AnimeSeason>(globalFilter.seasons, categoryFilter.seasons)
-  const countryOfOrigin = mergeSingleValue(globalFilter.countryOfOrigin, categoryFilter.countryOfOrigin)
+  const countriesOfOrigin = mergeStringArray(globalFilter.countriesOfOrigin, categoryFilter.countriesOfOrigin)
   const genres = mergeSelectionFilters(
     globalFilter.genres,
     globalFilter.excludedGenres,
@@ -182,7 +165,7 @@ export const mergeFilterStates = (
       episodes: episodes.range,
       duration: duration.range,
       seasons: seasons.values,
-      countryOfOrigin: countryOfOrigin.value,
+      countriesOfOrigin: countriesOfOrigin.values,
       tags: tags.included,
       excludedTags: tags.excluded,
       genres: genres.included,
@@ -199,7 +182,7 @@ export const mergeFilterStates = (
       duration.hasConflict ||
       popularity.hasConflict ||
       seasons.hasConflict ||
-      countryOfOrigin.hasConflict ||
+      countriesOfOrigin.hasConflict ||
       tags.hasConflict ||
       genres.hasConflict ||
       formats.hasConflict ||

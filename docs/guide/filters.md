@@ -50,7 +50,10 @@ without changing either stored filter.
   included and excluded tags,
   suggested from AniList metadata.
 - `Country of origin`:
-  a single country.
+  one or more of China,
+  Japan,
+  South Korea,
+  Taiwan.
 - `Popularity`:
   minimum and maximum.
 - `Minimum tag rank`:
@@ -96,15 +99,16 @@ The merge rules are:
 
 - numeric ranges intersect,
   the higher minimum and the lower maximum win,
-- single values,
+- multi-value lists,
   such as country of origin,
-  must agree,
-  otherwise the field is dropped and the merge is flagged as conflicting,
-- multi-value lists intersect,
+  intersect,
 - exclusions are unioned and win over inclusions,
   an excluded value is removed from the included list,
 - lists are deduplicated and sorted deterministically,
-  so the same filter always produces the same query.
+  so the same filter always produces the same query,
+- the category sort replaces the template sort,
+  and a category without a sort inherits it,
+- the higher minimum tag rank wins.
 
 When the intersection is empty,
 for example a global `Movie` format against a category `TV` format,

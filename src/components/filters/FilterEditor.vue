@@ -64,7 +64,7 @@ const formatOptions = createEnumOptions(animeFormats)
 const sourceOptions = createEnumOptions(animeSources)
 
 const countryOptions = computed(() =>
-  mergedOptions(staticCountryOptions, model.value.countryOfOrigin ? [model.value.countryOfOrigin] : []).map((option) => ({
+  mergedOptions(staticCountryOptions, model.value.countriesOfOrigin).map((option) => ({
     ...option,
     label: countryDisplayNames.of(option.value) ?? option.value,
   })),
@@ -74,9 +74,9 @@ const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], 
 const advancedFilterCount = computed(() => countAdvancedFilterFields(model.value))
 
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
-const countryOfOriginModel = computed({
-  get: () => model.value.countryOfOrigin,
-  set: (value: string | undefined) => updateFilter({ countryOfOrigin: value }),
+const countriesOfOriginModel = computed({
+  get: () => model.value.countriesOfOrigin,
+  set: (value: string[]) => updateFilter({ countriesOfOrigin: value }),
 })
 const sourceValue = computed({
   get: () => model.value.source[0] ?? undefined,
@@ -279,14 +279,12 @@ const updateMinimumTagRank = (rawValue: string) => {
           :inherit-label="mode === 'category' ? 'Use template order' : 'No sort set'"
         />
 
-        <FilterSingleComboboxField
-          v-model="countryOfOriginModel"
+        <FilterMultiSelectField
+          v-model="countriesOfOriginModel"
           label="Country of origin"
-          description="Pick the country where the anime was made."
+          description="Pick the countries where the anime was made."
           :options="countryOptions"
-          placeholder="Choose a country of origin"
-          clear-label="Clear country of origin"
-          :disabled-reason="disabledFields?.countryOfOrigin"
+          :disabled-reason="disabledFields?.countriesOfOrigin"
         />
 
         <FilterField

@@ -90,8 +90,9 @@ export interface TemplateExportCategoryPayloadV1 {
 }
 
 export interface TemplateExportFilterStateV1
-  extends Omit<FilterState, 'seasons' | 'tags' | 'excludedTags' | 'genres' | 'excludedGenres' | 'formats' | 'source'> {
+  extends Omit<FilterState, 'seasons' | 'countriesOfOrigin' | 'tags' | 'excludedTags' | 'genres' | 'excludedGenres' | 'formats' | 'source'> {
   seasons?: FilterState['seasons']
+  countriesOfOrigin?: FilterState['countriesOfOrigin']
   tags?: FilterState['tags']
   excludedTags?: FilterState['excludedTags']
   genres?: FilterState['genres']

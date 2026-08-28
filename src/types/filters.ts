@@ -90,7 +90,7 @@ export interface FilterState {
   episodes?: NumericRange
   duration?: NumericRange
   seasons: AnimeSeason[]
-  countryOfOrigin?: string
+  countriesOfOrigin: string[]
   tags: string[]
   excludedTags: string[]
   genres: string[]

@@ -46,7 +46,7 @@ describe('template validation', () => {
         episodes: undefined,
         duration: undefined,
         seasons: [],
-        countryOfOrigin: 'CN',
+        countriesOfOrigin: ['CN', 'JP'],
         tags: ['Cyberpunk'],
         excludedTags: [],
         minimumTagRank: 70,
@@ -67,7 +67,7 @@ describe('template validation', () => {
             episodes: undefined,
             duration: undefined,
             seasons: ['SPRING', 'WINTER'],
-            countryOfOrigin: undefined,
+            countriesOfOrigin: [],
             tags: [],
             excludedTags: [],
             minimumTagRank: undefined,
@@ -85,6 +85,20 @@ describe('template validation', () => {
         },
       ],
     })
+  })
+
+  it('imports the legacy scalar country of origin key', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'legacycountry01',
+      name: 'Legacy country',
+      globalFilter: {
+        countryOfOrigin: 'JP',
+      },
+      categories: [],
+    })
+
+    expect(payload.globalFilter?.countriesOfOrigin).toEqual(['JP'])
   })
 
   it('rejects unsupported versions and duplicate category ids', () => {
@@ -229,6 +243,26 @@ describe('template validation', () => {
     expect(stringifyTemplateExportPayload(template)).not.toContain('"genres": []')
     expect(stringifyTemplateExportPayload(template)).not.toContain('"formats": []')
     expect(stringifyTemplateExportPayload(template)).not.toContain('"source": []')
+  })
+
+  it('exports the countries of origin under the current key', () => {
+    const template = normalizeImportedTemplate(
+      {
+        version: templateSchemaVersion,
+        id: 'countryexport01',
+        name: 'Country export',
+        globalFilter: {
+          countriesOfOrigin: ['JP', 'CN'],
+        },
+        categories: [],
+      },
+      TemplateOrigin.User,
+    )
+
+    const payload = createTemplateExportPayload(template)
+
+    expect(payload.globalFilter.countriesOfOrigin).toEqual(['CN', 'JP'])
+    expect(payload.globalFilter).not.toHaveProperty('countryOfOrigin')
   })
 
   it('rejects invalid JSON imports early', () => {

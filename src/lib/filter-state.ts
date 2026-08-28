@@ -4,6 +4,7 @@ export const defaultMinimumTagRank = 60
 
 export const createEmptyFilterState = (): FilterState => ({
   seasons: [],
+  countriesOfOrigin: [],
   tags: [],
   excludedTags: [],
   genres: [],
