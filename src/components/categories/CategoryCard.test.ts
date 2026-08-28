@@ -182,4 +182,37 @@ describe('CategoryCard', () => {
 
     expect(wrapper.text()).not.toContain('by')
   })
+
+  it('tints the delete button hover state red', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category,
+        selection,
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          AnimePickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: { template: '<div><slot /></div>' },
+          TooltipTrigger: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+
+    const deleteButton = wrapper.get('button[aria-label="Delete category Best Opening"]')
+
+    expect(deleteButton.classes()).toContain('hover:bg-red-500/10')
+    expect(deleteButton.classes()).toContain('hover:border-red-400/50')
+  })
 })

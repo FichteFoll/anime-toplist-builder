@@ -212,7 +212,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         <TooltipTrigger as-child>
           <button
             type="button"
-            class="shell-button inline-flex h-10 w-10 items-center justify-center p-0"
+            class="shell-button inline-flex h-10 w-10 items-center justify-center p-0 hover:border-red-400/50 hover:bg-red-500/10"
             :aria-label="deleteCategoryTooltip"
             @click="emit('delete', category.id)"
           >
