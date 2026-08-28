@@ -65,6 +65,15 @@ The dialog explains that copying works through the browser's own
 
 - Covers that fail to load are drawn as placeholders,
   which also covers image hosts without permissive CORS headers.
+- Long text is wrapped and truncated
+  with grapheme- and script-aware measurement,
+  so text without spaces,
+  for example a Japanese title,
+  wraps instead of overflowing its column,
+  emoji are never split apart,
+  and a word longer than the column is broken across lines
+  rather than spilling out of the card.
+  A line that still does not fit ends with an ellipsis.
 - Long song text is truncated,
   the anime name first,
   then song title and artist if needed,

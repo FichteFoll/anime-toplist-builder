@@ -1,49 +1,39 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { countWrappedTextLines, formatSongSourceMetaLines } from '@/lib/export-image'
+import { formatSongSourceMetaLines } from '@/lib/export-image'
+import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 import { AnimeTitleLanguage, ThemeType } from '@/types'
 
-const createContext = (measureWidth: (text: string) => number) =>
-  ({
-    measureText: (text: string) => ({ width: measureWidth(text) }),
-  }) as CanvasRenderingContext2D
+// The stub measures 10px per character, so widths below are character counts.
+const font = 'normal 500 16px sans-serif'
 
-describe('countWrappedTextLines', () => {
-  it('counts a single fitting line', () => {
-    const context = createContext((text) => text.length * 10)
+beforeAll(() => {
+  installStubTextMeasurement()
+})
 
-    expect(countWrappedTextLines(context, 'Short title', 200, 2)).toBe(1)
-  })
-
-  it('counts wrapped lines', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(countWrappedTextLines(context, 'One two three four', 130, 3)).toBe(2)
-  })
-
-  it('caps the count at the max line limit', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(countWrappedTextLines(context, 'One two three four five six', 70, 2)).toBe(2)
-  })
+afterEach(() => {
+  resetStubTextMeasurement()
 })
 
 describe('formatSongSourceMetaLines', () => {
   it('splits long song source info across two lines', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(
-      formatSongSourceMetaLines(context, 'Eyeshield 21', 'ED6', '117-126', 220),
-    ).toEqual(['from Eyeshield 21', '(ED6, eps 117-126)'])
+    expect(formatSongSourceMetaLines(font, 'Eyeshield 21', 'ED6', '117-126', 220)).toEqual([
+      'from Eyeshield 21',
+      '(ED6, eps 117-126)',
+    ])
   })
 
   it('keeps short song source info on one line', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(formatSongSourceMetaLines(context, 'Cowboy Bebop', 'OP1', '1-25', 360)).toEqual([
+    expect(formatSongSourceMetaLines(font, 'Cowboy Bebop', 'OP1', '1-25', 360)).toEqual([
       'from Cowboy Bebop (OP1, eps 1-25)',
     ])
+  })
+
+  it('truncates only the anime name and keeps the full slug suffix', () => {
+    expect(
+      formatSongSourceMetaLines(font, 'A Very Long Anime Name That Never Ends', 'OP1', '1-25', 220),
+    ).toEqual(['from A Very Long An...', '(OP1, eps 1-25)'])
   })
 })
 

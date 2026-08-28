@@ -1,5 +1,6 @@
 import { appConfig } from '@/config/app'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
 import { formatSongEpisodesHint, getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
 import type {
   AnimeFormat,
@@ -29,7 +30,7 @@ export const FONT_SIZE_BODY = 18
 export const FONT_SIZE_META = 16
 
 export const formatSongSourceMetaLines = (
-  context: CanvasRenderingContext2D,
+  font: string,
   animeName: string,
   slug: string,
   episodes: string | null,
@@ -39,14 +40,14 @@ export const formatSongSourceMetaLines = (
   const suffix = episodesHint ? `(${slug}, ${episodesHint})` : `(${slug})`
   const fullLine = `from ${animeName} ${suffix}`
 
-  if (context.measureText(fullLine).width <= maxWidth) {
+  if (measureAdvanceWidth(fullLine, font) <= maxWidth) {
     return [fullLine]
   }
 
-  const labelWidth = context.measureText('from ').width
-  const sourceName = fitTextToWidth(context, animeName, Math.max(90, maxWidth - labelWidth))
+  const labelWidth = measureAdvanceWidth('from ', font)
+  const sourceName = truncateToWidth(animeName, font, Math.max(90, maxWidth - labelWidth))
 
-  return [`from ${sourceName}`, fitTextToWidth(context, suffix, maxWidth)]
+  return [`from ${sourceName}`, truncateToWidth(suffix, font, maxWidth)]
 }
 
 interface ExportPalette {
@@ -119,132 +120,25 @@ const imageCache = new Map<string, Promise<HTMLImageElement | null>>()
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
-const fitTextToWidth = (
+/** Draws already laid out `lines` and returns the y position below them. */
+const drawTextLines = (
   context: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-) => {
-  if (context.measureText(text).width <= maxWidth) {
-    return text
-  }
-
-  const characters = Array.from(text)
-  let low = 0
-  let high = characters.length
-
-  while (low < high) {
-    const mid = Math.ceil((low + high) / 2)
-    const candidate = `${characters.slice(0, mid).join('').trimEnd()}...`
-
-    if (context.measureText(candidate).width <= maxWidth) {
-      low = mid
-    } else {
-      high = mid - 1
-    }
-  }
-
-  if (low <= 0) {
-    return '...'
-  }
-
-  return `${characters.slice(0, low).join('').trimEnd()}...`
-}
-
-export const countWrappedTextLines = (
-  context: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-  maxLines: number,
-) => {
-  const words = text.trim().split(/\s+/).filter(Boolean)
-
-  if (words.length === 0) {
-    return 0
-  }
-
-  let lines = 0
-  let currentLine = ''
-  let index = 0
-
-  while (index < words.length && lines < maxLines - 1) {
-    const word = words[index]
-    const candidate = currentLine.length > 0 ? `${currentLine} ${word}` : word
-
-    if (context.measureText(candidate).width <= maxWidth || currentLine.length === 0) {
-      currentLine = candidate
-      index += 1
-      continue
-    }
-
-    lines += 1
-    currentLine = ''
-  }
-
-  if (index >= words.length) {
-    return lines + (currentLine.length > 0 ? 1 : 0)
-  }
-
-  return lines + 1
-}
-
-const drawWrappedText = (
-  context: CanvasRenderingContext2D,
-  text: string,
+  lines: Array<string>,
   x: number,
   y: number,
-  maxWidth: number,
   lineHeight: number,
-  maxLines: number,
   color: string,
 ) => {
-  const lineCount = countWrappedTextLines(context, text, maxWidth, maxLines)
-
-  if (lineCount === 0) {
-    return y
-  }
-
-  const words = text.trim().split(/\s+/).filter(Boolean)
-  const lines: Array<string> = []
-  let currentLine = ''
-  let index = 0
-
-  while (index < words.length && lines.length < maxLines - 1) {
-    const word = words[index]
-    const candidate = currentLine.length > 0 ? `${currentLine} ${word}` : word
-
-    if (context.measureText(candidate).width <= maxWidth || currentLine.length === 0) {
-      currentLine = candidate
-      index += 1
-      continue
-    }
-
-    lines.push(currentLine)
-    currentLine = ''
-  }
-
-  if (index >= words.length) {
-    if (currentLine.length > 0) {
-      lines.push(currentLine)
-    }
-  } else {
-    const remainingText = [currentLine, ...words.slice(index)].filter(Boolean).join(' ')
-    const finalLine = fitTextToWidth(context, remainingText, maxWidth)
-
-    if (finalLine.length > 0) {
-      lines.push(finalLine)
-    }
-  }
-
   context.save()
   context.fillStyle = color
 
-  for (const [index, line] of lines.slice(0, maxLines).entries()) {
-    context.fillText(line, x, y + index * lineHeight, maxWidth)
+  for (const [index, line] of lines.entries()) {
+    context.fillText(line, x, y + index * lineHeight)
   }
 
   context.restore()
 
-  return y + lines.slice(0, maxLines).length * lineHeight
+  return y + lines.length * lineHeight
 }
 
 const createFontConfig = (): ExportFontConfig => ({
@@ -255,13 +149,30 @@ const createFontConfig = (): ExportFontConfig => ({
   meta: FONT_SIZE_META,
 })
 
+/**
+ * Builds the CSS font string for the export canvas.
+ *
+ * It stays deterministic per (weight, size, style) so that pretext, which
+ * caches measurements keyed by the font string, keeps hitting its cache.
+ */
+export const exportFont = (
+  weight: 400 | 500 | 600 | 700,
+  size: number,
+  style: 'normal' | 'italic' = 'normal',
+) => `${style} ${weight} ${size}px ${fontFamily}`
+
+/** Assigns the export font to `context` and returns it, for measuring with it. */
 const setCanvasFont = (
   context: CanvasRenderingContext2D,
   weight: 400 | 500 | 600 | 700,
   size: number,
   style: 'normal' | 'italic' = 'normal',
 ) => {
-  context.font = `${style} ${weight} ${size}px ${fontFamily}`
+  const font = exportFont(weight, size, style)
+
+  context.font = font
+
+  return font
 }
 
 const drawRoundedRect = (
@@ -534,8 +445,6 @@ const createCanvas = (width: number, height: number) => {
   }
 }
 
-const createMeasurementContext = () => createCanvas(1, 1).context
-
 const toBlob = (canvas: HTMLCanvasElement) =>
   new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -560,7 +469,6 @@ export const renderTemplatePng = async ({
 }: ExportRenderInput): Promise<ExportRenderResult> => {
   const palette = exportPaletteByTheme[theme]
   const fonts = createFontConfig()
-  const measureContext = createMeasurementContext()
   const generatedLabel = new Date().toISOString().slice(0, 10)
   const columns = layout === 'landscape' ? CATEGORIES_PER_ROW_LANDSCAPE : CATEGORIES_PER_ROW_PORTRAIT
   const width = SIDE_MARGIN * 2 + CARD_WIDTH * columns + GRID_GAP * (columns - 1)
@@ -569,32 +477,46 @@ export const renderTemplatePng = async ({
   const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
   const cardHeight = COVER_HEIGHT + CARD_PADDING * 2
   const gridHeight = rows * cardHeight + (rows - 1) * GRID_GAP
+  const headerTextX = SIDE_MARGIN + 24
   const headerTextWidth = width - SIDE_MARGIN * 2 - 40
   const headerTitleLineHeight = Math.round(fonts.templateTitle * 1.15)
   const headerDescriptionLineHeight = Math.round(fonts.body * 1.35)
   const headerMetaLineHeight = Math.round(fonts.headerMeta * 1.3)
-  const headerTitleLines = countWrappedTextLines(measureContext, template.name, headerTextWidth, 2)
-  const headerDescriptionLines =
-    template.description.trim().length > 0
-      ? countWrappedTextLines(measureContext, template.description, headerTextWidth, 2)
-      : 0
+  // Each header font is measured with and drawn with this very string.
+  const headerTitleFont = exportFont(700, fonts.templateTitle)
+  const headerDescriptionFont = exportFont(500, fonts.body)
+  const headerMetaFont = exportFont(500, fonts.headerMeta)
+  const headerTitleLines = layoutTextLines(template.name, headerTitleFont, headerTextWidth, 2)
+  const headerDescriptionLines = layoutTextLines(
+    template.description,
+    headerDescriptionFont,
+    headerTextWidth,
+    2,
+  )
   const authorLabel = author.trim() || 'Anonymous'
+  const authorPrefix = 'Author: '
+  const authorPrefixWidth = measureAdvanceWidth(authorPrefix, headerMetaFont)
+  const badgeIconSize = 26
+  const badgeIconSpacing = 10
+  const badgeOffset = authorPrefixWidth + badgeIconSize + badgeIconSpacing
+  const showAuthorBadge = !hideAuthor && showAniListBadge
+  const summaryMetaText = `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`
+  // With the badge the author prefix is drawn separately, before the badge icon.
   const headerMetaText = hideAuthor
-    ? `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`
-    : `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`
-  const headerMetaTextWidth =
-    hideAuthor || !showAniListBadge
-      ? headerTextWidth
-      : headerTextWidth - (measureContext.measureText('Author: ').width + 26 + 10)
-  const headerMetaLines = countWrappedTextLines(measureContext, headerMetaText, headerMetaTextWidth, 2)
+    ? summaryMetaText
+    : `${showAuthorBadge ? '' : authorPrefix}${authorLabel}  •  ${summaryMetaText}`
+  const headerMetaTextWidth = showAuthorBadge ? headerTextWidth - badgeOffset : headerTextWidth
+  const headerMetaLines = layoutTextLines(headerMetaText, headerMetaFont, headerMetaTextWidth, 2)
   const headerTopPadding = 32
   const headerBottomPadding = 24
   const headerHeight =
     headerTopPadding
-    + headerTitleLineHeight * headerTitleLines
-    + (headerDescriptionLines > 0 ? 10 + headerDescriptionLineHeight * headerDescriptionLines : 0)
+    + headerTitleLineHeight * headerTitleLines.length
+    + (headerDescriptionLines.length > 0
+      ? 10 + headerDescriptionLineHeight * headerDescriptionLines.length
+      : 0)
     + 12
-    + headerMetaLineHeight * headerMetaLines
+    + headerMetaLineHeight * headerMetaLines.length
     + headerBottomPadding
   const height = SIDE_MARGIN + headerHeight + 28 + gridHeight + footerHeight + SIDE_MARGIN
   const { canvas, context } = createCanvas(width, height)
@@ -606,92 +528,52 @@ export const renderTemplatePng = async ({
   fillRoundedRect(context, SIDE_MARGIN, SIDE_MARGIN, width - SIDE_MARGIN * 2, headerHeight, 36, palette.surface)
   strokeRoundedRect(context, SIDE_MARGIN, SIDE_MARGIN, width - SIDE_MARGIN * 2, headerHeight, 36, palette.border, 2)
 
-  const headerTextX = SIDE_MARGIN + 24
   const headerTitleY = SIDE_MARGIN + 32
 
   context.textBaseline = 'top'
-  setCanvasFont(context, 700, fonts.templateTitle)
-  context.fillStyle = palette.text
-  const titleBottomY = drawWrappedText(
+  context.font = headerTitleFont
+  const titleBottomY = drawTextLines(
     context,
-    template.name,
+    headerTitleLines,
     headerTextX,
     headerTitleY,
-    headerTextWidth,
     headerTitleLineHeight,
-    2,
     palette.text,
   )
 
   let descriptionBottomY = titleBottomY
 
-  if (template.description.trim().length > 0) {
-    setCanvasFont(context, 500, fonts.body)
-    context.fillStyle = palette.muted
-    descriptionBottomY = drawWrappedText(
+  if (headerDescriptionLines.length > 0) {
+    context.font = headerDescriptionFont
+    descriptionBottomY = drawTextLines(
       context,
-      template.description,
+      headerDescriptionLines,
       headerTextX,
       titleBottomY + 10,
-      headerTextWidth,
       headerDescriptionLineHeight,
-      2,
       palette.muted,
     )
   }
 
-  setCanvasFont(context, 500, fonts.headerMeta)
+  context.font = headerMetaFont
   context.fillStyle = palette.muted
   const metaTopY = descriptionBottomY + 12
+  let metaTextX = headerTextX
 
-  if (hideAuthor) {
-    drawWrappedText(
-      context,
-      `Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-      headerTextX,
-      metaTopY,
-      headerTextWidth,
-      headerMetaLineHeight,
-      2,
-      palette.muted,
-    )
-  } else if (showAniListBadge) {
-    const authorPrefix = 'Author: '
-    const iconSize = 26
-    const iconSpacing = 10
-    const iconY = metaTopY + Math.round((fonts.headerMeta - iconSize) / 2)
+  if (showAuthorBadge) {
+    const iconX = headerTextX + authorPrefixWidth
+    const iconY = metaTopY + Math.round((fonts.headerMeta - badgeIconSize) / 2)
 
     context.fillText(authorPrefix, headerTextX, metaTopY)
 
-    const prefixWidth = context.measureText(authorPrefix).width
-    const iconX = headerTextX + prefixWidth
-    const textX = iconX + iconSize + iconSpacing
-
     if (aniListBadgeIcon) {
-      drawAniListBadgeIcon(context, iconX, iconY, iconSize, aniListBadgeIcon)
+      drawAniListBadgeIcon(context, iconX, iconY, badgeIconSize, aniListBadgeIcon)
     }
-    drawWrappedText(
-      context,
-      `${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-      textX,
-      metaTopY,
-      headerTextWidth - (textX - headerTextX),
-      headerMetaLineHeight,
-      2,
-      palette.muted,
-    )
-  } else {
-    drawWrappedText(
-      context,
-      `Author: ${authorLabel}  •  Categories: ${filledSelections}/${template.categories.length}  •  ${generatedLabel}`,
-      headerTextX,
-      metaTopY,
-      headerTextWidth,
-      headerMetaLineHeight,
-      2,
-      palette.muted,
-    )
+
+    metaTextX = iconX + badgeIconSize + badgeIconSpacing
   }
+
+  drawTextLines(context, headerMetaLines, metaTextX, metaTopY, headerMetaLineHeight, palette.muted)
 
   context.textBaseline = 'alphabetic'
 
@@ -717,16 +599,19 @@ export const renderTemplatePng = async ({
     setCanvasFont(context, 700, fonts.categoryTitle)
     context.fillStyle = palette.text
     context.fillText('No categories in this template yet.', SIDE_MARGIN + 28, emptyY + 64)
-    setCanvasFont(context, 500, fonts.body)
-    context.fillStyle = palette.muted
-    drawWrappedText(
+    const emptyHintFont = setCanvasFont(context, 500, fonts.body)
+
+    drawTextLines(
       context,
-      'Add category cards in the app before exporting to generate a filled grid image.',
+      layoutTextLines(
+        'Add category cards in the app before exporting to generate a filled grid image.',
+        emptyHintFont,
+        width - SIDE_MARGIN * 2 - 56,
+        3,
+      ),
       SIDE_MARGIN + 28,
       emptyY + 106,
-      width - SIDE_MARGIN * 2 - 56,
       Math.round(fonts.body * 1.45),
-      3,
       palette.muted,
     )
   }
@@ -747,9 +632,6 @@ export const renderTemplatePng = async ({
         ? resolveSongTitle(selection.song, titleLanguage).primary
         : resolveAnimeTitle(selection.title, titleLanguage)
       : ''
-
-    setCanvasFont(context, 500, fonts.meta)
-    context.fillStyle = palette.muted
 
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
@@ -782,38 +664,38 @@ export const renderTemplatePng = async ({
       )
     }
 
-    setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
-    context.fillStyle = palette.text
-    let prevLineY = drawWrappedText(
+    const categoryTitleFont = setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
+    let prevLineY = drawTextLines(
       context,
-      category.name,
+      layoutTextLines(category.name, categoryTitleFont, textWidth, 3),
       textX,
       y + CARD_PADDING + 22,
-      textWidth,
       Math.round(fonts.categoryTitle * 1.15),
-      3,
       palette.text,
     )
 
-    setCanvasFont(context, 700, fonts.body)
-    context.fillStyle = palette.text
-    prevLineY = drawWrappedText(
+    const selectionTitleFont = setCanvasFont(context, 700, fonts.body)
+
+    prevLineY = drawTextLines(
       context,
-      selectionTitle,
+      layoutTextLines(
+        selectionTitle,
+        selectionTitleFont,
+        textWidth,
+        selection?.kind === 'song' ? 2 : 3,
+      ),
       textX,
       prevLineY + CARD_TEXT_GAP,
-      textWidth,
       Math.round(fonts.body * 1.28),
-      selection?.kind === 'song' ? 2 : 3,
       palette.text,
     )
 
-    setCanvasFont(context, 500, fonts.meta)
-    context.fillStyle = palette.muted
+    const metaFont = setCanvasFont(context, 500, fonts.meta)
+
     if (selection?.kind === 'song') {
       const artist = selection.song.artist.trim()
       const sourceLines = formatSongSourceMetaLines(
-        context,
+        metaFont,
         resolveAnimeTitle(selection.animeTitle, titleLanguage),
         selection.song.slug,
         selection.song.episodes ?? null,
@@ -821,40 +703,36 @@ export const renderTemplatePng = async ({
       )
 
       if (artist) {
-        prevLineY = drawWrappedText(
+        prevLineY = drawTextLines(
           context,
-          `by ${artist}`,
+          layoutTextLines(`by ${artist}`, metaFont, textWidth, 2),
           textX,
           prevLineY + CARD_TEXT_GAP,
-          textWidth,
           Math.round(fonts.meta * 1.3),
-          2,
           palette.muted,
         )
       }
 
-      context.save()
-      context.fillStyle = palette.muted
-
-      for (const [lineIndex, line] of sourceLines.entries()) {
-        context.fillText(line, textX, prevLineY + CARD_TEXT_GAP + lineIndex * Math.round(fonts.meta * 1.3))
-      }
-
-      context.restore()
+      drawTextLines(
+        context,
+        sourceLines,
+        textX,
+        prevLineY + CARD_TEXT_GAP,
+        Math.round(fonts.meta * 1.3),
+        palette.muted,
+      )
     } else {
       const metaText = selection
         ? [selection.seasonYear ?? null, selection.format ?? null]
             .filter((value): value is number | AnimeFormat => value !== null)
             .join(' • ')
         : ''
-      drawWrappedText(
+      drawTextLines(
         context,
-        metaText,
+        layoutTextLines(metaText, metaFont, textWidth, 2),
         textX,
         prevLineY + CARD_TEXT_GAP,
-        textWidth,
         Math.round(fonts.meta * 1.3),
-        2,
         palette.muted,
       )
     }
