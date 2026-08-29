@@ -39,9 +39,13 @@ Two layouts are available:
 The dialog preselects landscape for templates with twelve or more categories,
 portrait otherwise.
 The height grows with the number of rows.
-Card size,
-cover size,
-and font sizes are code-level constants in `src/lib/export-image.ts`.
+The card width,
+the cover size,
+and the font sizes are code-level constants in `src/lib/export-image.ts`,
+but the card height is not:
+a grid row grows taller when a category name in it needs more room,
+and every card in that row shares the taller height,
+so the grid stays aligned.
 
 ## Card Text Allocation
 

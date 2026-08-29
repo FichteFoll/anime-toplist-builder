@@ -1,5 +1,11 @@
 import { appConfig } from '@/config/app'
-import { resolveAnimeTitle } from '@/lib/anime-title'
+import {
+  allocateCardTextBlocks,
+  buildCardTextBlocks,
+  CARD_TEXT_TOP_OFFSET,
+  measureRequiredTextHeight,
+  resolveRowHeights,
+} from '@/lib/export-card-layout'
 import {
   exportFont,
   FONT_SIZE_BODY,
@@ -8,10 +14,9 @@ import {
   FONT_SIZE_META,
   FONT_SIZE_TEMPLATE_TITLE,
 } from '@/lib/export-fonts'
-import { layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
-import { formatSongEpisodesHint, getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
+import { layoutTextLines, measureAdvanceWidth } from '@/lib/export-text'
+import { getSelectionCoverImage } from '@/lib/song-selection'
 import type {
-  AnimeFormat,
   AnimeTitleLanguage,
   CategorySelectionMap,
   ExportImageLayout,
@@ -32,25 +37,25 @@ export const COVER_HEIGHT = 183
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
 export const CATEGORIES_PER_ROW_LANDSCAPE = 5
 
-export const formatSongSourceMetaLines = (
-  font: string,
-  animeName: string,
-  slug: string,
-  episodes: string | null,
-  maxWidth: number,
-) => {
-  const episodesHint = formatSongEpisodesHint(episodes)
-  const suffix = episodesHint ? `(${slug}, ${episodesHint})` : `(${slug})`
-  const fullLine = `from ${animeName} ${suffix}`
+const EMPTY_STATE_HEIGHT = 220
 
-  if (measureAdvanceWidth(fullLine, font) <= maxWidth) {
-    return [fullLine]
+/** Row `y` offsets relative to the grid top, and the total grid height. */
+export const resolveGridRowOffsets = (
+  rowHeights: Array<number>,
+  gap: number,
+): { offsets: Array<number>, height: number } => {
+  const offsets: Array<number> = []
+  let cursor = 0
+
+  for (const rowHeight of rowHeights) {
+    offsets.push(cursor)
+    cursor += rowHeight + gap
   }
 
-  const labelWidth = measureAdvanceWidth('from ', font)
-  const sourceName = truncateToWidth(animeName, font, Math.max(90, maxWidth - labelWidth))
-
-  return [`from ${sourceName}`, truncateToWidth(suffix, font, maxWidth)]
+  return {
+    offsets,
+    height: Math.max(0, cursor - gap),
+  }
 }
 
 interface ExportPalette {
@@ -463,9 +468,30 @@ export const renderTemplatePng = async ({
   const width = SIDE_MARGIN * 2 + CARD_WIDTH * columns + GRID_GAP * (columns - 1)
   const footerHeight = 56
   const filledSelections = template.categories.filter((category) => selectionByCategory[category.id]).length
-  const rows = Math.max(1, Math.ceil(Math.max(template.categories.length, 1) / columns))
-  const cardHeight = COVER_HEIGHT + CARD_PADDING * 2
-  const gridHeight = rows * cardHeight + (rows - 1) * GRID_GAP
+  const cardTextX = SIDE_MARGIN + CARD_PADDING + COVER_WIDTH + 14
+  const cardTextWidth = CARD_WIDTH - (cardTextX - SIDE_MARGIN) - CARD_PADDING
+  const cardTextBlocks = template.categories.map((category) =>
+    buildCardTextBlocks({
+      categoryName: category.name,
+      selection: selectionByCategory[category.id] ?? null,
+      titleLanguage,
+      maxWidth: cardTextWidth,
+    }),
+  )
+  // A card never shrinks below its cover, but it grows to hold the text it owes.
+  const minCardHeight = COVER_HEIGHT + CARD_PADDING * 2
+  const rowHeights = resolveRowHeights(
+    cardTextBlocks.map(
+      (blocks) =>
+        CARD_PADDING * 2
+        + CARD_TEXT_TOP_OFFSET
+        + measureRequiredTextHeight(blocks, CARD_TEXT_GAP),
+    ),
+    columns,
+    minCardHeight,
+  )
+  const rowGrid = resolveGridRowOffsets(rowHeights, GRID_GAP)
+  const gridHeight = template.categories.length === 0 ? EMPTY_STATE_HEIGHT : rowGrid.height
   const headerTextX = SIDE_MARGIN + 24
   const headerTextWidth = width - SIDE_MARGIN * 2 - 40
   const headerTitleLineHeight = Math.round(fonts.templateTitle * 1.15)
@@ -507,7 +533,8 @@ export const renderTemplatePng = async ({
     + 12
     + headerMetaLineHeight * headerMetaLines.length
     + headerBottomPadding
-  const height = SIDE_MARGIN + headerHeight + 28 + gridHeight + footerHeight + SIDE_MARGIN
+  const gridTop = SIDE_MARGIN + headerHeight + 28
+  const height = gridTop + gridHeight + footerHeight + SIDE_MARGIN
   const { canvas, context } = createCanvas(width, height)
   const aniListBadgeIcon = showAniListBadge ? await loadImage(anilistBadgeSvgDataUri) : null
 
@@ -581,10 +608,19 @@ export const renderTemplatePng = async ({
   const imagesByCategoryId = new Map(imageEntries)
 
   if (template.categories.length === 0) {
-    const emptyY = SIDE_MARGIN + headerHeight + 28
+    const emptyY = gridTop
 
-    fillRoundedRect(context, SIDE_MARGIN, emptyY, width - SIDE_MARGIN * 2, 220, 32, palette.surface)
-    strokeRoundedRect(context, SIDE_MARGIN, emptyY, width - SIDE_MARGIN * 2, 220, 32, palette.border, 2)
+    fillRoundedRect(context, SIDE_MARGIN, emptyY, width - SIDE_MARGIN * 2, EMPTY_STATE_HEIGHT, 32, palette.surface)
+    strokeRoundedRect(
+      context,
+      SIDE_MARGIN,
+      emptyY,
+      width - SIDE_MARGIN * 2,
+      EMPTY_STATE_HEIGHT,
+      32,
+      palette.border,
+      2,
+    )
     setCanvasFont(context, 700, fonts.categoryTitle)
     context.fillStyle = palette.text
     context.fillText('No categories in this template yet.', SIDE_MARGIN + 28, emptyY + 64)
@@ -609,18 +645,13 @@ export const renderTemplatePng = async ({
     const row = Math.floor(index / columns)
     const column = index % columns
     const x = SIDE_MARGIN + column * (CARD_WIDTH + GRID_GAP)
-    const y = SIDE_MARGIN + headerHeight + 28 + row * (cardHeight + GRID_GAP)
+    const y = gridTop + rowGrid.offsets[row]
+    const cardHeight = rowHeights[row]
     const selection = selectionByCategory[category.id] ?? null
     const image = imagesByCategoryId.get(category.id) ?? null
     const coverX = x + CARD_PADDING
     const coverY = y + CARD_PADDING
     const textX = coverX + COVER_WIDTH + 14
-    const textWidth = CARD_WIDTH - (textX - x) - CARD_PADDING
-    const selectionTitle = selection
-      ? selection.kind === 'song'
-        ? resolveSongTitle(selection.song, titleLanguage).primary
-        : resolveAnimeTitle(selection.title, titleLanguage)
-      : ''
 
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
@@ -653,77 +684,27 @@ export const renderTemplatePng = async ({
       )
     }
 
-    const categoryTitleFont = setCanvasFont(context, 500, fonts.categoryTitle, 'italic')
-    let prevLineY = drawTextLines(
-      context,
-      layoutTextLines(category.name, categoryTitleFont, textWidth, 3),
-      textX,
-      y + CARD_PADDING + 22,
-      Math.round(fonts.categoryTitle * 1.15),
-      palette.text,
+    const availableTextHeight = cardHeight - CARD_PADDING * 2 - CARD_TEXT_TOP_OFFSET
+    const allocatedBlocks = allocateCardTextBlocks(
+      cardTextBlocks[index],
+      availableTextHeight,
+      CARD_TEXT_GAP,
     )
+    let cursorY = y + CARD_PADDING + CARD_TEXT_TOP_OFFSET
 
-    const selectionTitleFont = setCanvasFont(context, 700, fonts.body)
-
-    prevLineY = drawTextLines(
-      context,
-      layoutTextLines(
-        selectionTitle,
-        selectionTitleFont,
-        textWidth,
-        selection?.kind === 'song' ? 2 : 3,
-      ),
-      textX,
-      prevLineY + CARD_TEXT_GAP,
-      Math.round(fonts.body * 1.28),
-      palette.text,
-    )
-
-    const metaFont = setCanvasFont(context, 500, fonts.meta)
-
-    if (selection?.kind === 'song') {
-      const artist = selection.song.artist.trim()
-      const sourceLines = formatSongSourceMetaLines(
-        metaFont,
-        resolveAnimeTitle(selection.animeTitle, titleLanguage),
-        selection.song.slug,
-        selection.song.episodes ?? null,
-        textWidth,
-      )
-
-      if (artist) {
-        prevLineY = drawTextLines(
+    for (const block of allocatedBlocks) {
+      // `drawTextLines` restores the fill style, so only the font has to be set.
+      context.font = block.font
+      cursorY =
+        drawTextLines(
           context,
-          layoutTextLines(`by ${artist}`, metaFont, textWidth, 2),
+          block.lines,
           textX,
-          prevLineY + CARD_TEXT_GAP,
-          Math.round(fonts.meta * 1.3),
-          palette.muted,
+          cursorY,
+          block.lineHeight,
+          block.tone === 'muted' ? palette.muted : palette.text,
         )
-      }
-
-      drawTextLines(
-        context,
-        sourceLines,
-        textX,
-        prevLineY + CARD_TEXT_GAP,
-        Math.round(fonts.meta * 1.3),
-        palette.muted,
-      )
-    } else {
-      const metaText = selection
-        ? [selection.seasonYear ?? null, selection.format ?? null]
-            .filter((value): value is number | AnimeFormat => value !== null)
-            .join(' • ')
-        : ''
-      drawTextLines(
-        context,
-        layoutTextLines(metaText, metaFont, textWidth, 2),
-        textX,
-        prevLineY + CARD_TEXT_GAP,
-        Math.round(fonts.meta * 1.3),
-        palette.muted,
-      )
+        + CARD_TEXT_GAP
     }
   })
 

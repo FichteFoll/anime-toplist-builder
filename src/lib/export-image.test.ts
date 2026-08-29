@@ -1,12 +1,10 @@
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { formatSongSourceMetaLines } from '@/lib/export-image'
+import { resolveRowHeights } from '@/lib/export-card-layout'
+import { GRID_GAP, resolveGridRowOffsets } from '@/lib/export-image'
 import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 import { AnimeTitleLanguage, ThemeType } from '@/types'
-
-// The stub measures 10px per character, so widths below are character counts.
-const font = 'normal 500 16px sans-serif'
 
 beforeAll(() => {
   installStubTextMeasurement()
@@ -16,24 +14,19 @@ afterEach(() => {
   resetStubTextMeasurement()
 })
 
-describe('formatSongSourceMetaLines', () => {
-  it('splits long song source info across two lines', () => {
-    expect(formatSongSourceMetaLines(font, 'Eyeshield 21', 'ED6', '117-126', 220)).toEqual([
-      'from Eyeshield 21',
-      '(ED6, eps 117-126)',
-    ])
+describe('resolveGridRowOffsets', () => {
+  it('stacks rows on the cumulative height of the rows above them', () => {
+    const rowHeights = resolveRowHeights([223, 300, 223, 260], 2, 223)
+
+    expect(rowHeights).toEqual([300, 260])
+    expect(resolveGridRowOffsets(rowHeights, GRID_GAP)).toEqual({
+      offsets: [0, 300 + GRID_GAP],
+      height: 300 + GRID_GAP + 260,
+    })
   })
 
-  it('keeps short song source info on one line', () => {
-    expect(formatSongSourceMetaLines(font, 'Cowboy Bebop', 'OP1', '1-25', 360)).toEqual([
-      'from Cowboy Bebop (OP1, eps 1-25)',
-    ])
-  })
-
-  it('truncates only the anime name and keeps the full slug suffix', () => {
-    expect(
-      formatSongSourceMetaLines(font, 'A Very Long Anime Name That Never Ends', 'OP1', '1-25', 220),
-    ).toEqual(['from A Very Long An...', '(OP1, eps 1-25)'])
+  it('reports no height for an empty grid', () => {
+    expect(resolveGridRowOffsets([], GRID_GAP)).toEqual({ offsets: [], height: 0 })
   })
 })
 
