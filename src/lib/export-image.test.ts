@@ -1,18 +1,9 @@
-import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { resolveRowHeights } from '@/lib/export-card-layout'
 import { GRID_GAP, resolveGridRowOffsets } from '@/lib/export-image'
-import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 import { AnimeTitleLanguage, ThemeType } from '@/types'
-
-beforeAll(() => {
-  installStubTextMeasurement()
-})
-
-afterEach(() => {
-  resetStubTextMeasurement()
-})
 
 describe('resolveGridRowOffsets', () => {
   it('stacks rows on the cumulative height of the rows above them', () => {

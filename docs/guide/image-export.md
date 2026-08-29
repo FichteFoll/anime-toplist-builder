@@ -13,15 +13,19 @@ Nothing is sent to a server.
   unless hidden,
 - one card per category,
   in the order shown in the app,
-- for anime selections the cover and the title in the configured title language,
+- the category name on every card,
+  above the selection it holds,
+- for anime selections the cover,
+  the title in the configured title language,
+  and the year and format,
+  each as its own text block,
 - for song selections the cover,
-  and the category name,
-  song title,
-  artist,
-  and the anime the song is from with its slug and episode range
-  as separate text blocks,
-  with the number of lines a block gets depending on how much room
-  the card has,
+  the song title,
+  the artist,
+  and the anime the song is from with its slug and episode range,
+  each as its own text block,
+- the number of lines a card's text block gets
+  depends on how much room the card has,
 - a watermark line crediting the site,
   which cannot be disabled,
 - an opaque background and colors taken from the currently active theme,
@@ -39,9 +43,9 @@ Two layouts are available:
 The dialog preselects landscape for templates with twelve or more categories,
 portrait otherwise.
 The height grows with the number of rows.
-The card width,
-the cover size,
-and the font sizes are code-level constants in `src/lib/export-image.ts`,
+The card width and the cover size are code-level constants
+in `src/lib/export-image.ts`,
+and the font sizes are constants in `src/lib/export-fonts.ts`,
 but the card height is not:
 a grid row grows taller when a category name in it needs more room,
 and every card in that row shares the taller height,
@@ -53,7 +57,9 @@ Each card's text blocks are measured,
 and the vertical space the card offers is handed out between them
 rather than capping every block at a fixed number of lines.
 
-- The category name is always spelled out in full.
+- The category name is always spelled out in full,
+  up to a ceiling of six lines,
+  beyond which it ends with an ellipsis like any other text.
 - For a song card,
   the song title gets at least one line,
   and the block naming the anime the song is from,
@@ -118,7 +124,7 @@ The dialog explains that copying works through the browser's own
 - Long song text is only truncated
   once a block has been given every line the card can spare it,
   and the song slug always keeps its own last line,
-  never truncated away.
+  rather than being dropped to make room for the anime name.
 - If rendering fails,
   the dialog shows the error and discards the preview,
   so the download button stays disabled until a render succeeds.
