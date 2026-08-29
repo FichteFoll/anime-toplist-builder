@@ -1,49 +1,23 @@
 import { describe, expect, it } from 'vitest'
 
-import { countWrappedTextLines, formatSongSourceMetaLines } from '@/lib/export-image'
+import { resolveRowHeights } from '@/lib/export-card-layout'
+import { GRID_GAP, resolveGridRowOffsets } from '@/lib/export-image'
 import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
 import { AnimeTitleLanguage, ThemeType } from '@/types'
 
-const createContext = (measureWidth: (text: string) => number) =>
-  ({
-    measureText: (text: string) => ({ width: measureWidth(text) }),
-  }) as CanvasRenderingContext2D
+describe('resolveGridRowOffsets', () => {
+  it('stacks rows on the cumulative height of the rows above them', () => {
+    const rowHeights = resolveRowHeights([223, 300, 223, 260], 2, 223)
 
-describe('countWrappedTextLines', () => {
-  it('counts a single fitting line', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(countWrappedTextLines(context, 'Short title', 200, 2)).toBe(1)
+    expect(rowHeights).toEqual([300, 260])
+    expect(resolveGridRowOffsets(rowHeights, GRID_GAP)).toEqual({
+      offsets: [0, 300 + GRID_GAP],
+      height: 300 + GRID_GAP + 260,
+    })
   })
 
-  it('counts wrapped lines', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(countWrappedTextLines(context, 'One two three four', 130, 3)).toBe(2)
-  })
-
-  it('caps the count at the max line limit', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(countWrappedTextLines(context, 'One two three four five six', 70, 2)).toBe(2)
-  })
-})
-
-describe('formatSongSourceMetaLines', () => {
-  it('splits long song source info across two lines', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(
-      formatSongSourceMetaLines(context, 'Eyeshield 21', 'ED6', '117-126', 220),
-    ).toEqual(['from Eyeshield 21', '(ED6, eps 117-126)'])
-  })
-
-  it('keeps short song source info on one line', () => {
-    const context = createContext((text) => text.length * 10)
-
-    expect(formatSongSourceMetaLines(context, 'Cowboy Bebop', 'OP1', '1-25', 360)).toEqual([
-      'from Cowboy Bebop (OP1, eps 1-25)',
-    ])
+  it('reports no height for an empty grid', () => {
+    expect(resolveGridRowOffsets([], GRID_GAP)).toEqual({ offsets: [], height: 0 })
   })
 })
 

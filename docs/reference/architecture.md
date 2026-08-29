@@ -49,6 +49,11 @@ Contributor conventions and coding rules stay in [`AGENTS.md`](../../AGENTS.md).
 - `src/lib/export-image.ts`:
   browser-side PNG rendering,
   including layout constants and truncation rules.
+- `src/lib/export-text.ts`:
+  pretext-backed text measurement,
+  wrapping,
+  and truncation helpers,
+  independent of a canvas context.
 - `src/lib/anilist-auth.ts`:
   OAuth URL building,
   callback parsing,
