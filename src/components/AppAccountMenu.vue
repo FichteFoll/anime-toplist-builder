@@ -44,6 +44,10 @@ const themeLabels: Record<ThemePreference, string> = {
   [ThemePreference.Dark]: 'Dark',
 }
 
+const emit = defineEmits<{
+  'show-changelog': []
+}>()
+
 const triggerLabel = computed(() => aniListAuthStore.username ?? 'Settings')
 </script>
 
@@ -81,6 +85,15 @@ const triggerLabel = computed(() => aniListAuthStore.username ?? 'Settings')
         <DropdownMenuLabel class="px-2 py-1 text-xs font-medium uppercase tracking-[0.25em] text-app-muted">
           Account and preferences
         </DropdownMenuLabel>
+
+        <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
+
+        <DropdownMenuItem
+          class="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm text-app-text outline-none transition hover:bg-app-elevated/70 data-[highlighted]:bg-app-elevated/70"
+          @select="emit('show-changelog')"
+        >
+          <span>What's new</span>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator class="my-2 h-px bg-app-border/70" />
 

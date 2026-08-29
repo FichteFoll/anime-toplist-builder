@@ -55,6 +55,27 @@ describe('AppAccountMenu', () => {
     wrapper.unmount()
   })
 
+  it('emits show-changelog when the What\'s new item is selected', async () => {
+    const wrapper = mount(AccountMenuHost, { attachTo: document.body })
+    const menu = wrapper.findComponent(AppAccountMenu)
+
+    await wrapper.find('button').trigger('click')
+    await nextTick()
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+    const whatsNewItem = items.find((item) => item.textContent?.includes('What\'s new'))
+
+    expect(whatsNewItem).toBeDefined()
+
+    whatsNewItem?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await nextTick()
+
+    expect(menu.emitted('show-changelog')).toHaveLength(1)
+
+    wrapper.unmount()
+  })
+
   it('does not compensate the scrollbar on the body while open', async () => {
     const wrapper = mount(AccountMenuHost, { attachTo: document.body })
 
