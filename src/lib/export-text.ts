@@ -1,4 +1,4 @@
-import { layoutWithLines, measureNaturalWidth, prepareWithSegments } from '@chenglou/pretext'
+import { layoutWithLines, measureLineStats, measureNaturalWidth, prepareWithSegments } from '@chenglou/pretext'
 
 const ellipsis = '...'
 
@@ -75,4 +75,14 @@ export const layoutTextLines = (
   const rest = wrapped.slice(lineBudget - 1).join(' ')
 
   return [...kept, truncateToWidth(rest, font, maxWidth)]
+}
+
+/** Counts the lines `text` naturally needs at `maxWidth`, without materializing them. */
+export const countTextLines = (text: string, font: string, maxWidth: number): number => {
+  if (text.trim().length === 0) {
+    return 0
+  }
+
+  // The preparation matches `layoutTextLines`, so the count agrees with the wrap.
+  return measureLineStats(prepareWithSegments(text, font), maxWidth).lineCount
 }

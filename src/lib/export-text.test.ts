@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
+import { countTextLines, layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
 import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
 
 const font = 'normal 400 16px sans-serif'
@@ -75,6 +75,27 @@ describe('layoutTextLines', () => {
       expect(lines).toHaveLength(1)
       expect(lines[0]).toMatch(/\.\.\.$/)
     }
+  })
+})
+
+describe('countTextLines', () => {
+  it('counts the lines the text wraps into', () => {
+    expect(countTextLines('One two three four', font, 130)).toBe(2)
+  })
+
+  it('counts a fitting text as one line', () => {
+    expect(countTextLines('Short title', font, 200)).toBe(1)
+  })
+
+  it('counts no lines for empty or blank text', () => {
+    expect(countTextLines('', font, 200)).toBe(0)
+    expect(countTextLines('   ', font, 200)).toBe(0)
+  })
+
+  it('agrees with the line count `layoutTextLines` produces', () => {
+    const text = 'Supercalifragilisticexpialidocious tail'
+
+    expect(countTextLines(text, font, 100)).toBe(layoutTextLines(text, font, 100, 99).length)
   })
 })
 

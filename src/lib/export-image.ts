@@ -1,5 +1,13 @@
 import { appConfig } from '@/config/app'
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import {
+  exportFont,
+  FONT_SIZE_BODY,
+  FONT_SIZE_CATEGORY_TITLE,
+  FONT_SIZE_HEADER_META,
+  FONT_SIZE_META,
+  FONT_SIZE_TEMPLATE_TITLE,
+} from '@/lib/export-fonts'
 import { layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
 import { formatSongEpisodesHint, getSelectionCoverImage, resolveSongTitle } from '@/lib/song-selection'
 import type {
@@ -23,11 +31,6 @@ export const COVER_WIDTH = 126
 export const COVER_HEIGHT = 183
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
 export const CATEGORIES_PER_ROW_LANDSCAPE = 5
-export const FONT_SIZE_TEMPLATE_TITLE = 44
-export const FONT_SIZE_HEADER_META = 22
-export const FONT_SIZE_CATEGORY_TITLE = 20
-export const FONT_SIZE_BODY = 18
-export const FONT_SIZE_META = 16
 
 export const formatSongSourceMetaLines = (
   font: string,
@@ -109,8 +112,6 @@ const exportPaletteByTheme: Record<ExportTheme, ExportPalette> = {
   },
 }
 
-const fontFamily = "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-
 const anilistBadgeSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>AniList logo</title><desc>Anime and manga tracking website</desc><path fill="#1e2630" d="M0 0h512v512H0"/><path fill="#02a9ff" d="M321.92 323.27V136.6c0-10.698-5.887-16.602-16.558-16.602h-36.433c-10.672 0-16.561 5.904-16.561 16.602v88.651c0 2.497 23.996 14.089 24.623 16.541 18.282 71.61 3.972 128.92-13.359 131.6 28.337 1.405 31.455 15.064 10.348 5.731 3.229-38.209 15.828-38.134 52.049-1.406.31.317 7.427 15.282 7.87 15.282h85.545c10.672 0 16.558-5.9 16.558-16.6v-36.524c0-10.698-5.886-16.602-16.558-16.602z"/><path fill="#fefefe" d="M170.68 120 74.999 393h74.338l16.192-47.222h80.96L262.315 393h73.968l-95.314-273zm11.776 165.28 23.183-75.629 25.393 75.629z"/></svg>'
 
@@ -148,18 +149,6 @@ const createFontConfig = (): ExportFontConfig => ({
   body: FONT_SIZE_BODY,
   meta: FONT_SIZE_META,
 })
-
-/**
- * Builds the CSS font string for the export canvas.
- *
- * It stays deterministic per (weight, size, style) so that pretext, which
- * caches measurements keyed by the font string, keeps hitting its cache.
- */
-export const exportFont = (
-  weight: 400 | 500 | 600 | 700,
-  size: number,
-  style: 'normal' | 'italic' = 'normal',
-) => `${style} ${weight} ${size}px ${fontFamily}`
 
 /** Assigns the export font to `context` and returns it, for measuring with it. */
 const setCanvasFont = (
