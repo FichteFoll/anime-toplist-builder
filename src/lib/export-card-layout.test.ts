@@ -169,6 +169,29 @@ describe('allocateCardTextBlocks', () => {
     })
   })
 
+  it('keeps a multi-line category name in full in a tight card', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best opening songs from a long running mecha series',
+      selection: createSong({
+        title: 'Alpha Beta Gamma Delta Epsilon Zeta Eta Theta',
+        artist: 'Some Artist Name Here Extra',
+        animeName: 'Long Anime Title Words',
+      }),
+      titleLanguage,
+      maxWidth: 200,
+    })
+    const categoryLines = blocks.find((block) => block.key === 'category')?.naturalLines
+    const requiredHeight = measureRequiredTextHeight(blocks, blockGap)
+
+    expect(categoryLines).toBeGreaterThan(1)
+    expect(lineCountByKey(allocateCardTextBlocks(blocks, requiredHeight, blockGap))).toEqual({
+      category: categoryLines,
+      songTitle: 1,
+      artist: 1,
+      songSource: 2,
+    })
+  })
+
   it('grows the song title before the song source block', () => {
     const blocks = songBlocks()
 
