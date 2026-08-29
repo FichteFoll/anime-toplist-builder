@@ -11,7 +11,7 @@ stores call those helpers instead of parsing records themselves.
 | Key | Schema | Contents |
 | --- | --- | --- |
 | `anime-toplist-builder.templates.v1` | 1 | local templates, their origin, and the remote URL of URL imports |
-| `anime-toplist-builder.settings.v1` | 1 | theme, title language, last opened template, export author, hide-author flag |
+| `anime-toplist-builder.settings.v1` | 1 | theme, title language, last opened template, export author, hide-author flag, last shown changelog version |
 | `anime-toplist-builder.selections.v1` | 1 | selections per template id and category id |
 | `anime-toplist-builder.song-cache` | 2 | cached AnimeThemes responses per AniList anime id |
 
@@ -44,6 +44,8 @@ which is why an AniList session survives a reload but not a new tab.
   and entries whose kind no longer matches the category's entity kind are dropped.
 - Deleting a template deletes its selections.
 - Forking a template duplicates its selections to the fork.
+- The last shown changelog version is optional,
+  and its absence is what marks a first visit on this device.
 
 ## Song Cache
 

@@ -16,6 +16,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const lastOpenedTemplateId = ref<string | null>(null)
   const exportImageAuthor = ref('')
   const exportImageHideAuthor = ref(false)
+  const lastShownChangelogVersion = ref<string | null>(null)
   const isHydrated = ref(false)
 
   const persist = () => {
@@ -29,6 +30,7 @@ export const useSettingsStore = defineStore('settings', () => {
       lastOpenedTemplateId: lastOpenedTemplateId.value ?? undefined,
       exportImageAuthor: exportImageAuthor.value,
       exportImageHideAuthor: exportImageHideAuthor.value,
+      lastShownChangelogVersion: lastShownChangelogVersion.value ?? undefined,
     })
   }
 
@@ -44,6 +46,7 @@ export const useSettingsStore = defineStore('settings', () => {
     lastOpenedTemplateId.value = storedSettings.lastOpenedTemplateId ?? null
     exportImageAuthor.value = storedSettings.exportImageAuthor ?? ''
     exportImageHideAuthor.value = storedSettings.exportImageHideAuthor ?? false
+    lastShownChangelogVersion.value = storedSettings.lastShownChangelogVersion ?? null
     isHydrated.value = true
   }
 
@@ -72,12 +75,18 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  const setLastShownChangelogVersion = (value: string | null) => {
+    lastShownChangelogVersion.value = value
+    persist()
+  }
+
   return {
     themePreference,
     titleLanguage,
     lastOpenedTemplateId,
     exportImageAuthor,
     exportImageHideAuthor,
+    lastShownChangelogVersion,
     isHydrated,
     initialize,
     setThemePreference,
@@ -85,5 +94,6 @@ export const useSettingsStore = defineStore('settings', () => {
     setLastOpenedTemplateId,
     setExportImageAuthor,
     setExportImageHideAuthor,
+    setLastShownChangelogVersion,
   }
 })

@@ -6,9 +6,10 @@ import {
   DialogRoot,
   ToolbarRoot,
 } from 'reka-ui'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import AppAccountMenu from '@/components/AppAccountMenu.vue'
+import ChangelogDialog from '@/components/ChangelogDialog.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import ToolbarIconButton from '@/components/ToolbarIconButton.vue'
 import ImageExportDialog from '@/components/export/ImageExportDialog.vue'
@@ -18,10 +19,14 @@ import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import TemplateActionsMenu from '@/components/templates/TemplateActionsMenu.vue'
 import TemplateRemoteImportDialog from '@/components/templates/TemplateRemoteImportDialog.vue'
 import TemplateSwitcherMenu from '@/components/templates/TemplateSwitcherMenu.vue'
+import { changelogEntries, latestChangelogVersion } from '@/config/changelog'
+import { resolveChangelogAutoOpen } from '@/lib/changelog'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
+import { useSettingsStore } from '@/stores/settings'
 import { useTemplateManagement } from '@/components/templates/useTemplateManagement'
 
 const aniListAuthStore = useAniListAuthStore()
+const settingsStore = useSettingsStore()
 const {
   activeTemplate,
   activeTemplateSelections,
@@ -43,8 +48,41 @@ const {
 
 const isMobileMenuOpen = ref(false)
 const isImageExportOpen = ref(false)
+const isChangelogOpen = ref(false)
+
+// Captured before anything marks the changelog as seen,
+// so the `New` badges stay visible for the rest of the session.
+const seenChangelogVersion = ref(settingsStore.lastShownChangelogVersion)
 
 const activeTemplateName = computed(() => activeTemplate.value?.name ?? 'No active template')
+
+const recordChangelogVersion = (version: string | null) => {
+  if (version === null) {
+    return
+  }
+
+  settingsStore.setLastShownChangelogVersion(version)
+}
+
+const openChangelog = () => {
+  recordChangelogVersion(latestChangelogVersion)
+  isChangelogOpen.value = true
+}
+
+// Startup records through `resolveChangelogAutoOpen` alone,
+// so opening the popup automatically does not record a second time.
+onMounted(() => {
+  const { shouldOpen, versionToRecord } = resolveChangelogAutoOpen(
+    changelogEntries,
+    seenChangelogVersion.value,
+  )
+
+  recordChangelogVersion(versionToRecord)
+
+  if (shouldOpen) {
+    isChangelogOpen.value = true
+  }
+})
 </script>
 
 <template>
@@ -77,7 +115,7 @@ const activeTemplateName = computed(() => activeTemplate.value?.name ?? 'No acti
           <CameraIcon class="h-5 w-5" />
         </ToolbarIconButton>
 
-        <AppAccountMenu />
+        <AppAccountMenu @show-changelog="openChangelog" />
       </div>
 
       <div class="hidden items-center gap-3 lg:flex">
@@ -112,7 +150,7 @@ const activeTemplateName = computed(() => activeTemplate.value?.name ?? 'No acti
             <CameraIcon class="h-5 w-5" />
           </ToolbarIconButton>
 
-          <AppAccountMenu />
+          <AppAccountMenu @show-changelog="openChangelog" />
         </div>
       </div>
     </ToolbarRoot>
@@ -124,6 +162,12 @@ const activeTemplateName = computed(() => activeTemplate.value?.name ?? 'No acti
       :default-author="aniListAuthStore.username ?? undefined"
       :default-author-source="aniListAuthStore.isAuthenticated ? 'anilist' : 'manual'"
       hide-trigger
+    />
+
+    <ChangelogDialog
+      v-model:open="isChangelogOpen"
+      :entries="changelogEntries"
+      :seen-version="seenChangelogVersion"
     />
 
     <input

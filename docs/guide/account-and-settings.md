@@ -59,3 +59,15 @@ The menu holds:
 Both preferences are stored per device,
 together with the last opened template and the export author settings,
 see [persistence](../reference/persistence.md).
+
+### Changelog
+
+The menu also holds a `What's new` action
+that opens the changelog popup on demand.
+The popup also opens by itself
+when the app has entries newer than the version last shown on this device,
+and entries newer than that version are marked `New`.
+Nothing is shown on a first visit,
+because the app is used as-is then.
+The version last shown is stored per device,
+see [persistence](../reference/persistence.md).

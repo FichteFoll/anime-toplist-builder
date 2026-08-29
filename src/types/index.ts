@@ -1,4 +1,5 @@
 export * from './anilist'
+export * from './changelog'
 export * from './filters'
 export * from './selections'
 export * from './settings'
