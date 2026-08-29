@@ -154,6 +154,19 @@
 - `plans/` is untracked local scratch space for plans that are still open.
   Do not archive completed plans in the repository;
   fold what they established into `docs/` instead.
+- A user-visible change also gets a bullet
+  under the `## Unreleased` heading in `CHANGELOG.md`,
+  adding that heading at the top of the file when it is not there yet.
+  Releasing renames the heading to the release date as `## YYYY-MM-DD`.
+  The popup only renders date headings,
+  so entries stay invisible to users while they sit under `## Unreleased`,
+  and the rename is what publishes them.
+- `CHANGELOG.md` is rendered by the in-app changelog popup,
+  so only its supported Markdown subset may be used:
+  top-level bullet items,
+  inline code,
+  links,
+  and bold and italic text.
 
 ## References
 
