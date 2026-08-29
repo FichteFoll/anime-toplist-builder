@@ -57,6 +57,7 @@ interface StoredSettingsRecordV1 {
   lastOpenedTemplateId?: string
   exportImageAuthor?: string
   exportImageHideAuthor?: boolean
+  lastShownChangelogVersion?: string
 }
 
 interface StoredSelectionsRecordV1 {
@@ -404,6 +405,9 @@ export const loadStoredSettings = (storage = getBrowserStorage()): StoredSetting
     lastOpenedTemplateId: isString(value.lastOpenedTemplateId) ? value.lastOpenedTemplateId : undefined,
     exportImageAuthor: isString(value.exportImageAuthor) ? value.exportImageAuthor : '',
     exportImageHideAuthor: typeof value.exportImageHideAuthor === 'boolean' ? value.exportImageHideAuthor : false,
+    lastShownChangelogVersion: isString(value.lastShownChangelogVersion)
+      ? value.lastShownChangelogVersion
+      : undefined,
   }
 }
 

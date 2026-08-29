@@ -5,6 +5,7 @@ import {
   loadStoredSettings,
   loadStoredTemplates,
   saveStoredSelections,
+  saveStoredSettings,
   saveStoredTemplates,
 } from '@/lib/persistence'
 import { createAnimeSelection, createSongSelection } from '@/lib/song-selection'
@@ -146,6 +147,35 @@ describe('persistence helpers', () => {
       exportImageAuthor: '',
       exportImageHideAuthor: false,
     })
+  })
+
+  it('round-trips the last shown changelog version', () => {
+    const storage = createMockStorage()
+
+    saveStoredSettings(
+      {
+        themePreference: defaultThemePreference,
+        titleLanguage: defaultAnimeTitleLanguage,
+        exportImageAuthor: '',
+        exportImageHideAuthor: false,
+        lastShownChangelogVersion: '2026-08-29',
+      },
+      storage,
+    )
+
+    expect(loadStoredSettings(storage).lastShownChangelogVersion).toBe('2026-08-29')
+  })
+
+  it('loads a settings record without a changelog version as undefined', () => {
+    const storage = createMockStorage()
+
+    storage.write('anime-toplist-builder.settings.v1', {
+      schemaVersion: 1,
+      themePreference: defaultThemePreference,
+      titleLanguage: defaultAnimeTitleLanguage,
+    })
+
+    expect(loadStoredSettings(storage).lastShownChangelogVersion).toBeUndefined()
   })
 
   it('loads valid selections while dropping malformed entries', () => {
