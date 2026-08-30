@@ -18,7 +18,14 @@ import { useSelectionsStore } from '@/stores/selections'
 import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { useToastStore } from '@/stores/toasts'
-import { CategoryEntityKind, ThemeType, type AniListMetadata, type CategorySelection } from '@/types'
+import {
+  CategoryEntityKind,
+  type AniListMetadata,
+  type CategorySelection,
+  type CharacterFilterState,
+  type SongFilterState,
+  type VoiceActorFilterState,
+} from '@/types'
 
 const settingsStore = useSettingsStore()
 const templateStore = useTemplateStore()
@@ -64,7 +71,9 @@ const updateCategory = (
     description: string
     filter: FilterState
     entityKind: CategoryEntityKind
-    songFilter: { types: Array<ThemeType> }
+    songFilter: SongFilterState
+    characterFilter: CharacterFilterState
+    voiceActorFilter: VoiceActorFilterState
   },
 ) => {
   templateStore.updateActiveTemplate((template) => {
@@ -79,6 +88,8 @@ const updateCategory = (
     category.filter = value.filter
     category.entityKind = value.entityKind
     category.songFilter = value.songFilter
+    category.characterFilter = value.characterFilter
+    category.voiceActorFilter = value.voiceActorFilter
   })
 
   selectionsStore.pruneSelectionsForTemplates(templateStore.templates)

@@ -14,25 +14,35 @@ import {
 } from 'reka-ui'
 import { computed, ref, watch } from 'vue'
 
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import FilterEditor from '@/components/filters/FilterEditor.vue'
 import EditIcon from '@/components/icons/EditIcon.vue'
+import { voiceActorLanguageOptions } from '@/config/app'
 import {
   getCategoryFilterDisabledReasons,
   isNonBlankName,
 } from '@/lib/filter-editor'
-import { formatThemeTypeLabel } from '@/lib/format-label'
+import { formatCharacterRoleLabel, formatThemeTypeLabel } from '@/lib/format-label'
+import { getSelectionDisplayLabel } from '@/lib/song-selection'
+import { useSettingsStore } from '@/stores/settings'
 import {
   CategoryEntityKind,
   ThemeType,
+  characterRoles,
   type AniListMetadata,
   type Category,
+  type CategorySelection,
+  type CharacterFilterState,
+  type CharacterRole,
   type FilterState,
   type SongFilterState,
+  type VoiceActorFilterState,
 } from '@/types'
 
 const props = defineProps<{
   category: Category
+  selection: CategorySelection | null
   globalFilter: FilterState
   metadata: AniListMetadata | null
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
@@ -40,39 +50,40 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string, filter: FilterState, entityKind: CategoryEntityKind, songFilter: SongFilterState }]
+  save: [value: {
+    name: string
+    description: string
+    filter: FilterState
+    entityKind: CategoryEntityKind
+    songFilter: SongFilterState
+    characterFilter: CharacterFilterState
+    voiceActorFilter: VoiceActorFilterState
+  }]
 }>()
 
+const settingsStore = useSettingsStore()
+
 const open = ref(false)
+const isDiscardConfirmationOpen = ref(false)
 const draftName = ref(props.category.name)
 const draftDescription = ref(props.category.description)
-const draftFilter = ref<FilterState>(cloneFilter(props.category.filter))
+const draftFilter = ref<FilterState>(cloneDraft(props.category.filter))
 const draftEntityKind = ref<CategoryEntityKind>(props.category.entityKind)
-const draftSongFilter = ref<SongFilterState>(cloneSongFilter(props.category.songFilter))
+const draftSongFilter = ref<SongFilterState>(cloneDraft(props.category.songFilter))
+const draftCharacterFilter = ref<CharacterFilterState>(cloneDraft(props.category.characterFilter))
+const draftVoiceActorFilter = ref<VoiceActorFilterState>(cloneDraft(props.category.voiceActorFilter))
 
-function cloneFilter(filter: FilterState): FilterState {
+function cloneDraft<T>(value: T): T {
   if (typeof structuredClone === 'function') {
     try {
-      return structuredClone(filter)
+      return structuredClone(value)
     } catch {
       // Vue props can be proxies, which structuredClone rejects.
-      // Fall back to JSON cloning for this plain filter state.
+      // Fall back to JSON cloning for these plain state objects.
     }
   }
 
-  return JSON.parse(JSON.stringify(filter)) as FilterState
-}
-
-function cloneSongFilter(songFilter: SongFilterState): SongFilterState {
-  if (typeof structuredClone === 'function') {
-    try {
-      return structuredClone(songFilter)
-    } catch {
-      // Same JSON-compatible fallback as the filter clone helper.
-    }
-  }
-
-  return JSON.parse(JSON.stringify(songFilter)) as SongFilterState
+  return JSON.parse(JSON.stringify(value)) as T
 }
 
 const disabledFields = computed(() => getCategoryFilterDisabledReasons(props.globalFilter))
@@ -81,9 +92,13 @@ const hasValidName = computed(() => isNonBlankName(draftName.value))
 const resetDraft = () => {
   draftName.value = props.category.name
   draftDescription.value = props.category.description
-  draftFilter.value = cloneFilter(props.category.filter)
+  draftFilter.value = cloneDraft(props.category.filter)
   draftEntityKind.value = props.category.entityKind
-  draftSongFilter.value = cloneSongFilter(props.category.songFilter)
+  draftSongFilter.value = cloneDraft(props.category.songFilter)
+  draftCharacterFilter.value = cloneDraft(props.category.characterFilter)
+  draftVoiceActorFilter.value = cloneDraft(props.category.voiceActorFilter)
+  // Reopening the dialog must never show a confirmation left over from before.
+  isDiscardConfirmationOpen.value = false
 }
 
 watch(open, (isOpen) => {
@@ -102,23 +117,78 @@ watch(
   { deep: true },
 )
 
-const save = () => {
-  const nextName = draftName.value.trim()
-  const nextDescription = draftDescription.value.trim()
-
-  if (!isNonBlankName(nextName)) {
-    return
-  }
-
+const emitSave = () => {
   emit('save', {
-    name: nextName,
-    description: nextDescription,
-    filter: cloneFilter(draftFilter.value),
+    name: draftName.value.trim(),
+    description: draftDescription.value.trim(),
+    filter: cloneDraft(draftFilter.value),
     entityKind: draftEntityKind.value,
-    songFilter: cloneSongFilter(draftSongFilter.value),
+    songFilter: cloneDraft(draftSongFilter.value),
+    characterFilter: cloneDraft(draftCharacterFilter.value),
+    voiceActorFilter: cloneDraft(draftVoiceActorFilter.value),
   })
   open.value = false
 }
+
+const save = () => {
+  if (!isNonBlankName(draftName.value.trim())) {
+    return
+  }
+
+  // A stored selection cannot be converted to another entity kind,
+  // so the discard is confirmed before it happens.
+  if (draftEntityKind.value !== props.category.entityKind && props.selection !== null) {
+    isDiscardConfirmationOpen.value = true
+
+    return
+  }
+
+  emitSave()
+}
+
+const confirmDiscardSelection = () => {
+  isDiscardConfirmationOpen.value = false
+  emitSave()
+}
+
+const entityKindOptions = [
+  {
+    value: CategoryEntityKind.Anime,
+    label: 'Anime',
+    description: 'Pick one anime directly from AniList results.',
+  },
+  {
+    value: CategoryEntityKind.Song,
+    label: 'Song',
+    description: 'Pick an anime first, then choose a song tied to it.',
+  },
+  {
+    value: CategoryEntityKind.Character,
+    label: 'Character',
+    description: 'Pick an anime first, then a character from it.',
+  },
+  {
+    value: CategoryEntityKind.VoiceActor,
+    label: 'Voice actor',
+    description: 'Pick an anime first, then one of its voice credits.',
+  },
+] as const
+
+const formatEntityKindLabel = (kind: CategoryEntityKind) =>
+  entityKindOptions.find((option) => option.value === kind)?.label ?? kind
+
+const discardConfirmationDescription = computed(() => {
+  if (!props.selection) {
+    return ''
+  }
+
+  const selectionLabel = getSelectionDisplayLabel(props.selection, settingsStore.titleLanguage)
+  const currentKind = formatEntityKindLabel(props.category.entityKind)
+  const nextKind = formatEntityKindLabel(draftEntityKind.value)
+
+  return `Changing this category from ${currentKind} to ${nextKind}`
+    + ` discards the saved selection "${selectionLabel}". It cannot be converted.`
+})
 
 const songTypeOptions = [
   { value: ThemeType.OP, label: 'Opening' },
@@ -126,16 +196,38 @@ const songTypeOptions = [
   { value: ThemeType.ED, label: 'Ending' },
 ] as const
 
+const toggleValue = <T extends string>(values: Array<T>, value: T): Array<T> => {
+  const nextValues = values.includes(value)
+    ? values.filter((entry) => entry !== value)
+    : [...values, value]
+
+  return [...new Set(nextValues)].sort()
+}
+
 const isSongTypeSelected = (value: SongFilterState['types'][number]) =>
   draftSongFilter.value.types.includes(value)
 
 const toggleSongType = (value: SongFilterState['types'][number]) => {
-  const nextTypes = isSongTypeSelected(value)
-    ? draftSongFilter.value.types.filter((entry) => entry !== value)
-    : [...draftSongFilter.value.types, value]
-
   draftSongFilter.value = {
-    types: [...new Set(nextTypes)].sort(),
+    types: toggleValue(draftSongFilter.value.types, value),
+  }
+}
+
+const isCharacterRoleSelected = (value: CharacterRole) =>
+  draftCharacterFilter.value.roles.includes(value)
+
+const toggleCharacterRole = (value: CharacterRole) => {
+  draftCharacterFilter.value = {
+    roles: toggleValue(draftCharacterFilter.value.roles, value),
+  }
+}
+
+const isVoiceActorLanguageSelected = (value: string) =>
+  draftVoiceActorFilter.value.languages.includes(value)
+
+const toggleVoiceActorLanguage = (value: string) => {
+  draftVoiceActorFilter.value = {
+    languages: toggleValue(draftVoiceActorFilter.value.languages, value),
   }
 }
 </script>
@@ -221,31 +313,21 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
               Category type
             </span>
             <div class="grid gap-2 sm:grid-cols-2">
-              <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
+              <label
+                v-for="option in entityKindOptions"
+                :key="option.value"
+                class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40"
+              >
                 <input
                   v-model="draftEntityKind"
-                  :value="CategoryEntityKind.Anime"
+                  :value="option.value"
                   type="radio"
                   class="mt-1 h-4 w-4"
                 >
                 <div>
-                  <p class="font-medium text-app-text">Anime</p>
+                  <p class="font-medium text-app-text">{{ option.label }}</p>
                   <p class="mt-1 text-xs leading-5 text-app-muted">
-                    Pick one anime directly from AniList results.
-                  </p>
-                </div>
-              </label>
-              <label class="flex cursor-pointer items-start gap-3 rounded-[1rem] border border-app-border/70 bg-app-surface/70 p-3 text-sm text-app-text transition hover:border-app-accent/40">
-                <input
-                  v-model="draftEntityKind"
-                  :value="CategoryEntityKind.Song"
-                  type="radio"
-                  class="mt-1 h-4 w-4"
-                >
-                <div>
-                  <p class="font-medium text-app-text">Song</p>
-                  <p class="mt-1 text-xs leading-5 text-app-muted">
-                    Pick an anime first, then choose a song tied to it.
+                    {{ option.description }}
                   </p>
                 </div>
               </label>
@@ -274,6 +356,58 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
                 @click="toggleSongType(type.value)"
               >
                 {{ formatThemeTypeLabel(type.value) }}
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="draftEntityKind === CategoryEntityKind.Character"
+            class="mb-5 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4"
+          >
+            <p class="text-sm font-medium text-app-text">
+              Character role
+            </p>
+            <p class="mt-1 text-xs leading-5 text-app-muted">
+              Choose which roles this category can include. Selecting none allows every role.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                v-for="role in characterRoles"
+                :key="role"
+                type="button"
+                class="shell-button"
+                :class="isCharacterRoleSelected(role) ? 'border-app-accent/70 bg-app-accentSoft/70 text-app-text' : ''"
+                :aria-pressed="isCharacterRoleSelected(role)"
+                :aria-label="`${isCharacterRoleSelected(role) ? 'Remove' : 'Add'} ${formatCharacterRoleLabel(role)}`"
+                @click="toggleCharacterRole(role)"
+              >
+                {{ formatCharacterRoleLabel(role) }}
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="draftEntityKind === CategoryEntityKind.VoiceActor"
+            class="mb-5 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4"
+          >
+            <p class="text-sm font-medium text-app-text">
+              Voice actor language
+            </p>
+            <p class="mt-1 text-xs leading-5 text-app-muted">
+              Choose which credit languages this category can include. Selecting none allows every language.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                v-for="language in voiceActorLanguageOptions"
+                :key="language"
+                type="button"
+                class="shell-button"
+                :class="isVoiceActorLanguageSelected(language) ? 'border-app-accent/70 bg-app-accentSoft/70 text-app-text' : ''"
+                :aria-pressed="isVoiceActorLanguageSelected(language)"
+                :aria-label="`${isVoiceActorLanguageSelected(language) ? 'Remove' : 'Add'} ${language}`"
+                @click="toggleVoiceActorLanguage(language)"
+              >
+                {{ language }}
               </button>
             </div>
           </div>
@@ -310,5 +444,13 @@ const toggleSongType = (value: SongFilterState['types'][number]) => {
         </div>
       </DialogContent>
     </DialogPortal>
+
+    <ConfirmationDialog
+      v-model:open="isDiscardConfirmationOpen"
+      title="Discard the current selection?"
+      :description="discardConfirmationDescription"
+      confirm-label="Change type and discard"
+      @confirm="confirmDiscardSelection"
+    />
   </DialogRoot>
 </template>

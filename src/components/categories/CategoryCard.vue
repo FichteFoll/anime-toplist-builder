@@ -32,7 +32,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string, filter: FilterState, entityKind: Category['entityKind'], songFilter: Category['songFilter'] }]
+  save: [value: {
+    name: string
+    description: string
+    filter: FilterState
+    entityKind: Category['entityKind']
+    songFilter: Category['songFilter']
+    characterFilter: Category['characterFilter']
+    voiceActorFilter: Category['voiceActorFilter']
+  }]
   delete: [categoryId: string]
   selectSelection: [selection: CategorySelection]
   clearSelection: [categoryId: string]
@@ -204,6 +212,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
       </button>
       <CategoryEditDialog
         :category="category"
+        :selection="selection"
         :global-filter="globalFilter"
         :metadata="metadata"
         :metadata-status="metadataStatus"

@@ -33,6 +33,8 @@ const emit = defineEmits<{
     filter: FilterState
     entityKind: Category['entityKind']
     songFilter: Category['songFilter']
+    characterFilter: Category['characterFilter']
+    voiceActorFilter: Category['voiceActorFilter']
   }]
   deleteCategory: [categoryId: string]
   reorderCategories: [value: { fromIndex: number, toIndex: number }]
@@ -62,6 +64,8 @@ const forwardCategoryUpdate = (
     filter: FilterState
     entityKind: Category['entityKind']
     songFilter: Category['songFilter']
+    characterFilter: Category['characterFilter']
+    voiceActorFilter: Category['voiceActorFilter']
   },
 ) => {
   emit('updateCategory', categoryId, value)
