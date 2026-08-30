@@ -9,10 +9,19 @@ import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
 import {
+  createCharacterSelection,
   createEmptyCharacterFilterState,
   createEmptyVoiceActorFilterState,
 } from '@/lib/relation-selection'
-import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
+import {
+  AnimeFormat,
+  AnimeSeason,
+  CategoryEntityKind,
+  CharacterRole,
+  ThemeType,
+  type AnimeSelection,
+  type Category,
+} from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
   name: 'AnimePickerDialog',
@@ -229,6 +238,65 @@ describe('CategoryCard', () => {
     expect(wrapper.find('.character-picker-stub').exists()).toBe(true)
     expect(wrapper.find('.song-picker-stub').exists()).toBe(false)
     expect(wrapper.find('button.emit-clear').exists()).toBe(false)
+  })
+
+  it('renders a character selection with the anime cover as an inset', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: CategoryEntityKind.Character,
+        },
+        selection: createCharacterSelection({
+          characterId: 7,
+          characterName: 'Rem',
+          characterImage: { large: 'https://img.example/rem-large.jpg', medium: null },
+          role: CharacterRole.Main,
+          animeId: 42,
+          animeTitle: selection.title,
+          animeCoverImage: selection.coverImage,
+        }),
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          AnimePickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          CharacterPickerDialog: characterPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    const images = wrapper.findAll('img')
+
+    expect(images).toHaveLength(2)
+    expect(images[0].attributes('src')).toBe('https://img.example/rem-large.jpg')
+    expect(images[0].classes()).toContain('h-24')
+
+    // The insets are positioned against the primary image box itself,
+    // so that wrapper has to establish the positioning context.
+    const imageWrapper = images[0].element.parentElement
+
+    expect(imageWrapper).not.toBeNull()
+    expect([...imageWrapper!.classList]).toEqual(
+      expect.arrayContaining(['relative', 'h-24', 'w-16']),
+    )
+    expect(images[1].attributes('src')).toBe('https://img.example/haibane-large.jpg')
+    expect(images[1].classes()).toContain('bottom-1')
+    expect(wrapper.text()).toContain('Rem')
+    expect(wrapper.text()).toContain('Main character in Haibane Renmei')
   })
 
   it('tints the delete button hover state red', () => {

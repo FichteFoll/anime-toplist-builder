@@ -158,8 +158,39 @@ export const resolveSongTitle = (
       }
 }
 
-export const getSelectionCoverImage = (selection: CategorySelection) =>
-  selection.kind === 'anime' ? selection.coverImage : selection.animeCoverImage
+// AniList character and staff images expose only `large` and `medium`,
+// so `extraLarge` and `color` stay undefined for relation images.
+export interface SelectionImage {
+  large: string
+  extraLarge?: string | null
+  color?: string | null
+}
+
+export const getSelectionPrimaryImage = (selection: CategorySelection): SelectionImage => {
+  switch (selection.kind) {
+    case 'anime':
+      return selection.coverImage
+    case 'song':
+      return selection.animeCoverImage
+    case 'character':
+      return selection.characterImage
+    case 'voice-actor':
+      return selection.voiceActorImage
+  }
+}
+
+// Ordered top-to-bottom; every consumer draws the insets in this order.
+export const getSelectionInsetImages = (selection: CategorySelection): Array<SelectionImage> => {
+  switch (selection.kind) {
+    case 'anime':
+    case 'song':
+      return []
+    case 'character':
+      return [selection.animeCoverImage]
+    case 'voice-actor':
+      return [selection.characterImage, selection.animeCoverImage]
+  }
+}
 
 export const getSelectionPrimaryTitle = (
   selection: CategorySelection,

@@ -15,7 +15,7 @@ import {
   FONT_SIZE_TEMPLATE_TITLE,
 } from '@/lib/export-fonts'
 import { layoutTextLines, measureAdvanceWidth } from '@/lib/export-text'
-import { getSelectionCoverImage } from '@/lib/song-selection'
+import { getSelectionPrimaryImage } from '@/lib/song-selection'
 import type {
   AnimeTitleLanguage,
   CategorySelectionMap,
@@ -600,7 +600,7 @@ export const renderTemplatePng = async ({
         return [category.id, null] as const
       }
 
-      const coverImage = getSelectionCoverImage(selection)
+      const coverImage = getSelectionPrimaryImage(selection)
       const imageElement = await loadImage(coverImage.extraLarge ?? coverImage.large)
       return [category.id, imageElement] as const
     }),
@@ -669,7 +669,7 @@ export const renderTemplatePng = async ({
         18,
         palette,
         category.name,
-        getSelectionCoverImage(selection).color ?? palette.elevated,
+        getSelectionPrimaryImage(selection).color ?? palette.elevated,
       )
     } else {
       drawMissingSelectionPlaceholder(

@@ -9,11 +9,14 @@ import CharacterPickerDialog from '@/components/categories/CharacterPickerDialog
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
 import {
-  getSelectionCoverImage,
+  getSelectionInsetImages,
+  getSelectionPrimaryImage,
   getSelectionPrimaryTitle,
   resolveSongTitle,
   getSongContextLabel,
 } from '@/lib/song-selection'
+import { getCharacterRelationLabel, resolveRelationName } from '@/lib/relation-selection'
+import { resolveAnimeTitle } from '@/lib/anime-title'
 import { useSettingsStore } from '@/stores/settings'
 import type {
   AniListMetadata,
@@ -49,6 +52,28 @@ const emit = defineEmits<{
 
 const settingsStore = useSettingsStore()
 
+// The inset array is ordered top-to-bottom, so the last entry sits lowest.
+const insetBottomClasses = ['bottom-1', 'bottom-12']
+
+const resolveInsetAltLabels = (selection: CategorySelection) => {
+  if (selection.kind === 'anime' || selection.kind === 'song') {
+    return []
+  }
+
+  const animeLabel = `Cover of ${resolveAnimeTitle(selection.animeTitle, settingsStore.titleLanguage)}`
+
+  if (selection.kind === 'character') {
+    return [animeLabel]
+  }
+
+  const characterName = resolveRelationName(
+    { name: selection.characterName, nativeName: selection.characterNativeName },
+    settingsStore.titleLanguage,
+  ).primary
+
+  return [`Image of ${characterName}`, animeLabel]
+}
+
 const selectionTitle = computed(() => {
   if (!props.selection) {
     return null
@@ -61,12 +86,40 @@ const selectionAltTitle = computed(() => {
     return null
   }
 
-  return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
-    : null
+  if (props.selection.kind === 'song') {
+    return resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
+  }
+
+  if (props.selection.kind === 'character') {
+    return resolveRelationName(
+      { name: props.selection.characterName, nativeName: props.selection.characterNativeName },
+      settingsStore.titleLanguage,
+    ).tooltip
+  }
+
+  return null
 })
-const selectionCoverImage = computed(() =>
-  props.selection ? getSelectionCoverImage(props.selection) : null,
+const selectionPrimaryImage = computed(() =>
+  props.selection ? getSelectionPrimaryImage(props.selection) : null,
+)
+const selectionInsets = computed(() => {
+  if (!props.selection) {
+    return []
+  }
+
+  const insetImages = getSelectionInsetImages(props.selection)
+  const altLabels = resolveInsetAltLabels(props.selection)
+
+  return insetImages.map((image, index) => ({
+    src: image.large,
+    alt: altLabels[index] ?? 'Related image',
+    positionClass: insetBottomClasses[insetImages.length - 1 - index] ?? 'bottom-12',
+  }))
+})
+const characterRelationLine = computed(() =>
+  props.selection?.kind === 'character'
+    ? getCharacterRelationLabel(props.selection, settingsStore.titleLanguage)
+    : null,
 )
 const songArtistLine = computed(() =>
   props.selection?.kind === 'song' && props.selection.song.artist.trim()
@@ -116,11 +169,22 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         v-if="selection"
         class="flex gap-4"
       >
-        <img
-          :src="selectionCoverImage?.large"
-          :alt="selectionTitle ?? 'Selected anime cover'"
-          class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
-        >
+        <div class="relative h-24 w-16 shrink-0">
+          <img
+            :src="selectionPrimaryImage?.large"
+            :alt="selectionTitle ?? 'Selected anime cover'"
+            class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
+          >
+
+          <img
+            v-for="(inset, index) in selectionInsets"
+            :key="index"
+            :src="inset.src"
+            :alt="inset.alt"
+            class="absolute right-1 h-10 w-7 rounded-md object-cover ring-2 ring-app-surface"
+            :class="inset.positionClass"
+          >
+        </div>
 
         <div class="min-w-0 space-y-2">
           <TooltipRoot v-if="selectionAltTitle">
@@ -153,6 +217,12 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
           >
             {{ selection.seasonYear ?? 'Unknown year' }}
             <span v-if="selection.format"> · {{ selection.format }}</span>
+          </p>
+          <p
+            v-else-if="selection.kind === 'character'"
+            class="text-sm text-app-muted"
+          >
+            {{ characterRelationLine }}
           </p>
           <p
             v-else
