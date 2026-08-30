@@ -102,11 +102,11 @@ vi.mock('@/components/categories/AnimePickerBrowser.vue', () => ({
   },
 }))
 
-vi.mock('@/components/categories/SongPickerStepper.vue', () => ({
+vi.mock('@/components/categories/PickerStepper.vue', () => ({
   default: {
-    props: ['activeView', 'canNavigateToSongView'],
-    emits: ['update:activeView'],
-    template: '<div class="stepper"><button type="button" class="step-anime" @click="$emit(\'update:activeView\', \'anime\')">Anime</button><button type="button" class="step-song" :disabled="!canNavigateToSongView" @click="$emit(\'update:activeView\', \'song\')">Song</button><span class="active-view">{{ activeView }}</span></div>',
+    props: ['activeKey', 'steps', 'disabledKeys'],
+    emits: ['update:activeKey'],
+    template: '<div class="stepper"><button type="button" class="step-anime" @click="$emit(\'update:activeKey\', \'anime\')">Anime</button><button type="button" class="step-song" :disabled="disabledKeys.includes(\'song\')" @click="$emit(\'update:activeKey\', \'song\')">Song</button><span class="active-view">{{ activeKey }}</span></div>',
   },
 }))
 
