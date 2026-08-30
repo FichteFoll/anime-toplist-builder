@@ -56,6 +56,11 @@ Deliberate constraints and rough edges that are worth knowing before filing them
   and are not cached between page loads,
   unlike songs.
   Reopening a picker on the same anime later refetches its credits.
+- AniList caps character and voice credits at 25 per request.
+  The pickers page through the rest as the list nears its end,
+  and keep paging on their own
+  while the category's role or language filter matches nothing,
+  so a long cast costs several requests.
 - Voice-credit languages are whatever AniList reports for `languageV2`.
   The category editor's language shortlist is not exhaustive,
   and the filter accepts any non-empty value,

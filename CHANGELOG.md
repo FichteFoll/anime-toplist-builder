@@ -5,6 +5,14 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+- The character and voice-actor pickers now load more credits
+  as the list nears its end,
+  so anime with a large cast are no longer cut off
+  after the first 25 entries AniList returns per request.
+  A category whose role or language filter
+  matches nothing on the first page
+  keeps loading further pages on its own.
+
 - Categories can now pick a character of an anime,
   or a voice actor credited for a character,
   in addition to anime and song categories.

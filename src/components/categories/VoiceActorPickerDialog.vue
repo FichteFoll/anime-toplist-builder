@@ -11,6 +11,7 @@ import { computed, ref, watch } from 'vue'
 import {
   fetchAniListMediaById,
   fetchAnimeCharacterCredits,
+  type AniListCharacterCreditsResponse,
   normalizeAniListError,
   type AniListCharacterCredit,
   type AniListVoiceActorCredit,
@@ -49,13 +50,26 @@ const emit = defineEmits<{
   clear: []
 }>()
 
+// Start the next page slightly before the list actually ends,
+// so the rows are usually already there when the user arrives.
+const creditScrollThreshold = 200
+
+// AniList caps the `Media.characters` connection at 25 entries per page,
+// so the only way to reach the rest of a large cast is to page through it.
+interface CreditPages {
+  credits: Array<AniListCharacterCredit>
+  nextPage: number
+  hasNextPage: boolean
+}
+
 const open = ref(false)
 const activeView = ref<VoiceActorPickerView>('anime')
 const focusedAnimeId = ref<number | null>(null)
 const creditStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const creditErrorMessage = ref<string | null>(null)
 // The credits live for the lifetime of the dialog only; there is no persistent cache.
-const creditsByAnimeId = ref<Record<number, Array<AniListCharacterCredit>>>({})
+const creditsByAnimeId = ref<Record<number, CreditPages>>({})
+const isLoadingMoreCredits = ref(false)
 const hydratedSelectedAnime = ref<AniListSearchResult | null>(null)
 const aniListAuthStore = useAniListAuthStore()
 const settingsStore = useSettingsStore()
@@ -74,7 +88,13 @@ const pickerSteps = [
 const disabledSteps = computed(() => canNavigateToVoiceActorView.value ? [] : ['voice-actor'])
 const isAnimeView = computed(() => activeView.value === 'anime')
 const isVoiceActorView = computed(() => activeView.value === 'voice-actor')
-const focusedCredits = computed(() => (focusedAnimeId.value ? creditsByAnimeId.value[focusedAnimeId.value] ?? [] : []))
+const focusedCreditPages = computed(() =>
+  focusedAnimeId.value === null
+    ? null
+    : creditsByAnimeId.value[focusedAnimeId.value] ?? null,
+)
+const focusedCredits = computed(() => focusedCreditPages.value?.credits ?? [])
+const hasMoreCredits = computed(() => focusedCreditPages.value?.hasNextPage ?? false)
 // A credit routinely carries voice actors in many languages at once,
 // so the flat row list keeps the credit order and the order inside a credit.
 const focusedRows = computed<Array<VoiceActorCreditRow>>(() =>
@@ -115,6 +135,7 @@ const resetState = () => {
   creditStatus.value = 'idle'
   creditErrorMessage.value = null
   creditsByAnimeId.value = {}
+  isLoadingMoreCredits.value = false
   hydratedSelectedAnime.value = createHydratedAnimePlaceholder()
   focusedAnimeId.value = props.selectedVoiceActor?.animeId ?? null
 }
@@ -141,6 +162,83 @@ const hydrateSelectedAnime = async () => {
   if (hydratedSelectedAnime.value) {
     void loadCreditsForAnime(hydratedSelectedAnime.value, { openVoiceActorView: false })
   }
+}
+
+const appendCreditPage = (animeId: number, response: AniListCharacterCreditsResponse) => {
+  const loaded = creditsByAnimeId.value[animeId]
+
+  creditsByAnimeId.value = {
+    ...creditsByAnimeId.value,
+    [animeId]: {
+      credits: loaded ? [...loaded.credits, ...response.credits] : response.credits,
+      nextPage: response.pageInfo.currentPage + 1,
+      hasNextPage: response.pageInfo.hasNextPage,
+    },
+  }
+}
+
+const loadMoreCredits = async (): Promise<boolean> => {
+  const animeId = focusedAnimeId.value
+  const loaded = focusedCreditPages.value
+
+  if (animeId === null || !loaded?.hasNextPage || isLoadingMoreCredits.value) {
+    return false
+  }
+
+  const requestId = activeCreditRequestId
+
+  isLoadingMoreCredits.value = true
+  creditErrorMessage.value = null
+
+  try {
+    const response = await fetchAnimeCharacterCredits({
+      animeId,
+      page: loaded.nextPage,
+      accessToken: aniListAuthStore.resolveAccessTokenForRequest(),
+    })
+
+    if (requestId !== activeCreditRequestId) {
+      return false
+    }
+
+    appendCreditPage(animeId, response)
+
+    return true
+  } catch (error) {
+    aniListAuthStore.handleRequestAuthFailure(error)
+
+    if (requestId === activeCreditRequestId) {
+      creditErrorMessage.value = normalizeAniListError(error).message
+    }
+
+    return false
+  } finally {
+    if (requestId === activeCreditRequestId) {
+      isLoadingMoreCredits.value = false
+    }
+  }
+}
+
+// A language filter that excludes every row of the pages fetched so far
+// would leave nothing on screen to scroll, and so nothing to trigger the
+// next page. Pull pages in until a match appears or the credits run out.
+const loadUntilVisible = async () => {
+  while (visibleRows.value.length === 0 && hasMoreCredits.value) {
+    if (!await loadMoreCredits()) {
+      return
+    }
+  }
+}
+
+const handleCreditScroll = (event: Event) => {
+  const container = event.target as HTMLElement
+  const remaining = container.scrollHeight - container.scrollTop - container.clientHeight
+
+  if (remaining > creditScrollThreshold) {
+    return
+  }
+
+  void loadMoreCredits()
 }
 
 const loadCreditsForAnime = async (result: AniListSearchResult, options?: { openVoiceActorView?: boolean }) => {
@@ -171,11 +269,9 @@ const loadCreditsForAnime = async (result: AniListSearchResult, options?: { open
       return
     }
 
-    creditsByAnimeId.value = {
-      ...creditsByAnimeId.value,
-      [result.id]: response.credits,
-    }
+    appendCreditPage(result.id, response)
     creditStatus.value = 'ready'
+    await loadUntilVisible()
   } catch (error) {
     aniListAuthStore.handleRequestAuthFailure(error)
 
@@ -278,6 +374,7 @@ watch(open, (isOpen) => {
           <section
             v-if="detailAnime && isVoiceActorView"
             class="min-h-0 flex-1 overflow-y-auto flex flex-col gap-4"
+            @scroll="handleCreditScroll"
           >
             <div class="flex items-center justify-between gap-3">
               <p class="text-xs font-medium uppercase tracking-[0.2em] text-app-muted">
@@ -320,24 +417,46 @@ watch(open, (isOpen) => {
               </button>
             </div>
             <div
-              v-else-if="creditStatus === 'ready' && focusedRows.length === 0"
+              v-else-if="creditStatus === 'ready' && !hasMoreCredits && focusedRows.length === 0"
               class="text-sm leading-6 text-app-muted"
             >
               This anime has no voice credits on AniList.
             </div>
             <div
-              v-else-if="creditStatus === 'ready' && visibleRows.length === 0"
+              v-else-if="creditStatus === 'ready' && !hasMoreCredits && visibleRows.length === 0"
               class="text-sm leading-6 text-app-muted"
             >
               No voice actor matched this category's language filter.
             </div>
-            <VoiceActorPickerCreditList
-              v-else
-              :rows="visibleRows"
-              :selected-voice-actor-id="selectedVoiceActor?.voiceActorId ?? null"
-              :selected-character-id="selectedVoiceActor?.characterId ?? null"
-              @select="selectRow(detailAnime, $event)"
-            />
+            <template v-else>
+              <VoiceActorPickerCreditList
+                :rows="visibleRows"
+                :selected-voice-actor-id="selectedVoiceActor?.voiceActorId ?? null"
+                :selected-character-id="selectedVoiceActor?.characterId ?? null"
+                @select="selectRow(detailAnime, $event)"
+              />
+
+              <div
+                v-if="hasMoreCredits"
+                class="space-y-2"
+              >
+                <p
+                  v-if="creditErrorMessage"
+                  class="text-sm leading-6 text-app-muted"
+                >
+                  {{ creditErrorMessage }}
+                </p>
+
+                <button
+                  type="button"
+                  class="load-more-credits shell-button"
+                  :disabled="isLoadingMoreCredits"
+                  @click="loadMoreCredits()"
+                >
+                  {{ isLoadingMoreCredits ? 'Loading more voice actors...' : 'Load more voice actors' }}
+                </button>
+              </div>
+            </template>
           </section>
         </div>
       </DialogContent>

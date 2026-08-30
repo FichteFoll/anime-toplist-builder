@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AniListCharacterCreditsResponse } from '@/api'
 import VoiceActorPickerDialog from '@/components/categories/VoiceActorPickerDialog.vue'
@@ -224,6 +224,64 @@ const openDialog = async (wrapper: ReturnType<typeof mount>) => {
   await nextTick()
 }
 
+// AniList caps this connection at 25 credits per page, so a large cast
+// arrives across several pages and the language filter may match none of the first.
+const japaneseOnlyFirstPage: AniListCharacterCreditsResponse = {
+  ...createCreditsResponse([
+    {
+      characterId: 7,
+      name: 'Rakka',
+      nativeName: 'ラッカ',
+      image: rakkaImage,
+      role: CharacterRole.Main,
+      voiceActors: [
+        {
+          voiceActorId: 101,
+          name: 'Ryo Hirohashi',
+          nativeName: '広橋涼',
+          image: hirohashiImage,
+          language: 'Japanese',
+        },
+      ],
+    },
+  ]),
+  pageInfo: {
+    currentPage: 1,
+    hasNextPage: true,
+    lastPage: 2,
+    perPage: 25,
+    total: 2,
+  },
+}
+
+const englishSecondPage: AniListCharacterCreditsResponse = {
+  ...createCreditsResponse([
+    {
+      characterId: 8,
+      name: 'Kuu',
+      nativeName: null,
+      image: kuuImage,
+      role: CharacterRole.Supporting,
+      voiceActors: [
+        {
+          voiceActorId: 103,
+          name: 'Jessica Boone',
+          nativeName: null,
+          image: booneImage,
+          language: 'English',
+        },
+      ],
+    },
+  ]),
+  pageInfo: {
+    currentPage: 2,
+    hasNextPage: false,
+    lastPage: 2,
+    perPage: 25,
+    total: 2,
+  },
+}
+
 const mountDialog = (category: Category, voiceActor?: VoiceActorSelection) => mount(VoiceActorPickerDialog, {
   props: {
     category,
@@ -239,6 +297,13 @@ const selectAnime = async (wrapper: ReturnType<typeof mount>) => {
 }
 
 describe('VoiceActorPickerDialog', () => {
+  // Each case queues its own responses, so a leftover `mockResolvedValueOnce`
+  // from an earlier case must not answer a later one's first request.
+  beforeEach(() => {
+    mocks.fetchAnimeCharacterCredits.mockReset()
+    mocks.fetchAniListMediaById.mockReset()
+  })
+
   it('opens on the anime step and keeps the voice actor step disabled without a selection', async () => {
     setActivePinia(createPinia())
     mocks.fetchAniListMediaById.mockResolvedValue(null)
@@ -252,6 +317,33 @@ describe('VoiceActorPickerDialog', () => {
     expect(wrapper.find('.step-voice-actor').attributes('disabled')).toBeDefined()
     expect(wrapper.find('.step-labels').text()).toBe('Select Anime|Select Voice Actor')
     expect(wrapper.find('.credit-row').exists()).toBe(false)
+  })
+
+  it('keeps loading pages until the language filter matches a row', async () => {
+    setActivePinia(createPinia())
+    mocks.fetchAniListMediaById.mockResolvedValue(null)
+    mocks.fetchAnimeCharacterCredits
+      .mockResolvedValueOnce(japaneseOnlyFirstPage)
+      .mockResolvedValueOnce(englishSecondPage)
+
+    const wrapper = mountDialog(createCategory(['English']))
+
+    await openDialog(wrapper)
+    await selectAnime(wrapper)
+    await Promise.resolve()
+    await Promise.resolve()
+    await nextTick()
+
+    // The first page carries only a Japanese credit, so an English-only
+    // category would otherwise show an empty list with nothing to scroll.
+    expect(mocks.fetchAnimeCharacterCredits).toHaveBeenNthCalledWith(2, {
+      animeId: 42,
+      page: 2,
+      accessToken: 'token',
+    })
+    expect(wrapper.findAll('.credit-row')).toHaveLength(1)
+    expect(wrapper.text()).toContain('Jessica Boone')
+    expect(wrapper.text()).not.toContain("No voice actor matched this category's language filter.")
   })
 
   it('renders one row per voice actor of a credit', async () => {

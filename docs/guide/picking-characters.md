@@ -70,6 +70,19 @@ the picker keeps the credits of the anime it has already fetched
 only in memory for the lifetime of the dialog,
 so reopening the picker on the same anime later refetches it.
 
+AniList returns at most 25 credits per request,
+so a large cast arrives one page at a time.
+The picker loads the next page
+as the list nears its end,
+and a `Load more characters` or `Load more voice actors` button
+below the list does the same without scrolling.
+When the category's role or language filter
+excludes every credit fetched so far,
+the picker keeps loading further pages on its own
+until a match appears or the credits run out,
+so a filter that matches nothing on the first page
+never shows an empty list while more credits remain.
+
 AniList does not publish an enum for voice-credit languages,
 so the language filter accepts any non-empty value,
 and the language shortlist offered in the category editor

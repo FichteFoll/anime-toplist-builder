@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AniListCharacterCreditsResponse } from '@/api'
 import CharacterPickerDialog from '@/components/categories/CharacterPickerDialog.vue'
@@ -158,6 +158,48 @@ const selectedCharacter: CharacterSelection = createCharacterSelection({
   animeCoverImage,
 })
 
+// AniList caps this connection at 25 credits per page, so a large cast
+// arrives across several pages and the role filter may match none of the first.
+const mainOnlyFirstPage: AniListCharacterCreditsResponse = {
+  pageInfo: {
+    currentPage: 1,
+    hasNextPage: true,
+    lastPage: 2,
+    perPage: 25,
+    total: 3,
+  },
+  credits: [
+    {
+      characterId: 7,
+      name: 'Rakka',
+      nativeName: 'ラッカ',
+      image: { large: 'https://img.example/rakka-large.jpg', medium: null },
+      role: CharacterRole.Main,
+      voiceActors: [],
+    },
+  ],
+}
+
+const supportingSecondPage: AniListCharacterCreditsResponse = {
+  pageInfo: {
+    currentPage: 2,
+    hasNextPage: false,
+    lastPage: 2,
+    perPage: 25,
+    total: 3,
+  },
+  credits: [
+    {
+      characterId: 9,
+      name: 'Reki',
+      nativeName: null,
+      image: { large: 'https://img.example/reki-large.jpg', medium: null },
+      role: CharacterRole.Supporting,
+      voiceActors: [],
+    },
+  ],
+}
+
 const openDialog = async (wrapper: ReturnType<typeof mount>) => {
   ;(wrapper.vm as unknown as { open: boolean }).open = true
   await Promise.resolve()
@@ -175,6 +217,13 @@ const mountDialog = (category: Category, character?: CharacterSelection) => moun
 })
 
 describe('CharacterPickerDialog', () => {
+  // Each case queues its own responses, so a leftover `mockResolvedValueOnce`
+  // from an earlier case must not answer a later one's first request.
+  beforeEach(() => {
+    mocks.fetchAnimeCharacterCredits.mockReset()
+    mocks.fetchAniListMediaById.mockReset()
+  })
+
   it('opens on the anime step and keeps the character step disabled without a selection', async () => {
     setActivePinia(createPinia())
     mocks.fetchAniListMediaById.mockResolvedValue(null)
@@ -207,6 +256,96 @@ describe('CharacterPickerDialog', () => {
     expect(wrapper.findAll('.credit-row')).toHaveLength(2)
     expect(wrapper.text()).toContain('Rakka')
     expect(wrapper.text()).toContain('Main')
+  })
+
+  it('keeps loading pages until the role filter matches a credit', async () => {
+    setActivePinia(createPinia())
+    mocks.fetchAniListMediaById.mockResolvedValue(null)
+    mocks.fetchAnimeCharacterCredits
+      .mockResolvedValueOnce(mainOnlyFirstPage)
+      .mockResolvedValueOnce(supportingSecondPage)
+
+    const wrapper = mountDialog(createCategory([CharacterRole.Supporting]))
+
+    await openDialog(wrapper)
+    await wrapper.find('.select-result').trigger('click')
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+    await nextTick()
+
+    // The first page holds only a main character, so the supporting-only
+    // category would otherwise show an empty list with nothing to scroll.
+    expect(mocks.fetchAnimeCharacterCredits).toHaveBeenNthCalledWith(2, {
+      animeId: 42,
+      page: 2,
+      accessToken: 'token',
+    })
+    expect(wrapper.findAll('.credit-row')).toHaveLength(1)
+    expect(wrapper.text()).toContain('Reki')
+    expect(wrapper.text()).not.toContain("No character matched this category's role filter.")
+  })
+
+  it('loads the next page when the credit list is scrolled to its end', async () => {
+    setActivePinia(createPinia())
+    mocks.fetchAniListMediaById.mockResolvedValue(null)
+    mocks.fetchAnimeCharacterCredits
+      .mockResolvedValueOnce(mainOnlyFirstPage)
+      .mockResolvedValueOnce(supportingSecondPage)
+
+    const wrapper = mountDialog(createCategory())
+
+    await openDialog(wrapper)
+    await wrapper.find('.select-result').trigger('click')
+    await Promise.resolve()
+    await nextTick()
+
+    // Every credit matches, so nothing was loaded past the first page yet.
+    expect(mocks.fetchAnimeCharacterCredits).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('.load-more-credits').exists()).toBe(true)
+
+    const scroller = wrapper.find('section')
+
+    Object.defineProperty(scroller.element, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(scroller.element, 'clientHeight', { value: 400, configurable: true })
+    Object.defineProperty(scroller.element, 'scrollTop', { value: 500, configurable: true })
+    await scroller.trigger('scroll')
+    await Promise.resolve()
+    await nextTick()
+
+    expect(mocks.fetchAnimeCharacterCredits).toHaveBeenNthCalledWith(2, {
+      animeId: 42,
+      page: 2,
+      accessToken: 'token',
+    })
+    expect(wrapper.findAll('.credit-row')).toHaveLength(2)
+    expect(wrapper.find('.load-more-credits').exists()).toBe(false)
+  })
+
+  it('leaves the credit list alone while the scroll position is far from the end', async () => {
+    setActivePinia(createPinia())
+    mocks.fetchAniListMediaById.mockResolvedValue(null)
+    mocks.fetchAnimeCharacterCredits
+      .mockResolvedValueOnce(mainOnlyFirstPage)
+      .mockResolvedValueOnce(supportingSecondPage)
+
+    const wrapper = mountDialog(createCategory())
+
+    await openDialog(wrapper)
+    await wrapper.find('.select-result').trigger('click')
+    await Promise.resolve()
+    await nextTick()
+
+    const scroller = wrapper.find('section')
+
+    Object.defineProperty(scroller.element, 'scrollHeight', { value: 1000, configurable: true })
+    Object.defineProperty(scroller.element, 'clientHeight', { value: 400, configurable: true })
+    Object.defineProperty(scroller.element, 'scrollTop', { value: 0, configurable: true })
+    await scroller.trigger('scroll')
+    await Promise.resolve()
+    await nextTick()
+
+    expect(mocks.fetchAnimeCharacterCredits).toHaveBeenCalledTimes(1)
   })
 
   it('emits the picked credit as a character selection', async () => {
