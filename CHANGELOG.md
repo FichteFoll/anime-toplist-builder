@@ -29,7 +29,8 @@ The app shows these entries in its changelog popup.
   its saved selection,
   since a pick cannot be converted between entity kinds.
 - The predefined **Crunchyroll Anime Awards 2025** template now uses the new
-  character and voice-artist category types for its four matching categories,
+  character and voice-artist category types
+  for its five character and voice-artist categories,
   which discards any anime already picked for them.
 
 ## 2026-08-29

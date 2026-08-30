@@ -179,6 +179,10 @@ describe('template store fork-on-edit behavior', () => {
     const animeAwards = predefinedTemplates.find((template) => template.id === 'cr-anime-awards-2025')
     const categoryById = (id: string) => animeAwards?.categories.find((category) => category.id === id)
 
+    expect(categoryById('bestmaincharacter01')).toMatchObject({
+      entityKind: CategoryEntityKind.Character,
+      characterFilter: { roles: [CharacterRole.Main] },
+    })
     expect(categoryById('bestsupportingcharacter01')).toMatchObject({
       entityKind: CategoryEntityKind.Character,
       characterFilter: { roles: [CharacterRole.Supporting] },

@@ -100,6 +100,6 @@ Areas where automated tests do not cover the real behavior:
 - reopening a song picker with an existing selection,
 - native title language swapping,
 - reopening a character or voice-actor picker with an existing selection,
-- the predefined Crunchyroll template's four character and voice-artist
+- the predefined Crunchyroll template's five character and voice-artist
   categories switching entity kind,
   which discards any anime already picked for them.

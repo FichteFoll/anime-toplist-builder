@@ -121,6 +121,8 @@ const predefinedTemplatePayloads: Array<TemplateImportPayloadV1> = [
         id: 'bestmaincharacter01',
         name: 'Best Main Character',
         description: 'The best leading character of the year',
+        entityKind: CategoryEntityKind.Character,
+        characterFilter: { roles: [CharacterRole.Main] },
       },
       {
         id: 'bestsupportingcharacter01',
