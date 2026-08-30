@@ -39,10 +39,13 @@ export const INSET_WIDTH = 48
 export const INSET_HEIGHT = 70
 // The margin equals the ring width, so the ring's outer edge lands exactly on
 // the image slot's edge and the whole composition spans one cover slot.
-export const INSET_MARGIN = 3
+export const INSET_MARGIN = 2
 export const INSET_GAP = 6
 export const INSET_RADIUS = 10
-export const INSET_RING = 3
+export const INSET_RING = 2
+// The insets are small, so they carry a lighter outline than the primary
+// image, which keeps its 2 px border.
+export const INSET_BORDER_WIDTH = 1
 // How far the inset column reaches over the primary image. The insets are not
 // contained by the primary: it shrinks to make room for them, and they hang
 // past its edge, so a relation never hides a quarter of the primary subject.
@@ -521,7 +524,16 @@ const drawSelectionInsets = (
       fillRoundedRect(context, rect.x, rect.y, rect.width, rect.height, INSET_RADIUS, palette.elevated)
     }
 
-    strokeRoundedRect(context, rect.x, rect.y, rect.width, rect.height, INSET_RADIUS, palette.border, 2)
+    strokeRoundedRect(
+      context,
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height,
+      INSET_RADIUS,
+      palette.border,
+      INSET_BORDER_WIDTH,
+    )
   }
 }
 

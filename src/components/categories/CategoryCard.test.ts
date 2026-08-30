@@ -340,7 +340,7 @@ describe('CategoryCard', () => {
       expect.arrayContaining(['relative', 'h-24', 'w-16']),
     )
     expect(images[1].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[1].classes()).toContain('right-0.5')
+    expect(images[1].classes()).toContain('right-px')
     expect(wrapper.text()).toContain('Rem')
     expect(wrapper.text()).toContain('Main character in Haibane Renmei')
   })
@@ -397,9 +397,9 @@ describe('CategoryCard', () => {
     expect(images[0].classes()).toContain('h-[4.25rem]')
     // The first inset is the character and sits left of the anime cover.
     expect(images[1].attributes('src')).toBe('https://img.example/rem-large.jpg')
-    expect(images[1].classes()).toContain('right-[29px]')
+    expect(images[1].classes()).toContain('right-[28px]')
     expect(images[2].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[2].classes()).toContain('right-0.5')
+    expect(images[2].classes()).toContain('right-px')
     expect(wrapper.text()).toContain('Rie Takahashi')
     expect(wrapper.text()).toContain('Voiced Rem in Haibane Renmei')
     expect(wrapper.text()).toContain('Japanese')

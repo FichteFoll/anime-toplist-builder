@@ -92,7 +92,7 @@ describe('resolveInsetRects', () => {
 
   it('places a single inset in the lower right of the image slot', () => {
     expect(insetRects(1)).toEqual([
-      { x: coverX + 75, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 76, y: coverY + 111, width: INSET_WIDTH, height: INSET_HEIGHT },
     ])
   })
 
@@ -100,8 +100,8 @@ describe('resolveInsetRects', () => {
     const [left, right] = insetRects(2)
 
     expect(insetRects(2)).toEqual([
-      { x: coverX + 21, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
-      { x: coverX + 75, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 22, y: coverY + 111, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 76, y: coverY + 111, width: INSET_WIDTH, height: INSET_HEIGHT },
     ])
     // Side by side, so they share a baseline and never overlap each other.
     expect(left.y).toBe(right.y)
@@ -140,7 +140,7 @@ describe('resolvePrimaryRect', () => {
   })
 
   it('shrinks and keeps the cover aspect ratio once insets share the slot', () => {
-    for (const [count, expected] of [[1, { width: 93, height: 135 }], [2, { width: 88, height: 128 }]] as const) {
+    for (const [count, expected] of [[1, { width: 94, height: 137 }], [2, { width: 89, height: 129 }]] as const) {
       const rect = primaryRect(count)
 
       expect(rect).toEqual({ x: coverX, y: coverY, ...expected })

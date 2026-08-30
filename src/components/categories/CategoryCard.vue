@@ -60,8 +60,8 @@ const settingsStore = useSettingsStore()
 // The inset array is ordered top-to-bottom, so the last entry sits lowest.
 // Right-to-left, so a two-entry array puts the character left of the anime
 // cover on one baseline. The offsets pair with `w-6` insets inside the 64x96
-// image slot: 2 + 24 + 3 + 24 + 11 leaves the slot's width intact.
-const insetRightClasses = ['right-0.5', 'right-[29px]']
+// image slot: 1 + 24 + 3 + 24 + 12 leaves the slot's width intact.
+const insetRightClasses = ['right-px', 'right-[28px]']
 
 // The primary image gives up room to the insets rather than being covered by
 // them: one inset takes the lower right corner, two take the bottom row, and
@@ -219,7 +219,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             :key="index"
             :src="inset.src"
             :alt="inset.alt"
-            class="absolute bottom-0.5 h-9 w-6 rounded-md object-cover ring-2 ring-app-surface"
+            class="absolute bottom-px h-9 w-6 rounded-md object-cover ring-1 ring-app-surface"
             :class="inset.positionClass"
           >
         </div>
