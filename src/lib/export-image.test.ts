@@ -14,9 +14,11 @@ import {
   COVER_WIDTH,
   GRID_GAP,
   INSET_HEIGHT,
+  INSET_RING,
   INSET_WIDTH,
   resolveGridRowOffsets,
   resolveInsetRects,
+  resolvePrimaryRect,
 } from '@/lib/export-image'
 import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
 import { createVoiceActorSelection } from '@/lib/relation-selection'
@@ -79,6 +81,9 @@ describe('song title helpers', () => {
   })
 })
 
+const insetRectsFor = (count: number) =>
+  resolveInsetRects(76, 120, COVER_WIDTH, COVER_HEIGHT, count)
+
 describe('resolveInsetRects', () => {
   const coverX = 76
   const coverY = 120
@@ -87,30 +92,90 @@ describe('resolveInsetRects', () => {
 
   it('places a single inset in the lower right of the image slot', () => {
     expect(insetRects(1)).toEqual([
-      { x: coverX + 64, y: coverY + 97, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 75, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
     ])
   })
 
   it('stacks two insets top-to-bottom above the lower right corner', () => {
     expect(insetRects(2)).toEqual([
-      { x: coverX + 64, y: coverY + 13, width: INSET_WIDTH, height: INSET_HEIGHT },
-      { x: coverX + 64, y: coverY + 97, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 75, y: coverY + 34, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 75, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
     ])
   })
 
-  it('keeps every inset fully inside the image slot', () => {
+  it('keeps every inset and its ring fully inside the image slot', () => {
     for (const count of [1, 2]) {
       for (const rect of insetRects(count)) {
-        expect(rect.x).toBeGreaterThanOrEqual(coverX)
-        expect(rect.y).toBeGreaterThanOrEqual(coverY)
-        expect(rect.x + rect.width).toBeLessThanOrEqual(coverX + COVER_WIDTH)
-        expect(rect.y + rect.height).toBeLessThanOrEqual(coverY + COVER_HEIGHT)
+        expect(rect.x - INSET_RING).toBeGreaterThanOrEqual(coverX)
+        expect(rect.y - INSET_RING).toBeGreaterThanOrEqual(coverY)
+        expect(rect.x + rect.width + INSET_RING).toBeLessThanOrEqual(coverX + COVER_WIDTH)
+        expect(rect.y + rect.height + INSET_RING).toBeLessThanOrEqual(coverY + COVER_HEIGHT)
       }
     }
   })
 
   it('returns no rects for a selection without insets', () => {
     expect(insetRects(0)).toEqual([])
+  })
+})
+
+describe('resolvePrimaryRect', () => {
+  const coverX = 76
+  const coverY = 120
+  const primaryRect = (count: number) =>
+    resolvePrimaryRect(coverX, coverY, COVER_WIDTH, COVER_HEIGHT, count)
+
+  it('fills the image slot when the selection has no insets', () => {
+    expect(primaryRect(0)).toEqual({
+      x: coverX,
+      y: coverY,
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+    })
+  })
+
+  it('shrinks and keeps the cover aspect ratio once insets share the slot', () => {
+    const rect = primaryRect(1)
+
+    expect(rect).toEqual({ x: coverX, y: coverY, width: 93, height: 135 })
+    expect(rect.width).toBeLessThan(COVER_WIDTH)
+    expect(Math.abs(rect.width / rect.height - COVER_WIDTH / COVER_HEIGHT)).toBeLessThan(0.01)
+  })
+
+  it('is overlapped by the inset column rather than containing it', () => {
+    for (const count of [1, 2]) {
+      const primary = primaryRect(count)
+
+      for (const inset of insetRectsFor(count)) {
+        // The inset reaches over the primary's edge, so it is neither
+        // contained by it nor detached from it.
+        expect(inset.x).toBeLessThan(primary.x + primary.width)
+        expect(inset.x + inset.width).toBeGreaterThan(primary.x + primary.width)
+      }
+    }
+  })
+
+  it('spans exactly one cover slot together with the insets', () => {
+    for (const count of [1, 2]) {
+      const primary = primaryRect(count)
+      const insets = insetRectsFor(count)
+      const boxes = [
+        primary,
+        ...insets.map((rect) => ({
+          x: rect.x - INSET_RING,
+          y: rect.y - INSET_RING,
+          width: rect.width + INSET_RING * 2,
+          height: rect.height + INSET_RING * 2,
+        })),
+      ]
+
+      // A relation card must occupy the same footprint as a lone anime cover,
+      // so no card in the grid changes size.
+      expect(Math.min(...boxes.map((box) => box.x))).toBe(coverX)
+      expect(Math.min(...boxes.map((box) => box.y))).toBe(coverY)
+      expect(Math.max(...boxes.map((box) => box.x + box.width))).toBe(coverX + COVER_WIDTH)
+      expect(Math.max(...boxes.map((box) => box.y + box.height))).toBe(coverY + COVER_HEIGHT)
+    }
   })
 })
 

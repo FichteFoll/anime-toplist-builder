@@ -106,21 +106,21 @@ The slug is kept because it is part of the song identity.
 
 The card uses the character image as its primary image,
 with the anime cover as a small inset
-overlapping the lower right corner of that image,
-fully inside its bounds:
+in the lower right of the image slot.
+The character image shrinks to make room for it,
+and the inset reaches past the character image's edge
+rather than covering a corner of it:
 
 ```text
-+---------------+  Rem
-|               |  Main character
-|               |  in Re:Zero kara Hajimeru
-|   character   |     Isekai Seikatsu
-|     image     |
-|               |
-|     +-------+ |
-|     | anime | |
-|     | cover | |
-|     +-------+ |
-+---------------+
++-------------+    Rem
+|             |    Main character
+|  character  |    in Re:Zero kara Hajimeru
+|    image    |       Isekai Seikatsu
+|             |
+|          +-------+
+|          | anime |
++----------| cover |
+           +-------+
 ```
 
 Below the character name,
@@ -132,22 +132,22 @@ A clear action removes the selection.
 ### Voice-actor categories
 
 The card uses the voice actor image as its primary image,
-with two insets stacked on its right side,
-inside its bounds,
-the character above the anime cover:
+with two insets stacked down the right of the image slot,
+the character above the anime cover.
+The voice actor image shrinks to make room for them,
+and both insets reach past its edge:
 
 ```text
-+---------------+  Rie Takahashi
-|               |  Voiced Rem
-|     +-------+ |  in Re:Zero kara Hajimeru
-|     | chara | |     Isekai Seikatsu
-| v.  | cter  | |  Japanese
-| a.  +-------+ |
-| img +-------+ |
-|     | anime | |
-|     | cover | |
-|     +-------+ |
-+---------------+
++-------------+    Rie Takahashi
+|             |    Voiced Rem
+|    voice    +-------+  in Re:Zero kara Hajimeru
+|    actor    | chara |     Isekai Seikatsu
+|    image    | cter  |  Japanese
+|             +-------+
+|          +-------+
+|          | anime |
++----------| cover |
+           +-------+
 ```
 
 Below the voice actor name,

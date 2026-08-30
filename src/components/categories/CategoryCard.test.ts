@@ -328,7 +328,8 @@ describe('CategoryCard', () => {
 
     expect(images).toHaveLength(2)
     expect(images[0].attributes('src')).toBe('https://img.example/rem-large.jpg')
-    expect(images[0].classes()).toContain('h-24')
+    // The primary shrinks to make room for the inset instead of being covered.
+    expect(images[0].classes()).toContain('h-[4.5rem]')
 
     // The insets are positioned against the primary image box itself,
     // so that wrapper has to establish the positioning context.
@@ -339,7 +340,7 @@ describe('CategoryCard', () => {
       expect.arrayContaining(['relative', 'h-24', 'w-16']),
     )
     expect(images[1].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[1].classes()).toContain('bottom-1')
+    expect(images[1].classes()).toContain('bottom-0.5')
     expect(wrapper.text()).toContain('Rem')
     expect(wrapper.text()).toContain('Main character in Haibane Renmei')
   })
@@ -392,12 +393,12 @@ describe('CategoryCard', () => {
 
     expect(images).toHaveLength(3)
     expect(images[0].attributes('src')).toBe('https://img.example/rie-large.jpg')
-    expect(images[0].classes()).toContain('h-24')
+    expect(images[0].classes()).toContain('h-[4.5rem]')
     // The first inset is the character and sits above the anime cover.
     expect(images[1].attributes('src')).toBe('https://img.example/rem-large.jpg')
-    expect(images[1].classes()).toContain('bottom-12')
+    expect(images[1].classes()).toContain('bottom-[41px]')
     expect(images[2].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[2].classes()).toContain('bottom-1')
+    expect(images[2].classes()).toContain('bottom-0.5')
     expect(wrapper.text()).toContain('Rie Takahashi')
     expect(wrapper.text()).toContain('Voiced Rem in Haibane Renmei')
     expect(wrapper.text()).toContain('Japanese')

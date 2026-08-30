@@ -35,12 +35,18 @@ export const CARD_TEXT_GAP = 4
 export const COVER_WIDTH = 126
 export const COVER_HEIGHT = 183
 // An inset keeps the cover's aspect ratio, so it crops like the primary image.
-export const INSET_WIDTH = 54
-export const INSET_HEIGHT = 78
-export const INSET_MARGIN = 8
+export const INSET_WIDTH = 48
+export const INSET_HEIGHT = 70
+// The margin equals the ring width, so the ring's outer edge lands exactly on
+// the image slot's edge and the whole composition spans one cover slot.
+export const INSET_MARGIN = 3
 export const INSET_GAP = 6
 export const INSET_RADIUS = 10
 export const INSET_RING = 3
+// How far the inset column reaches over the primary image. The insets are not
+// contained by the primary: it shrinks to make room for them, and they hang
+// past its edge, so a relation never hides a quarter of the primary subject.
+export const INSET_OVERLAP = 18
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
 export const CATEGORIES_PER_ROW_LANDSCAPE = 5
 
@@ -70,6 +76,36 @@ export interface InsetRect {
   y: number
   width: number
   height: number
+}
+
+/**
+ * The primary image's rect inside the image slot.
+ *
+ * Without insets it fills the slot. With insets it shrinks and anchors to the
+ * top left, leaving the lower right of the slot to the inset column, so the
+ * two together span exactly the slot a lone anime cover would.
+ *
+ * Canvas-free so the geometry stays unit-testable.
+ */
+export const resolvePrimaryRect = (
+  coverX: number,
+  coverY: number,
+  coverWidth: number,
+  coverHeight: number,
+  insetCount: number,
+): InsetRect => {
+  if (insetCount <= 0) {
+    return { x: coverX, y: coverY, width: coverWidth, height: coverHeight }
+  }
+
+  const width = coverWidth - INSET_WIDTH - INSET_MARGIN + INSET_OVERLAP
+
+  return {
+    x: coverX,
+    y: coverY,
+    width,
+    height: Math.round((width * coverHeight) / coverWidth),
+  }
 }
 
 /**
@@ -753,16 +789,35 @@ export const renderTemplatePng = async ({
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
 
+    // With relation insets the primary image shrinks and anchors top left, so
+    // the insets have room of their own instead of covering it.
+    const primaryRect = resolvePrimaryRect(
+      coverX,
+      coverY,
+      COVER_WIDTH,
+      COVER_HEIGHT,
+      cardImages?.insets.length ?? 0,
+    )
+
     if (selection && image) {
-      drawCoverImage(context, image, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18)
-      strokeRoundedRect(context, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18, palette.border, 2)
+      drawCoverImage(context, image, primaryRect.x, primaryRect.y, primaryRect.width, primaryRect.height, 18)
+      strokeRoundedRect(
+        context,
+        primaryRect.x,
+        primaryRect.y,
+        primaryRect.width,
+        primaryRect.height,
+        18,
+        palette.border,
+        2,
+      )
     } else if (selection) {
       drawCoverPlaceholder(
         context,
-        coverX,
-        coverY,
-        COVER_WIDTH,
-        COVER_HEIGHT,
+        primaryRect.x,
+        primaryRect.y,
+        primaryRect.width,
+        primaryRect.height,
         18,
         palette,
         category.name,

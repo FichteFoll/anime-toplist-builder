@@ -65,11 +65,17 @@ so the grid stays aligned.
 ## Insets
 
 A character or voice-actor card draws its related entities as small insets
-overlapping the primary image:
+beside the primary image:
 a character card gets one inset, the anime cover,
 and a voice-actor card gets two, the character above the anime cover.
-Every inset sits inside the primary image's own bounds,
-in its lower right corner,
+
+The insets are not contained by the primary image.
+The primary image shrinks and anchors to the top left of the image slot,
+and the insets take the lower right of that slot,
+reaching past the primary image's edge rather than sitting on top of it,
+so a relation never hides a quarter of the primary subject.
+The primary image and its insets together
+span exactly the slot a lone anime cover would fill,
 so no card gains height or width from having insets,
 in the app or in the exported image.
 An inset whose image fails to load

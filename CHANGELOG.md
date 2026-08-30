@@ -5,6 +5,14 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+- Character and voice-actor cards now give their inset images room of their
+  own instead of laying them over the primary image.
+  The character or voice actor is drawn slightly smaller,
+  and the insets reach past its edge,
+  so a relation no longer hides a quarter or a half of the main subject.
+  The images together still fill exactly the space one anime cover would,
+  so no card changes size.
+
 - The character and voice-actor pickers now keep the chosen anime
   in a panel beside the credit list,
   the way the song picker does,
