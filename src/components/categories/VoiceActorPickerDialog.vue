@@ -19,6 +19,7 @@ import {
 import DialogCloseButton from '@/components/DialogCloseButton.vue'
 import DialogHeader from '@/components/DialogHeader.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
+import PickerAnimeDetail from '@/components/categories/PickerAnimeDetail.vue'
 import PickerStepper from '@/components/categories/PickerStepper.vue'
 import VoiceActorPickerCreditList from '@/components/categories/VoiceActorPickerCreditList.vue'
 import { resolveAnimeTitle } from '@/lib/anime-title'
@@ -160,7 +161,9 @@ const hydrateSelectedAnime = async () => {
 
   focusedAnimeId.value = hydratedSelectedAnime.value?.id ?? props.selectedVoiceActor.animeId
   if (hydratedSelectedAnime.value) {
-    void loadCreditsForAnime(hydratedSelectedAnime.value, { openVoiceActorView: false })
+    // A category that already has a pick opens on the credit list,
+    // where that pick is, rather than on the anime search.
+    void loadCreditsForAnime(hydratedSelectedAnime.value)
   }
 }
 
@@ -391,72 +394,78 @@ watch(open, (isOpen) => {
               </button>
             </div>
 
-            <p class="text-sm leading-6 text-app-muted">
-              Voice actors of {{ resolveAnimeTitle(detailAnime.title, settingsStore.titleLanguage) }}
-            </p>
+            <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+              <PickerAnimeDetail :anime="detailAnime" />
 
-            <div
-              v-if="creditStatus === 'loading'"
-              class="text-sm text-app-muted"
-            >
-              Loading voice actors...
-            </div>
-            <div
-              v-else-if="creditStatus === 'error'"
-              class="space-y-3"
-            >
-              <p class="text-sm leading-6 text-app-muted">
-                {{ creditErrorMessage }}
-              </p>
-              <button
-                type="button"
-                class="shell-button"
-                @click="loadCreditsForAnime(detailAnime, { openVoiceActorView: false })"
-              >
-                Retry voice actors
-              </button>
-            </div>
-            <div
-              v-else-if="creditStatus === 'ready' && !hasMoreCredits && focusedRows.length === 0"
-              class="text-sm leading-6 text-app-muted"
-            >
-              This anime has no voice credits on AniList.
-            </div>
-            <div
-              v-else-if="creditStatus === 'ready' && !hasMoreCredits && visibleRows.length === 0"
-              class="text-sm leading-6 text-app-muted"
-            >
-              No voice actor matched this category's language filter.
-            </div>
-            <template v-else>
-              <VoiceActorPickerCreditList
-                :rows="visibleRows"
-                :selected-voice-actor-id="selectedVoiceActor?.voiceActorId ?? null"
-                :selected-character-id="selectedVoiceActor?.characterId ?? null"
-                @select="selectRow(detailAnime, $event)"
-              />
-
-              <div
-                v-if="hasMoreCredits"
-                class="space-y-2"
-              >
-                <p
-                  v-if="creditErrorMessage"
-                  class="text-sm leading-6 text-app-muted"
-                >
-                  {{ creditErrorMessage }}
+              <div class="flex min-h-0 min-w-0 flex-col gap-4">
+                <p class="text-sm leading-6 text-app-muted">
+                  Voice actors of {{ resolveAnimeTitle(detailAnime.title, settingsStore.titleLanguage) }}
                 </p>
 
-                <button
-                  type="button"
-                  class="load-more-credits shell-button"
-                  :disabled="isLoadingMoreCredits"
-                  @click="loadMoreCredits()"
+                <div
+                  v-if="creditStatus === 'loading'"
+                  class="text-sm text-app-muted"
                 >
-                  {{ isLoadingMoreCredits ? 'Loading more voice actors...' : 'Load more voice actors' }}
-                </button>
+                  Loading voice actors...
+                </div>
+                <div
+                  v-else-if="creditStatus === 'error'"
+                  class="space-y-3"
+                >
+                  <p class="text-sm leading-6 text-app-muted">
+                    {{ creditErrorMessage }}
+                  </p>
+                  <button
+                    type="button"
+                    class="shell-button"
+                    @click="loadCreditsForAnime(detailAnime, { openVoiceActorView: false })"
+                  >
+                    Retry voice actors
+                  </button>
+                </div>
+                <div
+                  v-else-if="creditStatus === 'ready' && !hasMoreCredits && focusedRows.length === 0"
+                  class="text-sm leading-6 text-app-muted"
+                >
+                  This anime has no voice credits on AniList.
+                </div>
+                <div
+                  v-else-if="creditStatus === 'ready' && !hasMoreCredits && visibleRows.length === 0"
+                  class="text-sm leading-6 text-app-muted"
+                >
+                  No voice actor matched this category's language filter.
+                </div>
+                <template v-else>
+                  <VoiceActorPickerCreditList
+                    :rows="visibleRows"
+                    :selected-voice-actor-id="selectedVoiceActor?.voiceActorId ?? null"
+                    :selected-character-id="selectedVoiceActor?.characterId ?? null"
+                    @select="selectRow(detailAnime, $event)"
+                  />
+
+                  <div
+                    v-if="hasMoreCredits"
+                    class="space-y-2"
+                  >
+                    <p
+                      v-if="creditErrorMessage"
+                      class="text-sm leading-6 text-app-muted"
+                    >
+                      {{ creditErrorMessage }}
+                    </p>
+
+                    <button
+                      type="button"
+                      class="load-more-credits shell-button"
+                      :disabled="isLoadingMoreCredits"
+                      @click="loadMoreCredits()"
+                    >
+                      {{ isLoadingMoreCredits ? 'Loading more voice actors...' : 'Load more voice actors' }}
+                    </button>
+                  </div>
+                </template>
               </div>
-            </template>
+            </div>
           </section>
         </div>
       </DialogContent>

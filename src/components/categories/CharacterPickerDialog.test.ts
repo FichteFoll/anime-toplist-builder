@@ -386,10 +386,10 @@ describe('CharacterPickerDialog', () => {
 
     expect(mocks.fetchAniListMediaById).toHaveBeenCalledWith(42, 'token')
     expect(wrapper.find('.anime-view-hydrated').text()).toBe('42')
-    expect(wrapper.find('.active-view').text()).toBe('anime')
+    // A category that already has a pick opens where that pick is.
+    expect(wrapper.find('.active-view').text()).toBe('character')
     expect(wrapper.find('.step-character').attributes('disabled')).toBeUndefined()
-
-    await wrapper.find('.step-character').trigger('click')
+    expect(wrapper.find('.picker-anime-detail').exists()).toBe(true)
 
     const rows = wrapper.findAll('.credit-row')
 

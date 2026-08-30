@@ -57,8 +57,15 @@ and the anime together.
 
 Reopening a category that already has a voice actor
 restores the anime in step one
-and marks the stored voice-actor-and-character row as selected in step two,
+and marks the stored voice-actor-and-character row as selected,
 the same way the character picker restores its stored row.
+
+A category that already holds a pick opens on step two,
+where that pick is,
+rather than on the anime search.
+Step two keeps the chosen anime in a panel on the left,
+beside the credit list,
+the way the song picker does.
 
 ## Where Character And Voice-Actor Data Comes From
 

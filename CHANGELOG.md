@@ -5,6 +5,12 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+- The character and voice-actor pickers now keep the chosen anime
+  in a panel beside the credit list,
+  the way the song picker does,
+  and open straight on the credit list
+  for a category that already holds a pick.
+
 - The character and voice-actor pickers now load more credits
   as the list nears its end,
   so anime with a large cast are no longer cut off
