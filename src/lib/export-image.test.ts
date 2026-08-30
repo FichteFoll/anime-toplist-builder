@@ -96,11 +96,16 @@ describe('resolveInsetRects', () => {
     ])
   })
 
-  it('stacks two insets top-to-bottom above the lower right corner', () => {
+  it('lays two insets side by side on one baseline', () => {
+    const [left, right] = insetRects(2)
+
     expect(insetRects(2)).toEqual([
-      { x: coverX + 75, y: coverY + 34, width: INSET_WIDTH, height: INSET_HEIGHT },
+      { x: coverX + 21, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
       { x: coverX + 75, y: coverY + 110, width: INSET_WIDTH, height: INSET_HEIGHT },
     ])
+    // Side by side, so they share a baseline and never overlap each other.
+    expect(left.y).toBe(right.y)
+    expect(left.x + left.width).toBeLessThan(right.x)
   })
 
   it('keeps every inset and its ring fully inside the image slot', () => {
@@ -135,11 +140,13 @@ describe('resolvePrimaryRect', () => {
   })
 
   it('shrinks and keeps the cover aspect ratio once insets share the slot', () => {
-    const rect = primaryRect(1)
+    for (const [count, expected] of [[1, { width: 93, height: 135 }], [2, { width: 88, height: 128 }]] as const) {
+      const rect = primaryRect(count)
 
-    expect(rect).toEqual({ x: coverX, y: coverY, width: 93, height: 135 })
-    expect(rect.width).toBeLessThan(COVER_WIDTH)
-    expect(Math.abs(rect.width / rect.height - COVER_WIDTH / COVER_HEIGHT)).toBeLessThan(0.01)
+      expect(rect).toEqual({ x: coverX, y: coverY, ...expected })
+      expect(rect.width).toBeLessThan(COVER_WIDTH)
+      expect(Math.abs(rect.width / rect.height - COVER_WIDTH / COVER_HEIGHT)).toBeLessThan(0.01)
+    }
   })
 
   it('is overlapped by the inset column rather than containing it', () => {
@@ -147,10 +154,10 @@ describe('resolvePrimaryRect', () => {
       const primary = primaryRect(count)
 
       for (const inset of insetRectsFor(count)) {
-        // The inset reaches over the primary's edge, so it is neither
+        // The inset reaches past the primary's outline, so it is neither
         // contained by it nor detached from it.
-        expect(inset.x).toBeLessThan(primary.x + primary.width)
-        expect(inset.x + inset.width).toBeGreaterThan(primary.x + primary.width)
+        expect(inset.y).toBeLessThan(primary.y + primary.height)
+        expect(inset.y + inset.height).toBeGreaterThan(primary.y + primary.height)
       }
     }
   })

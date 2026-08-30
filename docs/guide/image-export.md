@@ -30,7 +30,7 @@ Nothing is sent to a server.
   and its relation to the anime,
   each as its own text block,
 - for voice-actor selections the voice actor image as the primary image,
-  the character above the anime cover as two stacked insets,
+  the character left of the anime cover as two insets side by side,
   the voice actor name,
   its relation to the character and the anime,
   and the credited language when one is known,
@@ -67,11 +67,13 @@ so the grid stays aligned.
 A character or voice-actor card draws its related entities as small insets
 beside the primary image:
 a character card gets one inset, the anime cover,
-and a voice-actor card gets two, the character above the anime cover.
+and a voice-actor card gets two,
+the character left of the anime cover on one baseline.
 
 The insets are not contained by the primary image.
 The primary image shrinks and anchors to the top left of the image slot,
 and the insets take the lower right of that slot,
+a single inset in the corner and a pair as a row along the bottom,
 reaching past the primary image's edge rather than sitting on top of it,
 so a relation never hides a quarter of the primary subject.
 The primary image and its insets together

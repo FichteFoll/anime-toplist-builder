@@ -340,12 +340,12 @@ describe('CategoryCard', () => {
       expect.arrayContaining(['relative', 'h-24', 'w-16']),
     )
     expect(images[1].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[1].classes()).toContain('bottom-0.5')
+    expect(images[1].classes()).toContain('right-0.5')
     expect(wrapper.text()).toContain('Rem')
     expect(wrapper.text()).toContain('Main character in Haibane Renmei')
   })
 
-  it('renders a voice-actor selection with the character above the anime cover', () => {
+  it('renders a voice-actor selection with the character left of the anime cover', () => {
     const wrapper = mount(CategoryCard, {
       props: {
         category: {
@@ -393,12 +393,13 @@ describe('CategoryCard', () => {
 
     expect(images).toHaveLength(3)
     expect(images[0].attributes('src')).toBe('https://img.example/rie-large.jpg')
-    expect(images[0].classes()).toContain('h-[4.5rem]')
-    // The first inset is the character and sits above the anime cover.
+    // Two insets take a whole row, so the primary gives up more than for one.
+    expect(images[0].classes()).toContain('h-[4.25rem]')
+    // The first inset is the character and sits left of the anime cover.
     expect(images[1].attributes('src')).toBe('https://img.example/rem-large.jpg')
-    expect(images[1].classes()).toContain('bottom-[41px]')
+    expect(images[1].classes()).toContain('right-[29px]')
     expect(images[2].attributes('src')).toBe('https://img.example/haibane-large.jpg')
-    expect(images[2].classes()).toContain('bottom-0.5')
+    expect(images[2].classes()).toContain('right-0.5')
     expect(wrapper.text()).toContain('Rie Takahashi')
     expect(wrapper.text()).toContain('Voiced Rem in Haibane Renmei')
     expect(wrapper.text()).toContain('Japanese')

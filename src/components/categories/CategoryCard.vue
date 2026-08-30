@@ -58,10 +58,15 @@ const emit = defineEmits<{
 const settingsStore = useSettingsStore()
 
 // The inset array is ordered top-to-bottom, so the last entry sits lowest.
-// Bottom-up, so a two-entry array stacks the character above the anime cover.
-// The offsets pair with `h-9` insets and a `bottom-0.5` ring inside the
-// 64x96 image slot: 2 + 36 + 3 + 36 + 2 leaves the slot's height intact.
-const insetBottomClasses = ['bottom-0.5', 'bottom-[41px]']
+// Right-to-left, so a two-entry array puts the character left of the anime
+// cover on one baseline. The offsets pair with `w-6` insets inside the 64x96
+// image slot: 2 + 24 + 3 + 24 + 11 leaves the slot's width intact.
+const insetRightClasses = ['right-0.5', 'right-[29px]']
+
+// The primary image gives up room to the insets rather than being covered by
+// them: one inset takes the lower right corner, two take the bottom row, and
+// the primary shrinks to match. Mirrors `resolvePrimaryRect` in the export.
+const primaryImageClasses = ['h-24 w-16', 'h-[4.5rem] w-12', 'h-[4.25rem] w-11']
 
 const resolveInsetAltLabels = (selection: CategorySelection) => {
   if (selection.kind === 'anime' || selection.kind === 'song') {
@@ -128,7 +133,7 @@ const selectionInsets = computed(() => {
   return insetImages.map((image, index) => ({
     src: image.large,
     alt: altLabels[index] ?? 'Related image',
-    positionClass: insetBottomClasses[insetImages.length - 1 - index] ?? 'bottom-[41px]',
+    positionClass: insetRightClasses[insetImages.length - 1 - index] ?? 'right-[29px]',
   }))
 })
 const characterRelationLine = computed(() =>
@@ -198,14 +203,15 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
           <!--
             With relation insets the primary image shrinks and stays top left,
             so the insets get room of their own beside and below it rather than
-            covering a quarter of the subject. The two together still span the
-            slot exactly, so no card changes size.
+            covering a quarter of the subject. Two insets sit side by side on
+            one baseline. Everything together still spans the slot exactly, so
+            no card changes size.
           -->
           <img
             :src="selectionPrimaryImage?.large"
             :alt="selectionTitle ?? 'Selected anime cover'"
             class="selection-primary-image rounded-xl border border-app-border/70 object-cover"
-            :class="selectionInsets.length > 0 ? 'h-[4.5rem] w-12' : 'h-24 w-16'"
+            :class="primaryImageClasses[selectionInsets.length] ?? 'h-[4.25rem] w-11'"
           >
 
           <img
@@ -213,7 +219,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             :key="index"
             :src="inset.src"
             :alt="inset.alt"
-            class="absolute right-0.5 h-9 w-6 rounded-md object-cover ring-2 ring-app-surface"
+            class="absolute bottom-0.5 h-9 w-6 rounded-md object-cover ring-2 ring-app-surface"
             :class="inset.positionClass"
           >
         </div>

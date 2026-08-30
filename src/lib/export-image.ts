@@ -98,18 +98,32 @@ export const resolvePrimaryRect = (
     return { x: coverX, y: coverY, width: coverWidth, height: coverHeight }
   }
 
-  const width = coverWidth - INSET_WIDTH - INSET_MARGIN + INSET_OVERLAP
+  // A lone inset tucks into the lower right corner, so the primary is bounded
+  // by the inset's left edge. Two insets sit side by side across the bottom,
+  // so the row's top edge bounds the primary instead.
+  if (insetCount === 1) {
+    const width = coverWidth - INSET_WIDTH - INSET_MARGIN + INSET_OVERLAP
+
+    return {
+      x: coverX,
+      y: coverY,
+      width,
+      height: Math.round((width * coverHeight) / coverWidth),
+    }
+  }
+
+  const height = coverHeight - INSET_HEIGHT - INSET_MARGIN + INSET_OVERLAP
 
   return {
     x: coverX,
     y: coverY,
-    width,
-    height: Math.round((width * coverHeight) / coverWidth),
+    width: Math.round((height * coverWidth) / coverHeight),
+    height,
   }
 }
 
 /**
- * Inset rects inside the image slot, top-to-bottom, right- and bottom-aligned.
+ * Inset rects inside the image slot, left-to-right, right- and bottom-aligned.
  *
  * Canvas-free so the geometry stays unit-testable.
  */
@@ -124,16 +138,18 @@ export const resolveInsetRects = (
     return []
   }
 
-  const x = coverX + coverWidth - INSET_WIDTH - INSET_MARGIN
+  // A single row: two insets read better side by side than stacked, and a
+  // stack down the right would crowd the primary image's whole edge.
+  const y = coverY + coverHeight - INSET_MARGIN - INSET_HEIGHT
 
   return Array.from({ length: count }, (_value, index) => ({
-    x,
-    y:
-      coverY
-      + coverHeight
+    x:
+      coverX
+      + coverWidth
       - INSET_MARGIN
-      - (count - index) * INSET_HEIGHT
+      - (count - index) * INSET_WIDTH
       - (count - 1 - index) * INSET_GAP,
+    y,
     width: INSET_WIDTH,
     height: INSET_HEIGHT,
   }))

@@ -132,22 +132,22 @@ A clear action removes the selection.
 ### Voice-actor categories
 
 The card uses the voice actor image as its primary image,
-with two insets stacked down the right of the image slot,
-the character above the anime cover.
+with two insets side by side along the bottom of the image slot,
+the character left of the anime cover.
 The voice actor image shrinks to make room for them,
-and both insets reach past its edge:
+and both insets reach past its lower edge:
 
 ```text
 +-------------+    Rie Takahashi
 |             |    Voiced Rem
-|    voice    +-------+  in Re:Zero kara Hajimeru
-|    actor    | chara |     Isekai Seikatsu
-|    image    | cter  |  Japanese
-|             +-------+
-|          +-------+
-|          | anime |
-+----------| cover |
-           +-------+
+|    voice    |    in Re:Zero kara Hajimeru
+|    actor    |       Isekai Seikatsu
+|    image    |    Japanese
+|             |
++--+-------+--+----+
+   | chara | | anime |
+   | cter  | | cover |
+   +-------+ +-------+
 ```
 
 Below the voice actor name,

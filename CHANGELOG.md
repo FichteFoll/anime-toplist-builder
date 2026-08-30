@@ -9,6 +9,7 @@ The app shows these entries in its changelog popup.
   own instead of laying them over the primary image.
   The character or voice actor is drawn slightly smaller,
   and the insets reach past its edge,
+  a voice-actor card putting its two insets side by side along the bottom,
   so a relation no longer hides a quarter or a half of the main subject.
   The images together still fill exactly the space one anime cover would,
   so no card changes size.
