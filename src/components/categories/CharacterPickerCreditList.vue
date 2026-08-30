@@ -1,13 +1,6 @@
 <script setup lang="ts">
-import {
-  TooltipArrow,
-  TooltipContent,
-  TooltipPortal,
-  TooltipRoot,
-  TooltipTrigger,
-} from 'reka-ui'
-
 import type { AniListCharacterCredit } from '@/api'
+import RelationName from '@/components/categories/RelationName.vue'
 import { formatCharacterRoleLabel } from '@/lib/format-label'
 import { resolveRelationName } from '@/lib/relation-selection'
 import { useSettingsStore } from '@/stores/settings'
@@ -45,29 +38,11 @@ const resolveCreditName = (credit: AniListCharacterCredit) =>
       >
 
       <span class="block min-w-0">
-        <TooltipRoot v-if="resolveCreditName(credit).tooltip">
-          <TooltipTrigger as-child>
-            <span class="block break-words font-medium text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-              {{ resolveCreditName(credit).primary }}
-            </span>
-          </TooltipTrigger>
-
-          <TooltipPortal>
-            <TooltipContent
-              class="z-[60] rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-              :side-offset="8"
-            >
-              {{ resolveCreditName(credit).tooltip }}
-              <TooltipArrow class="fill-app-surface" />
-            </TooltipContent>
-          </TooltipPortal>
-        </TooltipRoot>
-        <span
-          v-else
-          class="block break-words font-medium text-app-text"
-        >
-          {{ resolveCreditName(credit).primary }}
-        </span>
+        <RelationName
+          :primary="resolveCreditName(credit).primary"
+          :tooltip="resolveCreditName(credit).tooltip"
+          text-class="font-medium text-app-text"
+        />
 
         <span
           v-if="credit.role"

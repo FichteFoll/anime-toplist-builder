@@ -346,6 +346,23 @@ describe('VoiceActorPickerDialog', () => {
     expect(wrapper.text()).not.toContain("No voice actor matched this category's language filter.")
   })
 
+  it('shows the voice actor and the character image in a row', async () => {
+    setActivePinia(createPinia())
+    mocks.fetchAniListMediaById.mockResolvedValue(null)
+    mocks.fetchAnimeCharacterCredits.mockResolvedValue(creditsResponse)
+
+    const wrapper = mountDialog(createCategory(['Japanese']))
+
+    await openDialog(wrapper)
+    await selectAnime(wrapper)
+
+    const row = wrapper.findAll('.credit-row')[0]
+
+    // A credit is a pairing, so a row has to show both halves of it.
+    expect(row.find('.voice-actor-image').attributes('src')).toBe(hirohashiImage.large)
+    expect(row.find('.character-image').attributes('src')).toBe(rakkaImage.large)
+  })
+
   it('renders one row per voice actor of a credit', async () => {
     setActivePinia(createPinia())
     mocks.fetchAniListMediaById.mockResolvedValue(null)

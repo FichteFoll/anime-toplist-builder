@@ -310,9 +310,9 @@ watch(open, (isOpen) => {
       <button
         type="button"
         class="shell-button shell-button-active"
-        :aria-label="selectedCharacter ? `Choose character for ${category.name}, replacing the current selection` : `Choose character for ${category.name}`"
+        :aria-label="selectedCharacter ? `Replace character selection for ${category.name}` : `Pick character selection for ${category.name}`"
       >
-        Choose character
+        {{ selectedCharacter ? 'Replace' : 'Pick' }}
       </button>
     </DialogTrigger>
 
