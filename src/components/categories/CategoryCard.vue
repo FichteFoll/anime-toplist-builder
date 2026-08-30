@@ -7,8 +7,12 @@ import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
-import { resolveAnimeTitle } from '@/lib/anime-title'
-import { getSelectionCoverImage, resolveSongTitle, getSongContextLabel } from '@/lib/song-selection'
+import {
+  getSelectionCoverImage,
+  getSelectionPrimaryTitle,
+  resolveSongTitle,
+  getSongContextLabel,
+} from '@/lib/song-selection'
 import { useSettingsStore } from '@/stores/settings'
 import type {
   AniListMetadata,
@@ -41,9 +45,7 @@ const selectionTitle = computed(() => {
     return null
   }
 
-  return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).primary
-    : resolveAnimeTitle(props.selection.title, settingsStore.titleLanguage)
+  return getSelectionPrimaryTitle(props.selection, settingsStore.titleLanguage)
 })
 const selectionAltTitle = computed(() => {
   if (!props.selection) {

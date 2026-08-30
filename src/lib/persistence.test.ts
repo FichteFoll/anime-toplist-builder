@@ -9,6 +9,7 @@ import {
   saveStoredTemplates,
 } from '@/lib/persistence'
 import { createAnimeSelection, createSongSelection } from '@/lib/song-selection'
+import { createCharacterSelection, createVoiceActorSelection } from '@/lib/relation-selection'
 import { normalizeImportedTemplate } from '@/lib/template-validation'
 import {
   defaultAnimeTitleLanguage,
@@ -18,6 +19,7 @@ import {
   templateSchemaVersion,
   TemplateOrigin,
   ThemeType,
+  CharacterRole,
   type AnimeSelection,
 } from '@/types'
 
@@ -64,6 +66,42 @@ const createSelection = (): AnimeSelection => createAnimeSelection({
   season: AnimeSeason.Summer,
   seasonYear: 1998,
   format: AnimeFormat.Tv,
+})
+
+const createCharacterSelectionFixture = () => createCharacterSelection({
+  characterId: 118737,
+  characterName: 'Rem',
+  characterNativeName: 'レム',
+  characterImage: {
+    large: 'https://img.example/rem-large.jpg',
+    medium: 'https://img.example/rem-medium.jpg',
+  },
+  role: CharacterRole.Main,
+  animeId: 21355,
+  animeTitle: createSelection().title,
+  animeCoverImage: createSelection().coverImage,
+})
+
+const createVoiceActorSelectionFixture = () => createVoiceActorSelection({
+  voiceActorId: 95159,
+  voiceActorName: 'Rie Takahashi',
+  voiceActorNativeName: '高橋李依',
+  voiceActorImage: {
+    large: 'https://img.example/takahashi-large.jpg',
+    medium: null,
+  },
+  language: 'Japanese',
+  characterId: 118737,
+  characterName: 'Rem',
+  characterNativeName: 'レム',
+  characterImage: {
+    large: 'https://img.example/rem-large.jpg',
+    medium: 'https://img.example/rem-medium.jpg',
+  },
+  role: CharacterRole.Main,
+  animeId: 21355,
+  animeTitle: createSelection().title,
+  animeCoverImage: createSelection().coverImage,
 })
 
 describe('persistence helpers', () => {
@@ -242,6 +280,97 @@ describe('persistence helpers', () => {
     expect(loadStoredSelections(storage)).toEqual({
       valid: {
         saved: songSelection,
+      },
+    })
+  })
+
+  it('round-trips a stored character selection with every field intact', () => {
+    const storage = createMockStorage()
+    const characterSelection = createCharacterSelectionFixture()
+
+    saveStoredSelections({ valid: { saved: characterSelection } }, storage)
+
+    expect(loadStoredSelections(storage)).toEqual({
+      valid: {
+        saved: characterSelection,
+      },
+    })
+  })
+
+  it('round-trips a stored voice-actor selection with every field intact', () => {
+    const storage = createMockStorage()
+    const voiceActorSelection = createVoiceActorSelectionFixture()
+
+    saveStoredSelections({ valid: { saved: voiceActorSelection } }, storage)
+
+    expect(loadStoredSelections(storage)).toEqual({
+      valid: {
+        saved: voiceActorSelection,
+      },
+    })
+  })
+
+  it('drops a stored character selection without a large character image', () => {
+    const storage = createMockStorage()
+
+    storage.write('anime-toplist-builder.selections.v1', {
+      schemaVersion: 1,
+      selections: {
+        valid: {
+          saved: {
+            ...createCharacterSelectionFixture(),
+            characterImage: { medium: 'https://img.example/rem-medium.jpg' },
+          },
+        },
+      },
+    })
+
+    expect(loadStoredSelections(storage)).toEqual({})
+  })
+
+  it('drops a stored voice-actor selection with an unknown character role', () => {
+    const storage = createMockStorage()
+
+    storage.write('anime-toplist-builder.selections.v1', {
+      schemaVersion: 1,
+      selections: {
+        valid: {
+          saved: {
+            ...createVoiceActorSelectionFixture(),
+            role: 'LEAD',
+          },
+        },
+      },
+    })
+
+    expect(loadStoredSelections(storage)).toEqual({})
+  })
+
+  it('loads a legacy anime selection record that has no kind', () => {
+    const storage = createMockStorage()
+    const animeSelection = createSelection()
+    // A record as it was written before selections carried a `kind`.
+    const legacySelection = {
+      mediaId: animeSelection.mediaId,
+      title: animeSelection.title,
+      coverImage: animeSelection.coverImage,
+      season: animeSelection.season,
+      seasonYear: animeSelection.seasonYear,
+      format: animeSelection.format,
+    }
+
+    storage.write('anime-toplist-builder.selections.v1', {
+      schemaVersion: 1,
+      selections: {
+        valid: {
+          saved: legacySelection,
+        },
+      },
+    })
+
+    expect(loadStoredSelections(storage)).toEqual({
+      valid: {
+        saved: createSelection(),
       },
     })
   })

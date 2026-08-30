@@ -230,12 +230,16 @@ export const buildCardTextBlocks = ({
   titleLanguage,
   maxWidth,
 }: CardTextInput): Array<CardTextBlock> => {
-  const selectionBlocks =
-    selection === null
-      ? []
-      : selection.kind === 'song'
-        ? buildSongBlocks(selection, titleLanguage, maxWidth)
-        : buildAnimeBlocks(selection, titleLanguage, maxWidth)
+  const selectionBlocks = (() => {
+    switch (selection?.kind) {
+      case 'song':
+        return buildSongBlocks(selection, titleLanguage, maxWidth)
+      case 'anime':
+        return buildAnimeBlocks(selection, titleLanguage, maxWidth)
+      default:
+        return []
+    }
+  })()
 
   return [buildCategoryBlock(categoryName, maxWidth), ...selectionBlocks]
     .filter((block) => block.naturalLines > 0)

@@ -1,5 +1,5 @@
 import type { AnimeFormat, AnimeSeason } from './filters'
-import type { ThemeType } from './templates'
+import type { CharacterRole, ThemeType } from './templates'
 
 export interface AnimeTitle {
   userPreferred: string
@@ -48,7 +48,45 @@ export interface SongSelection {
   }
 }
 
-export type CategorySelection = AnimeSelection | SongSelection
+export interface RelationImage {
+  large: string
+  medium?: string | null
+}
+
+export interface CharacterSelection {
+  kind: 'character'
+  characterId: number
+  characterName: string
+  characterNativeName?: string | null
+  characterImage: RelationImage
+  role?: CharacterRole | null
+  animeId: number
+  animeTitle: AnimeTitle
+  animeCoverImage: AnimeCoverImage
+}
+
+export interface VoiceActorSelection {
+  kind: 'voice-actor'
+  voiceActorId: number
+  voiceActorName: string
+  voiceActorNativeName?: string | null
+  voiceActorImage: RelationImage
+  language?: string | null
+  characterId: number
+  characterName: string
+  characterNativeName?: string | null
+  characterImage: RelationImage
+  role?: CharacterRole | null
+  animeId: number
+  animeTitle: AnimeTitle
+  animeCoverImage: AnimeCoverImage
+}
+
+export type CategorySelection =
+  | AnimeSelection
+  | SongSelection
+  | CharacterSelection
+  | VoiceActorSelection
 
 export type CategorySelectionMap = Record<string, CategorySelection | null>
 

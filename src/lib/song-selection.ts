@@ -11,6 +11,7 @@ import {
 } from '@/types'
 
 import { resolveAnimeTitle } from '@/lib/anime-title'
+import { resolveRelationName } from '@/lib/relation-selection'
 
 const normalizeText = (value: string | null | undefined) => {
   const normalizedValue = value?.trim()
@@ -158,15 +159,29 @@ export const resolveSongTitle = (
 }
 
 export const getSelectionCoverImage = (selection: CategorySelection) =>
-  selection.kind === 'song' ? selection.animeCoverImage : selection.coverImage
+  selection.kind === 'anime' ? selection.coverImage : selection.animeCoverImage
 
 export const getSelectionPrimaryTitle = (
   selection: CategorySelection,
   titleLanguage: AnimeTitleLanguage,
-) =>
-  selection.kind === 'song'
-    ? resolveSongTitle(selection.song, titleLanguage).primary
-    : resolveAnimeTitle(selection.title, titleLanguage)
+) => {
+  switch (selection.kind) {
+    case 'song':
+      return resolveSongTitle(selection.song, titleLanguage).primary
+    case 'character':
+      return resolveRelationName(
+        { name: selection.characterName, nativeName: selection.characterNativeName },
+        titleLanguage,
+      ).primary
+    case 'voice-actor':
+      return resolveRelationName(
+        { name: selection.voiceActorName, nativeName: selection.voiceActorNativeName },
+        titleLanguage,
+      ).primary
+    case 'anime':
+      return resolveAnimeTitle(selection.title, titleLanguage)
+  }
+}
 
 export const getSelectionDisplayLabel = (
   selection: CategorySelection,
@@ -176,9 +191,27 @@ export const getSelectionDisplayLabel = (
     return resolveAnimeTitle(selection.title, titleLanguage)
   }
 
-  const songTitle = resolveSongTitle(selection.song, titleLanguage).primary
+  const animeName = resolveAnimeTitle(selection.animeTitle, titleLanguage)
 
-  return `${songTitle} from ${resolveAnimeTitle(selection.animeTitle, titleLanguage)}`
+  if (selection.kind === 'song') {
+    return `${resolveSongTitle(selection.song, titleLanguage).primary} from ${animeName}`
+  }
+
+  const characterName = resolveRelationName(
+    { name: selection.characterName, nativeName: selection.characterNativeName },
+    titleLanguage,
+  ).primary
+
+  if (selection.kind === 'character') {
+    return `${characterName} from ${animeName}`
+  }
+
+  const voiceActorName = resolveRelationName(
+    { name: selection.voiceActorName, nativeName: selection.voiceActorNativeName },
+    titleLanguage,
+  ).primary
+
+  return `${voiceActorName} as ${characterName} from ${animeName}`
 }
 
 export const getSongContextLabel = (
