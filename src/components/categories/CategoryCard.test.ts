@@ -45,6 +45,12 @@ const characterPickerStub = defineComponent({
   template: '<div class="character-picker-stub" />',
 })
 
+const voiceActorPickerStub = defineComponent({
+  name: 'VoiceActorPickerDialog',
+  emits: ['clear', 'select'],
+  template: '<div class="voice-actor-picker-stub" />',
+})
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
@@ -236,6 +242,44 @@ describe('CategoryCard', () => {
     })
 
     expect(wrapper.find('.character-picker-stub').exists()).toBe(true)
+    expect(wrapper.find('.song-picker-stub').exists()).toBe(false)
+    expect(wrapper.find('button.emit-clear').exists()).toBe(false)
+  })
+
+  it('mounts the voice actor picker for a voice-actor category', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: CategoryEntityKind.VoiceActor,
+        },
+        selection: null,
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          AnimePickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          CharacterPickerDialog: characterPickerStub,
+          VoiceActorPickerDialog: voiceActorPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    expect(wrapper.find('.voice-actor-picker-stub').exists()).toBe(true)
+    expect(wrapper.find('.character-picker-stub').exists()).toBe(false)
     expect(wrapper.find('.song-picker-stub').exists()).toBe(false)
     expect(wrapper.find('button.emit-clear').exists()).toBe(false)
   })
