@@ -234,7 +234,7 @@ watch(open, (isOpen) => {
       <button
         type="button"
         class="shell-button shell-button-active"
-        :aria-label="selectedVoiceActor ? `Replace voice actor selection for ${category.name}` : `Pick voice actor selection for ${category.name}`"
+        :aria-label="selectedVoiceActor ? `Choose voice actor for ${category.name}, replacing the current selection` : `Choose voice actor for ${category.name}`"
       >
         Choose voice actor
       </button>
