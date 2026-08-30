@@ -20,8 +20,18 @@ and serializes these payloads.
 - Ids are optional in an import payload.
   Missing template and category ids are generated during normalization,
   so hand-written payloads work.
-- Missing `entityKind` and `songFilter` default to anime-safe values,
-  which keeps payloads written before song categories valid.
+- Missing `entityKind`,
+  `songFilter`,
+  `characterFilter`,
+  and `voiceActorFilter` default to anime-safe values,
+  which keeps payloads written before song,
+  character,
+  and voice-actor categories valid.
+  `characterFilter` defaults to `{ roles: [] }`
+  and `voiceActorFilter` defaults to `{ languages: [] }`,
+  meaning every role and every language.
+  The schema version stays `1`
+  for this addition.
 - Filters are normalized:
   unknown enum values are rejected,
   array fields default to empty,

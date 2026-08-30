@@ -4,10 +4,11 @@ Deliberate constraints and rough edges that are worth knowing before filing them
 
 ## Product Scope
 
-- Anime categories and anime song categories only.
-  Character,
-  staff,
-  and manga categories are not implemented.
+- Anime,
+  song,
+  character,
+  and voice-actor categories.
+  Staff and manga categories are not implemented.
 - English-only interface,
   no localization layer.
 - Static hosting only,
@@ -49,6 +50,17 @@ Deliberate constraints and rough edges that are worth knowing before filing them
 - Video previews stream directly from AnimeThemes.
   A failing video degrades the preview dialog only.
 
+## Characters And Voice Actors
+
+- Character and voice credits come from AniList
+  and are not cached between page loads,
+  unlike songs.
+  Reopening a picker on the same anime later refetches its credits.
+- Voice-credit languages are whatever AniList reports for `languageV2`.
+  The category editor's language shortlist is not exhaustive,
+  and the filter accepts any non-empty value,
+  including ones outside that shortlist.
+
 ## UI
 
 - On Firefox,
@@ -81,4 +93,8 @@ Areas where automated tests do not cover the real behavior:
 - PNG export in both themes,
   with missing covers and very long titles,
 - reopening a song picker with an existing selection,
-- native title language swapping.
+- native title language swapping,
+- reopening a character or voice-actor picker with an existing selection,
+- the predefined Crunchyroll template's four character and voice-artist
+  categories switching entity kind,
+  which discards any anime already picked for them.

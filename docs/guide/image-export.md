@@ -24,6 +24,17 @@ Nothing is sent to a server.
   the artist,
   and the anime the song is from with its slug and episode range,
   each as its own text block,
+- for character selections the character image as the primary image,
+  the anime cover as an inset,
+  the character name,
+  and its relation to the anime,
+  each as its own text block,
+- for voice-actor selections the voice actor image as the primary image,
+  the character above the anime cover as two stacked insets,
+  the voice actor name,
+  its relation to the character and the anime,
+  and the credited language when one is known,
+  each as its own text block,
 - the number of lines a card's text block gets
   depends on how much room the card has,
 - a watermark line crediting the site,
@@ -51,6 +62,19 @@ a grid row grows taller when a category name in it needs more room,
 and every card in that row shares the taller height,
 so the grid stays aligned.
 
+## Insets
+
+A character or voice-actor card draws its related entities as small insets
+overlapping the primary image:
+a character card gets one inset, the anime cover,
+and a voice-actor card gets two, the character above the anime cover.
+Every inset sits inside the primary image's own bounds,
+in its lower right corner,
+so no card gains height or width from having insets,
+in the app or in the exported image.
+An inset whose image fails to load
+draws as a plain placeholder rectangle rather than being skipped.
+
 ## Card Text Allocation
 
 Each card's text blocks are measured,
@@ -72,6 +96,23 @@ rather than capping every block at a fixed number of lines.
 - For an anime card,
   the anime title gets at least one line,
   and the year and format line gets at least one line.
+- For a character card,
+  the character name gets at least one line,
+  and the relation line,
+  `<Role> character in <anime>`
+  or `Character in <anime>` when the role is unknown,
+  gets at least two lines,
+  unless its whole text already fits on one.
+- For a voice-actor card,
+  the voice actor name gets at least one line,
+  the relation line,
+  `Voiced <character> in <anime>`,
+  gets at least two lines,
+  unless its whole text already fits on one,
+  and the language block,
+  when the credit reports a language,
+  gets at least one line;
+  a voice-actor selection with no known language has no language block at all.
 - Once every block has its minimum,
   spare vertical space is given out in priority order:
   for a song card,
@@ -80,7 +121,14 @@ rather than capping every block at a fixed number of lines.
   then to the artist;
   for an anime card,
   to the anime title first,
-  then to the year and format line.
+  then to the year and format line;
+  for a character card,
+  to the character name first,
+  then to the relation line;
+  for a voice-actor card,
+  to the voice actor name first,
+  then to the relation line,
+  then to the language block.
   No block is ever given more lines than its text needs.
 
 ## Author

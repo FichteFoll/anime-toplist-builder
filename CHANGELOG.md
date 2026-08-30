@@ -3,6 +3,27 @@
 User-facing changes, newest first.
 The app shows these entries in its changelog popup.
 
+## Unreleased
+
+- Categories can now pick a character of an anime,
+  or a voice actor credited for a character,
+  in addition to anime and song categories.
+  Both are picked anime-first:
+  choose an anime,
+  then a character from it,
+  or one of its voice credits.
+- Character and voice-actor cards now show the related anime as a small inset
+  overlapping their primary image,
+  and a voice-actor card also shows the character as a second inset,
+  in the app and in the exported image,
+  without changing the size of any card.
+- Changing a category's type now asks for confirmation before discarding
+  its saved selection,
+  since a pick cannot be converted between entity kinds.
+- The predefined **Crunchyroll Anime Awards 2025** template now uses the new
+  character and voice-artist category types for its four matching categories,
+  which discards any anime already picked for them.
+
 ## 2026-08-29
 
 - The page header and the template card are now one sticky toolbar

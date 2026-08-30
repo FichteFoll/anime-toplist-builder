@@ -89,8 +89,9 @@ Contributor conventions and coding rules stay in [`AGENTS.md`](../../AGENTS.md).
   GitHub Pages included.
   No server-side code,
   no build-time secrets.
-- The product scope is anime and anime song categories.
-  Character,
-  staff,
-  and manga support are not implemented.
+- The product scope is anime,
+  song,
+  character,
+  and voice-actor categories.
+  Staff and manga support are not implemented.
 - The app is English-only.

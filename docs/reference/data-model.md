@@ -41,21 +41,41 @@ interface Category {
   filter: FilterState
   entityKind: CategoryEntityKind
   songFilter: SongFilterState
+  characterFilter: CharacterFilterState
+  voiceActorFilter: VoiceActorFilterState
 }
 ```
 
 - `id` is stable.
   Renames and reorders must never break stored selections,
   which is why selections are keyed by id and never by name.
-- `entityKind` is `anime` or `song`.
+- `entityKind` is `anime`,
+  `song`,
+  `character`,
+  or `voice-actor`.
   It belongs to the category definition,
   not to the selection payload.
 - `filter` always applies to the AniList anime search,
-  for both entity kinds.
+  for every entity kind.
 - `songFilter` is `{ types: ThemeType[] }` with `ThemeType` in `OP`,
   `IN`,
   `ED`.
   An empty list means all types.
+- `characterFilter` is `{ roles: CharacterRole[] }` with `CharacterRole` in `MAIN`,
+  `SUPPORTING`,
+  `BACKGROUND`.
+  An empty list means every role.
+  It is only relevant when `entityKind` is `character`,
+  but it is always present on every `Category`,
+  like `songFilter`.
+- `voiceActorFilter` is `{ languages: string[] }`,
+  a list of AniList `languageV2` values.
+  An empty list means every language.
+  AniList publishes no enum for these values,
+  so any non-empty trimmed string is accepted.
+  It is only relevant when `entityKind` is `voice-actor`,
+  but it is always present on every `Category`,
+  like `songFilter`.
 
 ## FilterState
 
@@ -101,7 +121,11 @@ cards,
 and the export renderer can branch safely:
 
 ```ts
-type CategorySelection = AnimeSelection | SongSelection
+type CategorySelection =
+  | AnimeSelection
+  | SongSelection
+  | CharacterSelection
+  | VoiceActorSelection
 type CategorySelectionMap = Record<CategoryId, CategorySelection | null>
 type TemplateSelectionsMap = Record<TemplateId, CategorySelectionMap>
 ```
@@ -124,10 +148,44 @@ type TemplateSelectionsMap = Record<TemplateId, CategorySelectionMap>
   optional raw `performances`,
   `videoLink`,
   and `episodes`.
+- `CharacterSelection` carries `characterId`,
+  `characterName`,
+  an optional `characterNativeName`,
+  `characterImage`,
+  an optional `role`,
+  and the anime relation:
+  `animeId`,
+  `animeTitle`,
+  `animeCoverImage`.
+- `VoiceActorSelection` carries `voiceActorId`,
+  `voiceActorName`,
+  an optional `voiceActorNativeName`,
+  `voiceActorImage`,
+  an optional `language`,
+  the character it was credited for,
+  `characterId`,
+  `characterName`,
+  an optional `characterNativeName`,
+  `characterImage`,
+  an optional `role`,
+  and the anime relation:
+  `animeId`,
+  `animeTitle`,
+  `animeCoverImage`.
 
 A song is uniquely identified by its AniList anime id plus its AnimeThemes slug.
-Both selection kinds store everything needed for rendering,
+Every selection kind stores everything needed for rendering,
 so no network request is required to display a saved list.
+`CharacterSelection` and `VoiceActorSelection` in particular
+carry the anime title and cover alongside the character
+(and, for a voice-actor selection, the voice actor)
+so the card, the editor summary, and the exported image
+never need a follow-up fetch.
 
+A selection's `kind` is exactly the `CategoryEntityKind` string
+of the category that may hold it,
+so a voice-actor selection's `kind` is `'voice-actor'`,
+spelled with a hyphen,
+not `'voiceActor'`.
 A selection whose `kind` does not match the category's `entityKind` is pruned,
 which is what makes changing the entity kind discard the previous pick.
