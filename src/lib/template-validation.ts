@@ -1,5 +1,6 @@
 import {
   categoryEntityKinds,
+  characterRoles,
   animeFormats,
   animeSeasons,
   animeSources,
@@ -11,12 +12,14 @@ import {
   type AnimeSeason,
   type AnimeSource,
   CategoryEntityKind,
+  type CharacterFilterState,
   type FilterSortDirection,
   type FilterSortField,
   type FilterState,
   type NumericRange,
   type SongFilterState,
   type Template,
+  type VoiceActorFilterState,
   type TemplateExportFilterStateV1,
   type TemplateExportPayloadV1,
   type TemplateImportCategoryPayloadV1,
@@ -31,6 +34,10 @@ import {
   isTemplateId,
 } from '@/lib/ids'
 import { createEmptySongFilterState } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 import { createEmptyFilterState } from '@/lib/filter-state'
 
 type JsonRecord = Record<string, unknown>
@@ -238,6 +245,36 @@ const parseSongFilterState = (value: unknown, path: string): SongFilterState => 
   }
 }
 
+const parseCharacterFilterState = (value: unknown, path: string): CharacterFilterState => {
+  if (value === undefined) {
+    return createEmptyCharacterFilterState()
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  return {
+    roles: asEnumArray(value.roles, `${path}.roles`, characterRoles),
+  }
+}
+
+// AniList publishes no enum for `languageV2`,
+// so any non-empty trimmed string is accepted here.
+const parseVoiceActorFilterState = (value: unknown, path: string): VoiceActorFilterState => {
+  if (value === undefined) {
+    return createEmptyVoiceActorFilterState()
+  }
+
+  if (!isRecord(value)) {
+    throw new TemplateValidationError(`Expected ${path} to be an object.`)
+  }
+
+  return {
+    languages: asOptionalStringArray(value.languages, `${path}.languages`),
+  }
+}
+
 const parseFilterState = (value: unknown, path: string): FilterState => {
   if (value === undefined) {
     return createEmptyFilterState()
@@ -294,6 +331,8 @@ const parseCategoryPayload = (
     filter: parseFilterState(value.filter, `${path}.filter`),
     entityKind: parseCategoryEntityKind(value.entityKind, `${path}.entityKind`),
     songFilter: parseSongFilterState(value.songFilter, `${path}.songFilter`),
+    characterFilter: parseCharacterFilterState(value.characterFilter, `${path}.characterFilter`),
+    voiceActorFilter: parseVoiceActorFilterState(value.voiceActorFilter, `${path}.voiceActorFilter`),
   }
 }
 
@@ -410,6 +449,14 @@ export const normalizeImportedTemplate = (
     filter: parseFilterState(category.filter, `categories.${category.name}.filter`),
     entityKind: parseCategoryEntityKind(category.entityKind, `categories.${category.name}.entityKind`),
     songFilter: parseSongFilterState(category.songFilter, `categories.${category.name}.songFilter`),
+    characterFilter: parseCharacterFilterState(
+      category.characterFilter,
+      `categories.${category.name}.characterFilter`,
+    ),
+    voiceActorFilter: parseVoiceActorFilterState(
+      category.voiceActorFilter,
+      `categories.${category.name}.voiceActorFilter`,
+    ),
   })),
   globalFilter: parseFilterState(payload.globalFilter, 'globalFilter'),
   origin,
@@ -433,6 +480,14 @@ export const createTemplateExportPayload = (template: Template): TemplateExportP
       filter: createTemplateExportFilterState(parseFilterState(category.filter, `categories[${index}].filter`)),
       entityKind: parseCategoryEntityKind(category.entityKind, `categories[${index}].entityKind`),
       songFilter: parseSongFilterState(category.songFilter, `categories[${index}].songFilter`),
+      characterFilter: parseCharacterFilterState(
+        category.characterFilter,
+        `categories[${index}].characterFilter`,
+      ),
+      voiceActorFilter: parseVoiceActorFilterState(
+        category.voiceActorFilter,
+        `categories[${index}].voiceActorFilter`,
+      ),
     }
   })
 

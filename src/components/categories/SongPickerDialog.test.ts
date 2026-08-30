@@ -8,6 +8,10 @@ import { describe, expect, it, vi } from 'vitest'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createSongSelection } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
@@ -117,6 +121,8 @@ const category: Category = {
   filter: createEmptyFilterState(),
   entityKind: CategoryEntityKind.Song,
   songFilter: { types: [] },
+  characterFilter: createEmptyCharacterFilterState(),
+  voiceActorFilter: createEmptyVoiceActorFilterState(),
 }
 
 const selectedSong = createSongSelection({

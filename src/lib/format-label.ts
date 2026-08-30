@@ -20,3 +20,5 @@ export const formatAnimeFormatLabel = (value: string) =>
 
 export const formatThemeTypeLabel = (value: string) =>
   specialThemeTypeLabels[value] ?? formatAnimeFormatLabel(value)
+
+export const formatCharacterRoleLabel = (value: string) => formatAnimeFormatLabel(value)

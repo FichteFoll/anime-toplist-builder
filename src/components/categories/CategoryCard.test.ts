@@ -8,6 +8,10 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import CategoryCard from '@/components/categories/CategoryCard.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState, createSongSelection } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AnimeSelection, type Category } from '@/types'
 
 const categoryMediaPickerStub = defineComponent({
@@ -33,6 +37,8 @@ const category: Category = {
   filter: createEmptyFilterState(),
   entityKind: CategoryEntityKind.Anime,
   songFilter: createEmptySongFilterState(),
+  characterFilter: createEmptyCharacterFilterState(),
+  voiceActorFilter: createEmptyVoiceActorFilterState(),
 }
 
 const selection: AnimeSelection = createAnimeSelection({

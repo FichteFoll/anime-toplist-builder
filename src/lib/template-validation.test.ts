@@ -9,7 +9,15 @@ import {
   parseTemplateImportPayload,
   stringifyTemplateExportPayload,
 } from '@/lib/template-validation'
-import { AnimeFormat, TemplateOrigin, templateSchemaVersion, type TemplateImportPayloadV1 } from '@/types'
+import {
+  AnimeFormat,
+  CategoryEntityKind,
+  CharacterRole,
+  TemplateOrigin,
+  ThemeType,
+  templateSchemaVersion,
+  type TemplateImportPayloadV1,
+} from '@/types'
 
 describe('template validation', () => {
   it('parses and normalizes imported payload fields', () => {
@@ -81,6 +89,12 @@ describe('template validation', () => {
           entityKind: 'anime',
           songFilter: {
             types: [],
+          },
+          characterFilter: {
+            roles: [],
+          },
+          voiceActorFilter: {
+            languages: [],
           },
         },
       ],
@@ -201,6 +215,12 @@ describe('template validation', () => {
           entityKind: 'anime',
           songFilter: {
             types: [],
+          },
+          characterFilter: {
+            roles: [],
+          },
+          voiceActorFilter: {
+            languages: [],
           },
         },
       ],
@@ -328,6 +348,164 @@ describe('template validation', () => {
       songFilter: {
         types: ['ED', 'OP'],
       },
+    })
+  })
+
+  it('parses character category roles as deduplicated and sorted', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'charactertpl01',
+      name: 'Character Template',
+      categories: [
+        {
+          id: 'characterpick1',
+          name: 'Best Girl',
+          entityKind: 'character',
+          characterFilter: {
+            roles: ['SUPPORTING', 'BACKGROUND', 'MAIN', 'SUPPORTING'],
+          },
+        },
+      ],
+    })
+
+    expect(payload.categories[0]).toMatchObject({
+      entityKind: 'character',
+      characterFilter: {
+        roles: [CharacterRole.Background, CharacterRole.Main, CharacterRole.Supporting],
+      },
+      voiceActorFilter: {
+        languages: [],
+      },
+    })
+  })
+
+  it('parses voice actor languages as trimmed and sorted', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'voiceactortpl1',
+      name: 'Voice Actor Template',
+      categories: [
+        {
+          id: 'voiceactorpk1',
+          name: 'Best Voice Artist Performance',
+          entityKind: 'voice-actor',
+          voiceActorFilter: {
+            languages: [' Japanese ', 'English'],
+          },
+        },
+      ],
+    })
+
+    expect(payload.categories[0]).toMatchObject({
+      entityKind: 'voice-actor',
+      characterFilter: {
+        roles: [],
+      },
+      voiceActorFilter: {
+        languages: ['English', 'Japanese'],
+      },
+    })
+  })
+
+  it('defaults the relation filters when both are absent', () => {
+    const payload = parseTemplateImportPayload({
+      version: templateSchemaVersion,
+      id: 'norelation001',
+      name: 'No relation filters',
+      categories: [
+        {
+          id: 'norelationct1',
+          name: 'Plain Category',
+        },
+      ],
+    })
+
+    expect(payload.categories[0]).toMatchObject({
+      characterFilter: { roles: [] },
+      voiceActorFilter: { languages: [] },
+    })
+  })
+
+  it('rejects unsupported entity kinds and character roles', () => {
+    expect(() =>
+      parseTemplateImportPayload({
+        version: templateSchemaVersion,
+        name: 'Staff kind',
+        categories: [
+          {
+            name: 'Best Staff',
+            entityKind: 'staff',
+          },
+        ],
+      }),
+    ).toThrowError(TemplateValidationError)
+
+    const importBadRole = () =>
+      parseTemplateImportPayload({
+        version: templateSchemaVersion,
+        name: 'Bad role',
+        categories: [
+          {
+            name: 'Best Girl',
+            entityKind: 'character',
+            characterFilter: {
+              roles: ['LEAD'],
+            },
+          },
+        ],
+      })
+
+    expect(importBadRole).toThrowError(TemplateValidationError)
+    expect(importBadRole).toThrowError(/Invalid value: LEAD/)
+  })
+
+  it('round-trips every entity kind and its relation filters', () => {
+    const template = normalizeImportedTemplate(
+      {
+        version: templateSchemaVersion,
+        id: 'allkinds00001',
+        name: 'All kinds',
+        categories: [
+          { id: 'kindanime0001', name: 'Best Anime', entityKind: CategoryEntityKind.Anime },
+          {
+            id: 'kindsong00001',
+            name: 'Best Opening',
+            entityKind: CategoryEntityKind.Song,
+            songFilter: { types: [ThemeType.OP] },
+          },
+          {
+            id: 'kindcharacter',
+            name: 'Best Girl',
+            entityKind: CategoryEntityKind.Character,
+            characterFilter: { roles: [CharacterRole.Main] },
+          },
+          {
+            id: 'kindvoiceact1',
+            name: 'Best Voice Artist Performance',
+            entityKind: CategoryEntityKind.VoiceActor,
+            voiceActorFilter: { languages: ['Japanese'] },
+          },
+        ],
+      },
+      TemplateOrigin.User,
+    )
+
+    const exported = createTemplateExportPayload(template)
+    const reimported = parseTemplateImportPayload(JSON.parse(JSON.stringify(exported)))
+
+    expect(reimported.categories.map((category) => category.entityKind)).toEqual([
+      CategoryEntityKind.Anime,
+      CategoryEntityKind.Song,
+      CategoryEntityKind.Character,
+      CategoryEntityKind.VoiceActor,
+    ])
+    expect(reimported.categories[2]).toMatchObject({
+      characterFilter: { roles: [CharacterRole.Main] },
+      voiceActorFilter: { languages: [] },
+    })
+    expect(reimported.categories[3]).toMatchObject({
+      characterFilter: { roles: [] },
+      voiceActorFilter: { languages: ['Japanese'] },
     })
   })
 })

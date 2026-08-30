@@ -10,6 +10,10 @@ import SpinnerIcon from '@/components/icons/SpinnerIcon.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
 import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
+import {
   CategoryEntityKind,
   TemplateOrigin,
   templateSchemaVersion,
@@ -81,6 +85,8 @@ const template: Template = {
       filter: createEmptyFilterState(),
       entityKind: CategoryEntityKind.Anime,
       songFilter: createEmptySongFilterState(),
+      characterFilter: createEmptyCharacterFilterState(),
+      voiceActorFilter: createEmptyVoiceActorFilterState(),
     },
   ],
   globalFilter: createEmptyFilterState(),

@@ -15,3 +15,18 @@ export const appConfig = {
     import.meta.env.VITE_EXPORT_SITE_URL?.trim() || 'https://_.github.io/anime-toplist-builder/',
   baseUrl: import.meta.env.BASE_URL,
 }
+
+// AniList `languageV2` values offered as a shortlist in the category editor.
+// The voice-actor filter accepts values outside this shortlist,
+// because AniList publishes no enum for them.
+export const voiceActorLanguageOptions = [
+  'Japanese',
+  'English',
+  'Korean',
+  'Chinese',
+  'Spanish',
+  'French',
+  'German',
+  'Portuguese',
+  'Italian',
+] as const

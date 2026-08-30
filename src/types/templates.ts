@@ -11,9 +11,28 @@ export type CategoryId = string
 export enum CategoryEntityKind {
   Anime = 'anime',
   Song = 'song',
+  Character = 'character',
+  VoiceActor = 'voice-actor',
 }
 
-export const categoryEntityKinds = [CategoryEntityKind.Anime, CategoryEntityKind.Song] as const
+export const categoryEntityKinds = [
+  CategoryEntityKind.Anime,
+  CategoryEntityKind.Song,
+  CategoryEntityKind.Character,
+  CategoryEntityKind.VoiceActor,
+] as const
+
+export enum ThemeType {
+  OP = 'OP',
+  IN = 'IN',
+  ED = 'ED',
+}
+
+export const themeTypes = [ThemeType.OP, ThemeType.IN, ThemeType.ED] as const
+
+export interface SongFilterState {
+  types: Array<ThemeType>
+}
 
 export enum CharacterRole {
   Main = 'MAIN',
@@ -27,16 +46,12 @@ export const characterRoles = [
   CharacterRole.Background,
 ] as const
 
-export enum ThemeType {
-  OP = 'OP',
-  IN = 'IN',
-  ED = 'ED',
+export interface CharacterFilterState {
+  roles: Array<CharacterRole>
 }
 
-export const themeTypes = [ThemeType.OP, ThemeType.IN, ThemeType.ED] as const
-
-export interface SongFilterState {
-  types: Array<ThemeType>
+export interface VoiceActorFilterState {
+  languages: Array<string>
 }
 
 export enum TemplateOrigin {
@@ -60,6 +75,8 @@ export interface Category {
   filter: FilterState
   entityKind: CategoryEntityKind
   songFilter: SongFilterState
+  characterFilter: CharacterFilterState
+  voiceActorFilter: VoiceActorFilterState
 }
 
 export interface Template {
@@ -81,6 +98,12 @@ export interface TemplateImportCategoryPayloadV1 {
   songFilter?: {
     types?: Array<ThemeType>
   }
+  characterFilter?: {
+    roles?: Array<CharacterRole>
+  }
+  voiceActorFilter?: {
+    languages?: Array<string>
+  }
 }
 
 export interface TemplateImportPayloadV1 {
@@ -99,6 +122,8 @@ export interface TemplateExportCategoryPayloadV1 {
   filter: TemplateExportFilterStateV1
   entityKind: CategoryEntityKind
   songFilter: SongFilterState
+  characterFilter: CharacterFilterState
+  voiceActorFilter: VoiceActorFilterState
 }
 
 export interface TemplateExportFilterStateV1
