@@ -5,6 +5,7 @@ import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigge
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
 import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
+import CharacterPickerDialog from '@/components/categories/CharacterPickerDialog.vue'
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
 import {
@@ -194,10 +195,18 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         @clear="emit('clearSelection', category.id)"
       />
       <SongPickerDialog
-        v-else
+        v-else-if="category.entityKind === 'song'"
         :category="category"
         :global-filter="globalFilter"
         :selected-song="selection?.kind === 'song' ? selection : null"
+        @select="emit('selectSelection', $event)"
+        @clear="emit('clearSelection', category.id)"
+      />
+      <CharacterPickerDialog
+        v-else-if="category.entityKind === 'character'"
+        :category="category"
+        :global-filter="globalFilter"
+        :selected-character="selection?.kind === 'character' ? selection : null"
         @select="emit('selectSelection', $event)"
         @clear="emit('clearSelection', category.id)"
       />

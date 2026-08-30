@@ -30,6 +30,12 @@ const songPickerStub = defineComponent({
   template: '<div class="song-picker-stub" />',
 })
 
+const characterPickerStub = defineComponent({
+  name: 'CharacterPickerDialog',
+  emits: ['clear', 'select'],
+  template: '<div class="character-picker-stub" />',
+})
+
 const category: Category = {
   id: 'category-1',
   name: 'Best Opening',
@@ -187,6 +193,42 @@ describe('CategoryCard', () => {
     })
 
     expect(wrapper.text()).not.toContain('by')
+  })
+
+  it('mounts the character picker for a character category', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: CategoryEntityKind.Character,
+        },
+        selection: null,
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          AnimePickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          CharacterPickerDialog: characterPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    expect(wrapper.find('.character-picker-stub').exists()).toBe(true)
+    expect(wrapper.find('.song-picker-stub').exists()).toBe(false)
+    expect(wrapper.find('button.emit-clear').exists()).toBe(false)
   })
 
   it('tints the delete button hover state red', () => {
