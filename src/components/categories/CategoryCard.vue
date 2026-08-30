@@ -16,7 +16,11 @@ import {
   resolveSongTitle,
   getSongContextLabel,
 } from '@/lib/song-selection'
-import { getCharacterRelationLabel, resolveRelationName } from '@/lib/relation-selection'
+import {
+  getCharacterRelationLabel,
+  getVoiceActorRelationLabel,
+  resolveRelationName,
+} from '@/lib/relation-selection'
 import { resolveAnimeTitle } from '@/lib/anime-title'
 import { useSettingsStore } from '@/stores/settings'
 import type {
@@ -98,6 +102,13 @@ const selectionAltTitle = computed(() => {
     ).tooltip
   }
 
+  if (props.selection.kind === 'voice-actor') {
+    return resolveRelationName(
+      { name: props.selection.voiceActorName, nativeName: props.selection.voiceActorNativeName },
+      settingsStore.titleLanguage,
+    ).tooltip
+  }
+
   return null
 })
 const selectionPrimaryImage = computed(() =>
@@ -120,6 +131,16 @@ const selectionInsets = computed(() => {
 const characterRelationLine = computed(() =>
   props.selection?.kind === 'character'
     ? getCharacterRelationLabel(props.selection, settingsStore.titleLanguage)
+    : null,
+)
+const voiceActorRelationLine = computed(() =>
+  props.selection?.kind === 'voice-actor'
+    ? getVoiceActorRelationLabel(props.selection, settingsStore.titleLanguage)
+    : null,
+)
+const voiceActorLanguageLine = computed(() =>
+  props.selection?.kind === 'voice-actor' && props.selection.language?.trim()
+    ? props.selection.language.trim()
     : null,
 )
 const songArtistLine = computed(() =>
@@ -226,6 +247,12 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             {{ characterRelationLine }}
           </p>
           <p
+            v-else-if="selection.kind === 'voice-actor'"
+            class="text-sm text-app-muted"
+          >
+            {{ voiceActorRelationLine }}
+          </p>
+          <p
             v-else
             class="text-sm text-app-muted"
           >
@@ -237,6 +264,12 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             class="text-xs leading-5 text-app-muted"
           >
             {{ songContextLine }}
+          </p>
+          <p
+            v-else-if="voiceActorLanguageLine"
+            class="text-xs leading-5 text-app-muted"
+          >
+            {{ voiceActorLanguageLine }}
           </p>
         </div>
       </div>

@@ -1,7 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { resolveRowHeights } from '@/lib/export-card-layout'
 import {
+  buildCardTextBlocks,
+  CARD_TEXT_TOP_OFFSET,
+  measureRequiredTextHeight,
+  resolveRowHeights,
+} from '@/lib/export-card-layout'
+import {
+  CARD_PADDING,
+  CARD_TEXT_GAP,
+  CARD_WIDTH,
   COVER_HEIGHT,
   COVER_WIDTH,
   GRID_GAP,
@@ -10,8 +18,17 @@ import {
   resolveGridRowOffsets,
   resolveInsetRects,
 } from '@/lib/export-image'
-import { createSongSelection, resolveSongTitle } from '@/lib/song-selection'
-import { AnimeTitleLanguage, ThemeType } from '@/types'
+import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
+import { createVoiceActorSelection } from '@/lib/relation-selection'
+import { createAnimeSelection, createSongSelection, resolveSongTitle } from '@/lib/song-selection'
+import {
+  AnimeFormat,
+  AnimeSeason,
+  AnimeTitleLanguage,
+  CharacterRole,
+  ThemeType,
+  type CategorySelection,
+} from '@/types'
 
 describe('resolveGridRowOffsets', () => {
   it('stacks rows on the cumulative height of the rows above them', () => {
@@ -94,5 +111,78 @@ describe('resolveInsetRects', () => {
 
   it('returns no rects for a selection without insets', () => {
     expect(insetRects(0)).toEqual([])
+  })
+})
+
+describe('row heights with insets', () => {
+  // The production formula in `renderTemplatePng`, kept in one place here.
+  const cardTextWidth = CARD_WIDTH - (CARD_PADDING + COVER_WIDTH + 14) - CARD_PADDING
+  const minCardHeight = COVER_HEIGHT + CARD_PADDING * 2
+
+  const requiredCardHeight = (categoryName: string, selection: CategorySelection) =>
+    CARD_PADDING * 2
+    + CARD_TEXT_TOP_OFFSET
+    + measureRequiredTextHeight(
+      buildCardTextBlocks({
+        categoryName,
+        selection,
+        titleLanguage: AnimeTitleLanguage.Romaji,
+        maxWidth: cardTextWidth,
+      }),
+      CARD_TEXT_GAP,
+    )
+
+  beforeAll(() => {
+    installStubTextMeasurement()
+  })
+
+  afterEach(() => {
+    resetStubTextMeasurement()
+  })
+
+  it('keeps a voice-actor card beside an anime card at the minimum row height', () => {
+    const animeTitle = {
+      userPreferred: 'Re:Zero',
+      romaji: 'Re:Zero',
+      english: null,
+      native: null,
+    }
+    const animeCoverImage = {
+      large: 'https://img.example/re-zero.jpg',
+      medium: null,
+      extraLarge: null,
+      color: null,
+    }
+
+    const voiceActorCard = requiredCardHeight(
+      'Best Voice Artist',
+      createVoiceActorSelection({
+        voiceActorId: 1,
+        voiceActorName: 'Rie Takahashi',
+        voiceActorImage: { large: 'https://img.example/rie.jpg', medium: null },
+        language: 'Japanese',
+        characterId: 2,
+        characterName: 'Rem',
+        characterImage: { large: 'https://img.example/rem.jpg', medium: null },
+        role: CharacterRole.Main,
+        animeId: 3,
+        animeTitle,
+        animeCoverImage,
+      }),
+    )
+    const animeCard = requiredCardHeight(
+      'Best Anime',
+      createAnimeSelection({
+        mediaId: 3,
+        title: animeTitle,
+        coverImage: animeCoverImage,
+        season: AnimeSeason.Spring,
+        seasonYear: 2016,
+        format: AnimeFormat.Tv,
+      }),
+    )
+
+    // Two insets are drawn inside the cover slot, so they add no height at all.
+    expect(resolveRowHeights([voiceActorCard, animeCard], 2, minCardHeight)).toEqual([223])
   })
 })

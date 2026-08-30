@@ -15,7 +15,7 @@ import {
 } from '@/lib/export-card-layout'
 import { CARD_PADDING, COVER_HEIGHT } from '@/lib/export-image'
 import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
-import { createCharacterSelection } from '@/lib/relation-selection'
+import { createCharacterSelection, createVoiceActorSelection } from '@/lib/relation-selection'
 import { createSongSelection } from '@/lib/song-selection'
 import {
   AnimeFormat,
@@ -80,6 +80,31 @@ const createCharacter = ({
     characterName,
     characterImage: { large: 'https://img.example/character.jpg', medium: null },
     role,
+    animeId: 1,
+    animeTitle: { userPreferred: animeName, romaji: animeName, english: null, native: null },
+    animeCoverImage: coverImage,
+  })
+
+const createVoiceActor = ({
+  voiceActorName,
+  characterName,
+  animeName,
+  language,
+}: {
+  voiceActorName: string
+  characterName: string
+  animeName: string
+  language: string | null
+}) =>
+  createVoiceActorSelection({
+    voiceActorId: 1,
+    voiceActorName,
+    voiceActorImage: { large: 'https://img.example/voice-actor.jpg', medium: null },
+    language,
+    characterId: 1,
+    characterName,
+    characterImage: { large: 'https://img.example/character.jpg', medium: null },
+    role: CharacterRole.Main,
     animeId: 1,
     animeTitle: { userPreferred: animeName, romaji: animeName, english: null, native: null },
     animeCoverImage: coverImage,
@@ -199,6 +224,68 @@ describe('buildCardTextBlocks', () => {
     expect(
       CARD_PADDING * 2 + CARD_TEXT_TOP_OFFSET + measureRequiredTextHeight(blocks, blockGap),
     ).toBeLessThanOrEqual(COVER_HEIGHT + CARD_PADDING * 2)
+  })
+
+  it('returns the voice-actor blocks in draw order', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance (Japanese)',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero kara Hajimeru Isekai Seikatsu',
+        language: 'Japanese',
+      }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      'category',
+      'voiceActorName',
+      'voiceActorRelation',
+      'voiceActorLanguage',
+    ])
+  })
+
+  it('drops the language block when the credit carries no language', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero',
+        language: null,
+      }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      'category',
+      'voiceActorName',
+      'voiceActorRelation',
+    ])
+  })
+
+  it('names the character and the anime in the voice-actor relation line', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero',
+        language: 'Japanese',
+      }),
+      titleLanguage,
+      maxWidth: 400,
+    })
+
+    expect(
+      allocateCardTextBlocks(blocks, 1000, blockGap)
+        .find((block) => block.key === 'voiceActorRelation')
+        ?.lines
+        .join(' '),
+    ).toBe('Voiced Rem in Re:Zero')
   })
 
   it('returns only the category block without a selection', () => {

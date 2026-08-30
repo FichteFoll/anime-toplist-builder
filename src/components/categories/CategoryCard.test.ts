@@ -12,6 +12,7 @@ import {
   createCharacterSelection,
   createEmptyCharacterFilterState,
   createEmptyVoiceActorFilterState,
+  createVoiceActorSelection,
 } from '@/lib/relation-selection'
 import {
   AnimeFormat,
@@ -341,6 +342,65 @@ describe('CategoryCard', () => {
     expect(images[1].classes()).toContain('bottom-1')
     expect(wrapper.text()).toContain('Rem')
     expect(wrapper.text()).toContain('Main character in Haibane Renmei')
+  })
+
+  it('renders a voice-actor selection with the character above the anime cover', () => {
+    const wrapper = mount(CategoryCard, {
+      props: {
+        category: {
+          ...category,
+          entityKind: CategoryEntityKind.VoiceActor,
+        },
+        selection: createVoiceActorSelection({
+          voiceActorId: 11,
+          voiceActorName: 'Rie Takahashi',
+          voiceActorImage: { large: 'https://img.example/rie-large.jpg', medium: null },
+          language: 'Japanese',
+          characterId: 7,
+          characterName: 'Rem',
+          characterImage: { large: 'https://img.example/rem-large.jpg', medium: null },
+          role: CharacterRole.Main,
+          animeId: 42,
+          animeTitle: selection.title,
+          animeCoverImage: selection.coverImage,
+        }),
+        globalFilter: createEmptyFilterState(),
+        metadata: null,
+        metadataStatus: 'idle',
+        metadataError: null,
+        canReorder: false,
+      },
+      global: {
+        stubs: {
+          CategoryEditDialog: true,
+          AnimePickerDialog: categoryMediaPickerStub,
+          SongPickerDialog: songPickerStub,
+          CharacterPickerDialog: characterPickerStub,
+          VoiceActorPickerDialog: voiceActorPickerStub,
+          DeleteIcon: true,
+          DragHandleIcon: true,
+          TooltipArrow: true,
+          TooltipContent: true,
+          TooltipPortal: true,
+          TooltipRoot: true,
+          TooltipTrigger: true,
+        },
+      },
+    })
+
+    const images = wrapper.findAll('img')
+
+    expect(images).toHaveLength(3)
+    expect(images[0].attributes('src')).toBe('https://img.example/rie-large.jpg')
+    expect(images[0].classes()).toContain('h-24')
+    // The first inset is the character and sits above the anime cover.
+    expect(images[1].attributes('src')).toBe('https://img.example/rem-large.jpg')
+    expect(images[1].classes()).toContain('bottom-12')
+    expect(images[2].attributes('src')).toBe('https://img.example/haibane-large.jpg')
+    expect(images[2].classes()).toContain('bottom-1')
+    expect(wrapper.text()).toContain('Rie Takahashi')
+    expect(wrapper.text()).toContain('Voiced Rem in Haibane Renmei')
+    expect(wrapper.text()).toContain('Japanese')
   })
 
   it('tints the delete button hover state red', () => {
