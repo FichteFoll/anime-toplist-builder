@@ -15,6 +15,18 @@ export enum CategoryEntityKind {
 
 export const categoryEntityKinds = [CategoryEntityKind.Anime, CategoryEntityKind.Song] as const
 
+export enum CharacterRole {
+  Main = 'MAIN',
+  Supporting = 'SUPPORTING',
+  Background = 'BACKGROUND',
+}
+
+export const characterRoles = [
+  CharacterRole.Main,
+  CharacterRole.Supporting,
+  CharacterRole.Background,
+] as const
+
 export enum ThemeType {
   OP = 'OP',
   IN = 'IN',
