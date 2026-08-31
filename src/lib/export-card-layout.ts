@@ -6,6 +6,11 @@ import {
   FONT_SIZE_META,
 } from '@/lib/export-fonts'
 import { countTextLines, layoutTextLines, measureAdvanceWidth, truncateToWidth } from '@/lib/export-text'
+import {
+  getCharacterRelationLabel,
+  getVoiceActorRelationLabel,
+  resolveRelationName,
+} from '@/lib/relation-selection'
 import { formatSongEpisodesHint, resolveSongTitle } from '@/lib/song-selection'
 import type { AnimeFormat, AnimeTitleLanguage, CategorySelection } from '@/types'
 
@@ -224,18 +229,116 @@ const buildAnimeBlocks = (
   return [animeTitle, animeMeta]
 }
 
+const buildCharacterBlocks = (
+  selection: Extract<CategorySelection, { kind: 'character' }>,
+  titleLanguage: AnimeTitleLanguage,
+  maxWidth: number,
+): Array<CardTextBlock> => {
+  const characterName = buildTextBlock(
+    {
+      key: 'characterName',
+      font: TITLE_FONT,
+      lineHeight: TITLE_LINE_HEIGHT,
+      tone: 'primary',
+      minLines: 1,
+      growthRank: 0,
+    },
+    resolveRelationName(
+      { name: selection.characterName, nativeName: selection.characterNativeName },
+      titleLanguage,
+    ).primary,
+    maxWidth,
+  )
+
+  // The wording lives in `relation-selection`, so the card and the PNG cannot drift apart.
+  const characterRelation = buildTextBlock(
+    {
+      key: 'characterRelation',
+      font: META_FONT,
+      lineHeight: META_LINE_HEIGHT,
+      tone: 'muted',
+      minLines: 2,
+      growthRank: 1,
+    },
+    getCharacterRelationLabel(selection, titleLanguage),
+    maxWidth,
+  )
+
+  return [characterName, characterRelation]
+}
+
+const buildVoiceActorBlocks = (
+  selection: Extract<CategorySelection, { kind: 'voice-actor' }>,
+  titleLanguage: AnimeTitleLanguage,
+  maxWidth: number,
+): Array<CardTextBlock> => {
+  const voiceActorName = buildTextBlock(
+    {
+      key: 'voiceActorName',
+      font: TITLE_FONT,
+      lineHeight: TITLE_LINE_HEIGHT,
+      tone: 'primary',
+      minLines: 1,
+      growthRank: 0,
+    },
+    resolveRelationName(
+      { name: selection.voiceActorName, nativeName: selection.voiceActorNativeName },
+      titleLanguage,
+    ).primary,
+    maxWidth,
+  )
+
+  // The wording lives in `relation-selection`, so the card and the PNG cannot drift apart.
+  const voiceActorRelation = buildTextBlock(
+    {
+      key: 'voiceActorRelation',
+      font: META_FONT,
+      lineHeight: META_LINE_HEIGHT,
+      tone: 'muted',
+      minLines: 2,
+      growthRank: 1,
+    },
+    getVoiceActorRelationLabel(selection, titleLanguage),
+    maxWidth,
+  )
+
+  // An empty block is dropped by `buildCardTextBlocks`, like a song without an artist.
+  const voiceActorLanguage = buildTextBlock(
+    {
+      key: 'voiceActorLanguage',
+      font: META_FONT,
+      lineHeight: META_LINE_HEIGHT,
+      tone: 'muted',
+      minLines: 1,
+      growthRank: 2,
+    },
+    selection.language?.trim() ?? '',
+    maxWidth,
+  )
+
+  return [voiceActorName, voiceActorRelation, voiceActorLanguage]
+}
+
 export const buildCardTextBlocks = ({
   categoryName,
   selection,
   titleLanguage,
   maxWidth,
 }: CardTextInput): Array<CardTextBlock> => {
-  const selectionBlocks =
-    selection === null
-      ? []
-      : selection.kind === 'song'
-        ? buildSongBlocks(selection, titleLanguage, maxWidth)
-        : buildAnimeBlocks(selection, titleLanguage, maxWidth)
+  const selectionBlocks = (() => {
+    switch (selection?.kind) {
+      case 'song':
+        return buildSongBlocks(selection, titleLanguage, maxWidth)
+      case 'anime':
+        return buildAnimeBlocks(selection, titleLanguage, maxWidth)
+      case 'character':
+        return buildCharacterBlocks(selection, titleLanguage, maxWidth)
+      case 'voice-actor':
+        return buildVoiceActorBlocks(selection, titleLanguage, maxWidth)
+      default:
+        return []
+    }
+  })()
 
   return [buildCategoryBlock(categoryName, maxWidth), ...selectionBlocks]
     .filter((block) => block.naturalLines > 0)

@@ -114,3 +114,42 @@ export interface AniListViewerData {
     } | null
   }
 }
+
+interface AniListRelationImageResponse {
+  large?: string | null
+  medium?: string | null
+}
+
+interface AniListRelationNameResponse {
+  userPreferred: string
+  native?: string | null
+}
+
+export interface AniListCharacterNodeResponse {
+  id: number
+  name: AniListRelationNameResponse
+  image: AniListRelationImageResponse
+}
+
+export interface AniListStaffNodeResponse {
+  id: number
+  name: AniListRelationNameResponse
+  image: AniListRelationImageResponse
+  languageV2?: string | null
+}
+
+export interface AniListCharacterEdgeResponse {
+  role?: string | null
+  node: AniListCharacterNodeResponse
+  voiceActors?: Array<AniListStaffNodeResponse> | null
+}
+
+export interface AniListCharacterCreditsData {
+  Media: {
+    id: number
+    characters: {
+      pageInfo: AniListPageInfoResponse
+      edges: Array<AniListCharacterEdgeResponse>
+    }
+  } | null
+}

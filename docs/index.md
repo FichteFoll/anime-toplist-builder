@@ -2,7 +2,10 @@
 
 Anime Toplist Builder is a statically hosted browser app for building anime ranking lists
 from templates,
-filling them with anime or anime songs,
+filling them with anime,
+anime songs,
+characters,
+or the voice actors credited for a character,
 and exporting the result as a themed PNG image.
 
 This `docs/` tree is the living documentation of how the site is supposed to behave.
@@ -38,7 +41,10 @@ Task-oriented documentation of the intended user flows.
   fork-on-edit,
   and sharing by URL.
 - [Categories](./guide/categories.md):
-  anime and song categories,
+  anime,
+  song,
+  character,
+  and voice-actor categories,
   editing,
   reordering,
   deleting,
@@ -58,6 +64,10 @@ Task-oriented documentation of the intended user flows.
   song type filters,
   previews,
   and caching.
+- [Picking characters and voice actors](./guide/picking-characters.md):
+  the two-step character and voice-actor pickers,
+  role and language filters,
+  and how credits are fetched.
 - [Image export](./guide/image-export.md):
   layouts,
   author handling,

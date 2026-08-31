@@ -3,6 +3,10 @@ import { CategoryEntityKind, TemplateOrigin, templateSchemaVersion, type Templat
 import { createCategoryId, createTemplateId } from '@/lib/ids'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createEmptySongFilterState } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 
 const cloneWithFallback = <T>(value: T): T => {
   if (typeof structuredClone === 'function') {
@@ -37,6 +41,8 @@ export const createBlankCategory = (name: string) => ({
   filter: createEmptyFilterState(),
   entityKind: CategoryEntityKind.Anime,
   songFilter: createEmptySongFilterState(),
+  characterFilter: createEmptyCharacterFilterState(),
+  voiceActorFilter: createEmptyVoiceActorFilterState(),
 })
 
 export const cloneTemplate = (template: Template): Template => cloneWithFallback(template)

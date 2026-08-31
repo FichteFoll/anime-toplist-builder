@@ -6,15 +6,24 @@ import {
   countSongSourceLines,
   layoutSongSourceLines,
   MAX_CATEGORY_TITLE_LINES,
+  CARD_TEXT_TOP_OFFSET,
   measureRequiredTextHeight,
   measureTextBlocksHeight,
   resolveRowHeights,
   type AllocatedCardTextBlock,
   type CardTextBlock,
 } from '@/lib/export-card-layout'
+import { CARD_PADDING, COVER_HEIGHT } from '@/lib/export-image'
 import { installStubTextMeasurement, resetStubTextMeasurement } from '@/lib/export-text.test-support'
+import { createCharacterSelection, createVoiceActorSelection } from '@/lib/relation-selection'
 import { createSongSelection } from '@/lib/song-selection'
-import { AnimeFormat, AnimeTitleLanguage, ThemeType, type AnimeSelection } from '@/types'
+import {
+  AnimeFormat,
+  AnimeTitleLanguage,
+  CharacterRole,
+  ThemeType,
+  type AnimeSelection,
+} from '@/types'
 
 // The stub measures 10px per character, so widths below are character counts.
 const font = 'normal 500 16px sans-serif'
@@ -56,6 +65,64 @@ const createAnime = (title: string): AnimeSelection => ({
   seasonYear: 2019,
   format: AnimeFormat.Tv,
 })
+
+const createCharacter = ({
+  characterName,
+  animeName,
+  role,
+}: {
+  characterName: string
+  animeName: string
+  role: CharacterRole | null
+}) =>
+  createCharacterSelection({
+    characterId: 1,
+    characterName,
+    characterImage: { large: 'https://img.example/character.jpg', medium: null },
+    role,
+    animeId: 1,
+    animeTitle: { userPreferred: animeName, romaji: animeName, english: null, native: null },
+    animeCoverImage: coverImage,
+  })
+
+const createVoiceActor = ({
+  voiceActorName,
+  characterName,
+  animeName,
+  language,
+}: {
+  voiceActorName: string
+  characterName: string
+  animeName: string
+  language: string | null
+}) =>
+  createVoiceActorSelection({
+    voiceActorId: 1,
+    voiceActorName,
+    voiceActorImage: { large: 'https://img.example/voice-actor.jpg', medium: null },
+    language,
+    characterId: 1,
+    characterName,
+    characterImage: { large: 'https://img.example/character.jpg', medium: null },
+    role: CharacterRole.Main,
+    animeId: 1,
+    animeTitle: { userPreferred: animeName, romaji: animeName, english: null, native: null },
+    animeCoverImage: coverImage,
+  })
+
+const characterRelationText = (role: CharacterRole | null) => {
+  const blocks = buildCardTextBlocks({
+    categoryName: 'Best Girl',
+    selection: createCharacter({ characterName: 'Rem', animeName: 'Re:Zero', role }),
+    titleLanguage,
+    maxWidth: 400,
+  })
+
+  return allocateCardTextBlocks(blocks, 1000, blockGap)
+    .find((block) => block.key === 'characterRelation')
+    ?.lines
+    .join(' ')
+}
 
 const lineCountByKey = (allocated: Array<AllocatedCardTextBlock>) =>
   Object.fromEntries(allocated.map((block) => [block.key, block.lines.length]))
@@ -117,6 +184,108 @@ describe('buildCardTextBlocks', () => {
     })
 
     expect(blocks.map((block) => block.key)).toEqual(['category', 'songTitle', 'songSource'])
+  })
+
+  it('returns the character blocks in draw order', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Girl',
+      selection: createCharacter({
+        characterName: 'Rem',
+        animeName: 'Re:Zero kara Hajimeru Isekai Seikatsu',
+        role: CharacterRole.Main,
+      }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      'category',
+      'characterName',
+      'characterRelation',
+    ])
+  })
+
+  it('names the character role in the relation line', () => {
+    expect(characterRelationText(CharacterRole.Main)).toBe('Main character in Re:Zero')
+  })
+
+  it('omits the role from the relation line when it is unknown', () => {
+    expect(characterRelationText(null)).toBe('Character in Re:Zero')
+  })
+
+  it('keeps a short character card within the minimum card height', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Girl',
+      selection: createCharacter({ characterName: 'Rem', animeName: 'Re:Zero', role: CharacterRole.Main }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(
+      CARD_PADDING * 2 + CARD_TEXT_TOP_OFFSET + measureRequiredTextHeight(blocks, blockGap),
+    ).toBeLessThanOrEqual(COVER_HEIGHT + CARD_PADDING * 2)
+  })
+
+  it('returns the voice-actor blocks in draw order', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance (Japanese)',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero kara Hajimeru Isekai Seikatsu',
+        language: 'Japanese',
+      }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      'category',
+      'voiceActorName',
+      'voiceActorRelation',
+      'voiceActorLanguage',
+    ])
+  })
+
+  it('drops the language block when the credit carries no language', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero',
+        language: null,
+      }),
+      titleLanguage,
+      maxWidth: 235,
+    })
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      'category',
+      'voiceActorName',
+      'voiceActorRelation',
+    ])
+  })
+
+  it('names the character and the anime in the voice-actor relation line', () => {
+    const blocks = buildCardTextBlocks({
+      categoryName: 'Best Voice Artist Performance',
+      selection: createVoiceActor({
+        voiceActorName: 'Rie Takahashi',
+        characterName: 'Rem',
+        animeName: 'Re:Zero',
+        language: 'Japanese',
+      }),
+      titleLanguage,
+      maxWidth: 400,
+    })
+
+    expect(
+      allocateCardTextBlocks(blocks, 1000, blockGap)
+        .find((block) => block.key === 'voiceActorRelation')
+        ?.lines
+        .join(' '),
+    ).toBe('Voiced Rem in Re:Zero')
   })
 
   it('returns only the category block without a selection', () => {

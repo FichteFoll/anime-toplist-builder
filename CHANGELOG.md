@@ -3,6 +3,57 @@
 User-facing changes, newest first.
 The app shows these entries in its changelog popup.
 
+## Unreleased
+
+- Native-title tooltips now appear next to the name they belong to
+  instead of floating in the middle of the row.
+  This affected song titles in the song picker
+  and the selected entry's title on a category card,
+  as well as the new character and voice-actor lists.
+
+- Character and voice-actor cards now give their inset images room of their
+  own instead of laying them over the primary image.
+  The character or voice actor is drawn slightly smaller,
+  and the insets reach past its edge,
+  a voice-actor card putting its two insets side by side along the bottom,
+  so a relation no longer hides a quarter or a half of the main subject.
+  The images together still fill exactly the space one anime cover would,
+  so no card changes size.
+
+- The character and voice-actor pickers now keep the chosen anime
+  in a panel beside the credit list,
+  the way the song picker does,
+  and open straight on the credit list
+  for a category that already holds a pick.
+
+- The character and voice-actor pickers now load more credits
+  as the list nears its end,
+  so anime with a large cast are no longer cut off
+  after the first 25 entries AniList returns per request.
+  A category whose role or language filter
+  matches nothing on the first page
+  keeps loading further pages on its own.
+
+- Categories can now pick a character of an anime,
+  or a voice actor credited for a character,
+  in addition to anime and song categories.
+  Both are picked anime-first:
+  choose an anime,
+  then a character from it,
+  or one of its voice credits.
+- Character and voice-actor cards now show the related anime as a small inset
+  overlapping their primary image,
+  and a voice-actor card also shows the character as a second inset,
+  in the app and in the exported image,
+  without changing the size of any card.
+- Changing a category's type now asks for confirmation before discarding
+  its saved selection,
+  since a pick cannot be converted between entity kinds.
+- The predefined **Crunchyroll Anime Awards 2025** template now uses the new
+  character and voice-artist category types
+  for its five character and voice-artist categories,
+  which discards any anime already picked for them.
+
 ## 2026-08-29
 
 - The page header and the template card are now one sticky toolbar

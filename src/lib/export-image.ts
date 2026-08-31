@@ -15,7 +15,7 @@ import {
   FONT_SIZE_TEMPLATE_TITLE,
 } from '@/lib/export-fonts'
 import { layoutTextLines, measureAdvanceWidth } from '@/lib/export-text'
-import { getSelectionCoverImage } from '@/lib/song-selection'
+import { getSelectionInsetImages, getSelectionPrimaryImage } from '@/lib/song-selection'
 import type {
   AnimeTitleLanguage,
   CategorySelectionMap,
@@ -34,6 +34,22 @@ export const CARD_PADDING = 20
 export const CARD_TEXT_GAP = 4
 export const COVER_WIDTH = 126
 export const COVER_HEIGHT = 183
+// An inset keeps the cover's aspect ratio, so it crops like the primary image.
+export const INSET_WIDTH = 48
+export const INSET_HEIGHT = 70
+// The margin equals the ring width, so the ring's outer edge lands exactly on
+// the image slot's edge and the whole composition spans one cover slot.
+export const INSET_MARGIN = 2
+export const INSET_GAP = 6
+export const INSET_RADIUS = 10
+export const INSET_RING = 2
+// The insets are small, so they carry a lighter outline than the primary
+// image, which keeps its 2 px border.
+export const INSET_BORDER_WIDTH = 1
+// How far the inset column reaches over the primary image. The insets are not
+// contained by the primary: it shrinks to make room for them, and they hang
+// past its edge, so a relation never hides a quarter of the primary subject.
+export const INSET_OVERLAP = 18
 export const CATEGORIES_PER_ROW_PORTRAIT = 3
 export const CATEGORIES_PER_ROW_LANDSCAPE = 5
 
@@ -58,6 +74,90 @@ export const resolveGridRowOffsets = (
   }
 }
 
+export interface InsetRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * The primary image's rect inside the image slot.
+ *
+ * Without insets it fills the slot. With insets it shrinks and anchors to the
+ * top left, leaving the lower right of the slot to the inset column, so the
+ * two together span exactly the slot a lone anime cover would.
+ *
+ * Canvas-free so the geometry stays unit-testable.
+ */
+export const resolvePrimaryRect = (
+  coverX: number,
+  coverY: number,
+  coverWidth: number,
+  coverHeight: number,
+  insetCount: number,
+): InsetRect => {
+  if (insetCount <= 0) {
+    return { x: coverX, y: coverY, width: coverWidth, height: coverHeight }
+  }
+
+  // A lone inset tucks into the lower right corner, so the primary is bounded
+  // by the inset's left edge. Two insets sit side by side across the bottom,
+  // so the row's top edge bounds the primary instead.
+  if (insetCount === 1) {
+    const width = coverWidth - INSET_WIDTH - INSET_MARGIN + INSET_OVERLAP
+
+    return {
+      x: coverX,
+      y: coverY,
+      width,
+      height: Math.round((width * coverHeight) / coverWidth),
+    }
+  }
+
+  const height = coverHeight - INSET_HEIGHT - INSET_MARGIN + INSET_OVERLAP
+
+  return {
+    x: coverX,
+    y: coverY,
+    width: Math.round((height * coverWidth) / coverHeight),
+    height,
+  }
+}
+
+/**
+ * Inset rects inside the image slot, left-to-right, right- and bottom-aligned.
+ *
+ * Canvas-free so the geometry stays unit-testable.
+ */
+export const resolveInsetRects = (
+  coverX: number,
+  coverY: number,
+  coverWidth: number,
+  coverHeight: number,
+  count: number,
+): Array<InsetRect> => {
+  if (count <= 0) {
+    return []
+  }
+
+  // A single row: two insets read better side by side than stacked, and a
+  // stack down the right would crowd the primary image's whole edge.
+  const y = coverY + coverHeight - INSET_MARGIN - INSET_HEIGHT
+
+  return Array.from({ length: count }, (_value, index) => ({
+    x:
+      coverX
+      + coverWidth
+      - INSET_MARGIN
+      - (count - index) * INSET_WIDTH
+      - (count - 1 - index) * INSET_GAP,
+    y,
+    width: INSET_WIDTH,
+    height: INSET_HEIGHT,
+  }))
+}
+
 interface ExportPalette {
   background: string
   surface: string
@@ -67,6 +167,12 @@ interface ExportPalette {
   muted: string
   accent: string
   accentSoft: string
+}
+
+/** The images one card draws: its primary image and its insets, top-to-bottom. */
+interface CardImages {
+  primary: HTMLImageElement | null
+  insets: Array<HTMLImageElement | null>
 }
 
 interface ExportFontConfig {
@@ -384,6 +490,53 @@ const drawCoverPlaceholder = (
   context.textBaseline = 'alphabetic'
 }
 
+/**
+ * Draws the loaded insets over the primary image, in the order they arrive.
+ *
+ * Generic over the array, so a two-inset selection needs no extra code path.
+ */
+const drawSelectionInsets = (
+  context: CanvasRenderingContext2D,
+  images: Array<HTMLImageElement | null>,
+  coverX: number,
+  coverY: number,
+  palette: ExportPalette,
+) => {
+  const rects = resolveInsetRects(coverX, coverY, COVER_WIDTH, COVER_HEIGHT, images.length)
+
+  for (const [index, rect] of rects.entries()) {
+    const image = images[index]
+
+    // The ring is punched out of the primary image, so the inset reads as separate.
+    fillRoundedRect(
+      context,
+      rect.x - INSET_RING,
+      rect.y - INSET_RING,
+      rect.width + INSET_RING * 2,
+      rect.height + INSET_RING * 2,
+      INSET_RADIUS + INSET_RING,
+      palette.surface,
+    )
+
+    if (image) {
+      drawCoverImage(context, image, rect.x, rect.y, rect.width, rect.height, INSET_RADIUS)
+    } else {
+      fillRoundedRect(context, rect.x, rect.y, rect.width, rect.height, INSET_RADIUS, palette.elevated)
+    }
+
+    strokeRoundedRect(
+      context,
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height,
+      INSET_RADIUS,
+      palette.border,
+      INSET_BORDER_WIDTH,
+    )
+  }
+}
+
 const drawMissingSelectionPlaceholder = (
   context: CanvasRenderingContext2D,
   x: number,
@@ -594,15 +747,22 @@ export const renderTemplatePng = async ({
   context.textBaseline = 'alphabetic'
 
   const imageEntries = await Promise.all(
-    template.categories.map(async (category) => {
+    template.categories.map(async (category): Promise<[string, CardImages]> => {
       const selection = selectionByCategory[category.id] ?? null
       if (selection == null) {
-        return [category.id, null] as const
+        return [category.id, { primary: null, insets: [] }]
       }
 
-      const coverImage = getSelectionCoverImage(selection)
-      const imageElement = await loadImage(coverImage.extraLarge ?? coverImage.large)
-      return [category.id, imageElement] as const
+      const coverImage = getSelectionPrimaryImage(selection)
+      const [primary, insets] = await Promise.all([
+        loadImage(coverImage.extraLarge ?? coverImage.large),
+        Promise.all(
+          getSelectionInsetImages(selection)
+            .map((insetImage) => loadImage(insetImage.extraLarge ?? insetImage.large)),
+        ),
+      ])
+
+      return [category.id, { primary, insets }]
     }),
   )
   const imagesByCategoryId = new Map(imageEntries)
@@ -648,7 +808,8 @@ export const renderTemplatePng = async ({
     const y = gridTop + rowGrid.offsets[row]
     const cardHeight = rowHeights[row]
     const selection = selectionByCategory[category.id] ?? null
-    const image = imagesByCategoryId.get(category.id) ?? null
+    const cardImages = imagesByCategoryId.get(category.id) ?? null
+    const image = cardImages?.primary ?? null
     const coverX = x + CARD_PADDING
     const coverY = y + CARD_PADDING
     const textX = coverX + COVER_WIDTH + 14
@@ -656,20 +817,39 @@ export const renderTemplatePng = async ({
     fillRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.surface)
     strokeRoundedRect(context, x, y, CARD_WIDTH, cardHeight, 28, palette.border, 2)
 
+    // With relation insets the primary image shrinks and anchors top left, so
+    // the insets have room of their own instead of covering it.
+    const primaryRect = resolvePrimaryRect(
+      coverX,
+      coverY,
+      COVER_WIDTH,
+      COVER_HEIGHT,
+      cardImages?.insets.length ?? 0,
+    )
+
     if (selection && image) {
-      drawCoverImage(context, image, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18)
-      strokeRoundedRect(context, coverX, coverY, COVER_WIDTH, COVER_HEIGHT, 18, palette.border, 2)
+      drawCoverImage(context, image, primaryRect.x, primaryRect.y, primaryRect.width, primaryRect.height, 18)
+      strokeRoundedRect(
+        context,
+        primaryRect.x,
+        primaryRect.y,
+        primaryRect.width,
+        primaryRect.height,
+        18,
+        palette.border,
+        2,
+      )
     } else if (selection) {
       drawCoverPlaceholder(
         context,
-        coverX,
-        coverY,
-        COVER_WIDTH,
-        COVER_HEIGHT,
+        primaryRect.x,
+        primaryRect.y,
+        primaryRect.width,
+        primaryRect.height,
         18,
         palette,
         category.name,
-        getSelectionCoverImage(selection).color ?? palette.elevated,
+        getSelectionPrimaryImage(selection).color ?? palette.elevated,
       )
     } else {
       drawMissingSelectionPlaceholder(
@@ -682,6 +862,10 @@ export const renderTemplatePng = async ({
         palette,
         palette.elevated,
       )
+    }
+
+    if (selection) {
+      drawSelectionInsets(context, cardImages?.insets ?? [], coverX, coverY, palette)
     }
 
     const availableTextHeight = cardHeight - CARD_PADDING * 2 - CARD_TEXT_TOP_OFFSET

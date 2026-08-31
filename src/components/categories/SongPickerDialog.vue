@@ -14,7 +14,7 @@ import DialogHeader from '@/components/DialogHeader.vue'
 import AnimePickerBrowser from '@/components/categories/AnimePickerBrowser.vue'
 import SongPreviewDialog from '@/components/categories/SongPreviewDialog.vue'
 import SongPickerSongView from '@/components/categories/SongPickerSongView.vue'
-import SongPickerStepper from '@/components/categories/SongPickerStepper.vue'
+import PickerStepper from '@/components/categories/PickerStepper.vue'
 import { loadCachedAnimeSongs, saveCachedAnimeSongs } from '@/lib/song-cache'
 import {
   createSongSelection,
@@ -69,6 +69,11 @@ const detailAnime = computed(() =>
 const hasSelectedAnime = computed(() => detailAnime.value !== null)
 const canNavigateToSongView = computed(() => hasSelectedAnime.value)
 const canOpenSongView = computed(() => canNavigateToSongView.value)
+const pickerSteps = [
+  { key: 'anime', label: 'Select Anime' },
+  { key: 'song', label: 'Select Song' },
+]
+const disabledSteps = computed(() => canNavigateToSongView.value ? [] : ['song'])
 const isAnimeView = computed(() => activeView.value === 'anime')
 const isSongView = computed(() => activeView.value === 'song')
 const focusedSongs = computed(() => (focusedAnimeId.value ? songsByAnimeId.value[focusedAnimeId.value] ?? [] : []))
@@ -219,6 +224,8 @@ const setActiveView = (view: SongPickerView) => {
   activeView.value = view
 }
 
+const setActiveViewFromKey = (key: string) => setActiveView(key as SongPickerView)
+
 watch(open, (isOpen) => {
   if (isOpen) {
     resetState()
@@ -257,10 +264,11 @@ watch(open, (isOpen) => {
         </div>
 
         <div class="-mx-5 px-5 -mt-5 pt-5 pb-4 border-b border-app-border/70 bg-app-surface/95 ">
-          <SongPickerStepper
-            :active-view="activeView"
-            :can-navigate-to-song-view="canNavigateToSongView"
-            @update:active-view="setActiveView"
+          <PickerStepper
+            :active-key="activeView"
+            :steps="pickerSteps"
+            :disabled-keys="disabledSteps"
+            @update:active-key="setActiveViewFromKey"
           />
         </div>
 

@@ -3,12 +3,26 @@ import { computed } from 'vue'
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
+import NameWithTooltip from '@/components/categories/NameWithTooltip.vue'
 import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
+import CharacterPickerDialog from '@/components/categories/CharacterPickerDialog.vue'
+import VoiceActorPickerDialog from '@/components/categories/VoiceActorPickerDialog.vue'
 import DeleteIcon from '@/components/icons/DeleteIcon.vue'
 import DragHandleIcon from '@/components/icons/DragHandleIcon.vue'
+import {
+  getSelectionInsetImages,
+  getSelectionPrimaryImage,
+  getSelectionPrimaryTitle,
+  resolveSongTitle,
+  getSongContextLabel,
+} from '@/lib/song-selection'
+import {
+  getCharacterRelationLabel,
+  getVoiceActorRelationLabel,
+  resolveRelationName,
+} from '@/lib/relation-selection'
 import { resolveAnimeTitle } from '@/lib/anime-title'
-import { getSelectionCoverImage, resolveSongTitle, getSongContextLabel } from '@/lib/song-selection'
 import { useSettingsStore } from '@/stores/settings'
 import type {
   AniListMetadata,
@@ -28,7 +42,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  save: [value: { name: string, description: string, filter: FilterState, entityKind: Category['entityKind'], songFilter: Category['songFilter'] }]
+  save: [value: {
+    name: string
+    description: string
+    filter: FilterState
+    entityKind: Category['entityKind']
+    songFilter: Category['songFilter']
+    characterFilter: Category['characterFilter']
+    voiceActorFilter: Category['voiceActorFilter']
+  }]
   delete: [categoryId: string]
   selectSelection: [selection: CategorySelection]
   clearSelection: [categoryId: string]
@@ -36,26 +58,99 @@ const emit = defineEmits<{
 
 const settingsStore = useSettingsStore()
 
+// The inset array is ordered top-to-bottom, so the last entry sits lowest.
+// Right-to-left, so a two-entry array puts the character left of the anime
+// cover on one baseline. The offsets pair with `w-6` insets inside the 64x96
+// image slot: 1 + 24 + 3 + 24 + 12 leaves the slot's width intact.
+const insetRightClasses = ['right-px', 'right-[28px]']
+
+// The primary image gives up room to the insets rather than being covered by
+// them: one inset takes the lower right corner, two take the bottom row, and
+// the primary shrinks to match. Mirrors `resolvePrimaryRect` in the export.
+const primaryImageClasses = ['h-24 w-16', 'h-[4.5rem] w-12', 'h-[4.25rem] w-11']
+
+const resolveInsetAltLabels = (selection: CategorySelection) => {
+  if (selection.kind === 'anime' || selection.kind === 'song') {
+    return []
+  }
+
+  const animeLabel = `Cover of ${resolveAnimeTitle(selection.animeTitle, settingsStore.titleLanguage)}`
+
+  if (selection.kind === 'character') {
+    return [animeLabel]
+  }
+
+  const characterName = resolveRelationName(
+    { name: selection.characterName, nativeName: selection.characterNativeName },
+    settingsStore.titleLanguage,
+  ).primary
+
+  return [`Image of ${characterName}`, animeLabel]
+}
+
 const selectionTitle = computed(() => {
   if (!props.selection) {
     return null
   }
 
-  return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).primary
-    : resolveAnimeTitle(props.selection.title, settingsStore.titleLanguage)
+  return getSelectionPrimaryTitle(props.selection, settingsStore.titleLanguage)
 })
 const selectionAltTitle = computed(() => {
   if (!props.selection) {
     return null
   }
 
-  return props.selection.kind === 'song'
-    ? resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
-    : null
+  if (props.selection.kind === 'song') {
+    return resolveSongTitle(props.selection.song, settingsStore.titleLanguage).tooltip
+  }
+
+  if (props.selection.kind === 'character') {
+    return resolveRelationName(
+      { name: props.selection.characterName, nativeName: props.selection.characterNativeName },
+      settingsStore.titleLanguage,
+    ).tooltip
+  }
+
+  if (props.selection.kind === 'voice-actor') {
+    return resolveRelationName(
+      { name: props.selection.voiceActorName, nativeName: props.selection.voiceActorNativeName },
+      settingsStore.titleLanguage,
+    ).tooltip
+  }
+
+  return null
 })
-const selectionCoverImage = computed(() =>
-  props.selection ? getSelectionCoverImage(props.selection) : null,
+const selectionPrimaryImage = computed(() =>
+  props.selection ? getSelectionPrimaryImage(props.selection) : null,
+)
+const selectionInsets = computed(() => {
+  if (!props.selection) {
+    return []
+  }
+
+  const insetImages = getSelectionInsetImages(props.selection)
+  const altLabels = resolveInsetAltLabels(props.selection)
+
+  return insetImages.map((image, index) => ({
+    src: image.large,
+    alt: altLabels[index] ?? 'Related image',
+    positionClass: insetRightClasses[insetImages.length - 1 - index] ?? 'right-[29px]',
+  }))
+})
+const characterRelationLine = computed(() =>
+  props.selection?.kind === 'character'
+    ? getCharacterRelationLabel(props.selection, settingsStore.titleLanguage)
+    : null,
+)
+const voiceActorRelationLine = computed(() =>
+  props.selection?.kind === 'voice-actor'
+    ? getVoiceActorRelationLabel(props.selection, settingsStore.titleLanguage)
+    : null,
+)
+const voiceActorLanguageLine = computed(() =>
+  props.selection?.kind === 'voice-actor' && props.selection.language?.trim()
+    ? props.selection.language.trim()
+    : null,
 )
 const songArtistLine = computed(() =>
   props.selection?.kind === 'song' && props.selection.song.artist.trim()
@@ -105,36 +200,37 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         v-if="selection"
         class="flex gap-4"
       >
-        <img
-          :src="selectionCoverImage?.large"
-          :alt="selectionTitle ?? 'Selected anime cover'"
-          class="h-24 w-16 rounded-xl border border-app-border/70 object-cover"
-        >
+        <div class="relative h-24 w-16 shrink-0">
+          <!--
+            With relation insets the primary image shrinks and stays top left,
+            so the insets get room of their own beside and below it rather than
+            covering a quarter of the subject. Two insets sit side by side on
+            one baseline. Everything together still spans the slot exactly, so
+            no card changes size.
+          -->
+          <img
+            :src="selectionPrimaryImage?.large"
+            :alt="selectionTitle ?? 'Selected anime cover'"
+            class="selection-primary-image rounded-xl border border-app-border/70 object-cover"
+            :class="primaryImageClasses[selectionInsets.length] ?? 'h-[4.25rem] w-11'"
+          >
+
+          <img
+            v-for="(inset, index) in selectionInsets"
+            :key="index"
+            :src="inset.src"
+            :alt="inset.alt"
+            class="absolute bottom-px h-9 w-6 rounded-md object-cover ring-1 ring-app-surface"
+            :class="inset.positionClass"
+          >
+        </div>
 
         <div class="min-w-0 space-y-2">
-          <TooltipRoot v-if="selectionAltTitle">
-            <TooltipTrigger as-child>
-              <p class="break-words text-base font-semibold text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-                {{ selectionTitle }}
-              </p>
-            </TooltipTrigger>
-
-            <TooltipPortal>
-              <TooltipContent
-                class="z-50 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                :side-offset="8"
-              >
-                {{ selectionAltTitle }}
-                <TooltipArrow class="fill-app-surface" />
-              </TooltipContent>
-            </TooltipPortal>
-          </TooltipRoot>
-          <p
-            v-else
-            class="break-words text-base font-semibold text-app-text"
-          >
-            {{ selectionTitle }}
-          </p>
+          <NameWithTooltip
+            :primary="selectionTitle ?? ''"
+            :tooltip="selectionAltTitle"
+            text-class="text-base font-semibold text-app-text"
+          />
 
           <p
             v-if="selection.kind === 'anime'"
@@ -142,6 +238,18 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
           >
             {{ selection.seasonYear ?? 'Unknown year' }}
             <span v-if="selection.format"> · {{ selection.format }}</span>
+          </p>
+          <p
+            v-else-if="selection.kind === 'character'"
+            class="text-sm text-app-muted"
+          >
+            {{ characterRelationLine }}
+          </p>
+          <p
+            v-else-if="selection.kind === 'voice-actor'"
+            class="text-sm text-app-muted"
+          >
+            {{ voiceActorRelationLine }}
           </p>
           <p
             v-else
@@ -155,6 +263,12 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             class="text-xs leading-5 text-app-muted"
           >
             {{ songContextLine }}
+          </p>
+          <p
+            v-else-if="voiceActorLanguageLine"
+            class="text-xs leading-5 text-app-muted"
+          >
+            {{ voiceActorLanguageLine }}
           </p>
         </div>
       </div>
@@ -184,10 +298,26 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         @clear="emit('clearSelection', category.id)"
       />
       <SongPickerDialog
-        v-else
+        v-else-if="category.entityKind === 'song'"
         :category="category"
         :global-filter="globalFilter"
         :selected-song="selection?.kind === 'song' ? selection : null"
+        @select="emit('selectSelection', $event)"
+        @clear="emit('clearSelection', category.id)"
+      />
+      <CharacterPickerDialog
+        v-else-if="category.entityKind === 'character'"
+        :category="category"
+        :global-filter="globalFilter"
+        :selected-character="selection?.kind === 'character' ? selection : null"
+        @select="emit('selectSelection', $event)"
+        @clear="emit('clearSelection', category.id)"
+      />
+      <VoiceActorPickerDialog
+        v-else-if="category.entityKind === 'voice-actor'"
+        :category="category"
+        :global-filter="globalFilter"
+        :selected-voice-actor="selection?.kind === 'voice-actor' ? selection : null"
         @select="emit('selectSelection', $event)"
         @clear="emit('clearSelection', category.id)"
       />
@@ -202,6 +332,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
       </button>
       <CategoryEditDialog
         :category="category"
+        :selection="selection"
         :global-filter="globalFilter"
         :metadata="metadata"
         :metadata-status="metadataStatus"

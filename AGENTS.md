@@ -57,8 +57,8 @@
 - Make components re-usable and encapsulate functionality to keep per-component context minimal and isolated.
 - Prefer bi-directional data transfer using the `defineModel` directive.
 - Prefer small pure helpers in `src/lib` for normalization, validation, and merge logic.
-- Do not introduce character, staff, or manga support.
-  The current product scope is anime and anime-related song categories only.
+- Character and voice-actor categories are in scope.
+  Do not introduce staff or manga support.
 - Keep the app English-only unless the plan is explicitly updated.
 - Preserve static-hosting compatibility for GitHub Pages.
 
@@ -68,7 +68,10 @@
 - Template ids and category ids are stable internal identities.
   Category renames must never break stored selections.
 - Categories are keyed by internal ids, not display names.
-- Category entity kinds are stable and currently include anime and song categories.
+- Category entity kinds are stable and currently include anime,
+  song,
+  character,
+  and voice-actor categories.
 - When the app exports templates, it should keep stable ids in the payload.
   When it imports older or hand-written payloads without ids, it should generate ids during normalization.
 - Template origin matters.

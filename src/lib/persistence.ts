@@ -2,13 +2,19 @@ import {
   animeFormats,
   animeSeasons,
   animeTitleLanguages,
+  characterRoles,
   defaultAnimeTitleLanguage,
   defaultThemePreference,
   TemplateOrigin,
   themeTypes,
   themePreferences,
+  type AnimeTitle,
   type AnimeTitleLanguage,
   type CategorySelection,
+  type CharacterRole,
+  type CharacterSelection,
+  type RelationImage,
+  type VoiceActorSelection,
   type SongPerformance,
   type SongSelection,
   type Template,
@@ -22,6 +28,7 @@ import {
   parseTemplateImportPayload,
 } from '@/lib/template-validation'
 import { createAnimeSelection, normalizeSongEpisodes } from '@/lib/song-selection'
+import { createCharacterSelection, createVoiceActorSelection } from '@/lib/relation-selection'
 
 const templatesStorageKey = 'anime-toplist-builder.templates.v1'
 const settingsStorageKey = 'anime-toplist-builder.settings.v1'
@@ -88,6 +95,53 @@ const isNullableAnimeFormat = (
 
 const isThemeType = (value: unknown): value is (typeof themeTypes)[number] =>
   typeof value === 'string' && themeTypes.includes(value as (typeof themeTypes)[number])
+
+const isCharacterRole = (value: unknown): value is CharacterRole =>
+  typeof value === 'string' && characterRoles.includes(value as CharacterRole)
+
+const isAnimeTitleRecord = (value: unknown): value is JsonRecord =>
+  isRecord(value)
+  && isString(value.userPreferred)
+  && isNullableString(value.romaji)
+  && isNullableString(value.english)
+  && isNullableString(value.native)
+
+const isAnimeCoverImageRecord = (value: unknown): value is JsonRecord =>
+  isRecord(value)
+  && isString(value.large)
+  && isNullableString(value.medium)
+  && isNullableString(value.extraLarge)
+  && isNullableString(value.color)
+
+const isRelationImageRecord = (value: unknown): value is JsonRecord =>
+  isRecord(value) && isString(value.large) && isNullableString(value.medium)
+
+const toAnimeTitle = (value: JsonRecord): AnimeTitle => ({
+  userPreferred: value.userPreferred as string,
+  romaji: (value.romaji as string | null | undefined) ?? null,
+  english: (value.english as string | null | undefined) ?? null,
+  native: (value.native as string | null | undefined) ?? null,
+})
+
+const toAnimeCoverImage = (value: JsonRecord) => ({
+  large: value.large as string,
+  medium: (value.medium as string | null | undefined) ?? null,
+  extraLarge: (value.extraLarge as string | null | undefined) ?? null,
+  color: (value.color as string | null | undefined) ?? null,
+})
+
+const toRelationImage = (value: JsonRecord): RelationImage => ({
+  large: value.large as string,
+  medium: (value.medium as string | null | undefined) ?? null,
+})
+
+// `role` and `language` are optional on the stored shape,
+// so an absent value is as valid as an explicit `null`.
+const isOptionalCharacterRole = (value: unknown) =>
+  value === undefined || value === null || isCharacterRole(value)
+
+const isOptionalNullableString = (value: unknown) =>
+  value === undefined || isNullableString(value)
 
 const isTemplateOrigin = (value: unknown): value is TemplateOrigin =>
   value === TemplateOrigin.User
@@ -324,13 +378,89 @@ const parseStoredSongSelection = (value: unknown): SongSelection | null => {
   }
 }
 
-const parseStoredSelection = (value: unknown): CategorySelection | null => {
-  const songSelection = parseStoredSongSelection(value)
-
-  if (songSelection) {
-    return songSelection
+const parseStoredCharacterSelection = (value: unknown): CharacterSelection | null => {
+  if (!isRecord(value) || value.kind !== 'character') {
+    return null
   }
 
+  if (
+    !Number.isInteger(value.characterId)
+    || !isString(value.characterName)
+    || !isOptionalNullableString(value.characterNativeName)
+    || !isRelationImageRecord(value.characterImage)
+    || !isOptionalCharacterRole(value.role)
+    || !Number.isInteger(value.animeId)
+    || !isAnimeTitleRecord(value.animeTitle)
+    || !isAnimeCoverImageRecord(value.animeCoverImage)
+  ) {
+    return null
+  }
+
+  return createCharacterSelection({
+    characterId: value.characterId as number,
+    characterName: value.characterName,
+    characterNativeName: value.characterNativeName as string | null | undefined,
+    characterImage: toRelationImage(value.characterImage),
+    role: value.role as CharacterRole | null | undefined,
+    animeId: value.animeId as number,
+    animeTitle: toAnimeTitle(value.animeTitle),
+    animeCoverImage: toAnimeCoverImage(value.animeCoverImage),
+  })
+}
+
+const parseStoredVoiceActorSelection = (value: unknown): VoiceActorSelection | null => {
+  if (!isRecord(value) || value.kind !== 'voice-actor') {
+    return null
+  }
+
+  if (
+    !Number.isInteger(value.voiceActorId)
+    || !isString(value.voiceActorName)
+    || !isOptionalNullableString(value.voiceActorNativeName)
+    || !isRelationImageRecord(value.voiceActorImage)
+    || !isOptionalNullableString(value.language)
+    || !Number.isInteger(value.characterId)
+    || !isString(value.characterName)
+    || !isOptionalNullableString(value.characterNativeName)
+    || !isRelationImageRecord(value.characterImage)
+    || !isOptionalCharacterRole(value.role)
+    || !Number.isInteger(value.animeId)
+    || !isAnimeTitleRecord(value.animeTitle)
+    || !isAnimeCoverImageRecord(value.animeCoverImage)
+  ) {
+    return null
+  }
+
+  return createVoiceActorSelection({
+    voiceActorId: value.voiceActorId as number,
+    voiceActorName: value.voiceActorName,
+    voiceActorNativeName: value.voiceActorNativeName as string | null | undefined,
+    voiceActorImage: toRelationImage(value.voiceActorImage),
+    language: value.language as string | null | undefined,
+    characterId: value.characterId as number,
+    characterName: value.characterName,
+    characterNativeName: value.characterNativeName as string | null | undefined,
+    characterImage: toRelationImage(value.characterImage),
+    role: value.role as CharacterRole | null | undefined,
+    animeId: value.animeId as number,
+    animeTitle: toAnimeTitle(value.animeTitle),
+    animeCoverImage: toAnimeCoverImage(value.animeCoverImage),
+  })
+}
+
+const parseStoredSelection = (value: unknown): CategorySelection | null => {
+  const kind = isRecord(value) ? value.kind : undefined
+
+  switch (kind) {
+    case 'song':
+      return parseStoredSongSelection(value)
+    case 'character':
+      return parseStoredCharacterSelection(value)
+    case 'voice-actor':
+      return parseStoredVoiceActorSelection(value)
+  }
+
+  // Selections written before `kind` existed carry the anime shape without it.
   return parseStoredAnimeSelection(value)
 }
 

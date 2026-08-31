@@ -126,3 +126,46 @@ export const fetchAniListMediaByIdQuery = `
     }
   }
 `
+
+export const fetchAnimeCharacterCreditsQuery = `
+  query FetchAnimeCharacterCredits($id: Int!, $page: Int!, $perPage: Int!) {
+    Media(id: $id, type: ANIME, isAdult: false) {
+      id
+      characters(page: $page, perPage: $perPage, sort: [ROLE, RELEVANCE]) {
+        pageInfo {
+          currentPage
+          hasNextPage
+          lastPage
+          perPage
+          total
+        }
+        edges {
+          role
+          node {
+            id
+            name {
+              userPreferred
+              native
+            }
+            image {
+              large
+              medium
+            }
+          }
+          voiceActors(sort: [RELEVANCE]) {
+            id
+            name {
+              userPreferred
+              native
+            }
+            image {
+              large
+              medium
+            }
+            languageV2
+          }
+        }
+      }
+    }
+  }
+`

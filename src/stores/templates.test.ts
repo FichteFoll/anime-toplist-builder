@@ -6,7 +6,14 @@ import { useSettingsStore } from '@/stores/settings'
 import { useTemplateStore } from '@/stores/templates'
 import { predefinedTemplates } from '@/templates/predefined'
 import { createAnimeSelection } from '@/lib/song-selection'
-import { AnimeFormat, AnimeSeason, templateSchemaVersion, type AnimeSelection } from '@/types'
+import {
+  AnimeFormat,
+  AnimeSeason,
+  CategoryEntityKind,
+  CharacterRole,
+  templateSchemaVersion,
+  type AnimeSelection,
+} from '@/types'
 
 const createSelection = (): AnimeSelection => createAnimeSelection({
   mediaId: 5114,
@@ -165,6 +172,32 @@ describe('template store fork-on-edit behavior', () => {
     )
     expect(animeAwards?.categories.find((category) => category.id === 'bestnewseries01')?.filter).toMatchObject({
       episodes: { minimum: 4 },
+    })
+  })
+
+  it('uses the character and voice-actor entity kinds for the anime awards template', () => {
+    const animeAwards = predefinedTemplates.find((template) => template.id === 'cr-anime-awards-2025')
+    const categoryById = (id: string) => animeAwards?.categories.find((category) => category.id === id)
+
+    expect(categoryById('bestmaincharacter01')).toMatchObject({
+      entityKind: CategoryEntityKind.Character,
+      characterFilter: { roles: [CharacterRole.Main] },
+    })
+    expect(categoryById('bestsupportingcharacter01')).toMatchObject({
+      entityKind: CategoryEntityKind.Character,
+      characterFilter: { roles: [CharacterRole.Supporting] },
+    })
+    expect(categoryById('mustprotect01')).toMatchObject({
+      entityKind: CategoryEntityKind.Character,
+      characterFilter: { roles: [] },
+    })
+    expect(categoryById('bestvoiceartistperformancejapanese01')).toMatchObject({
+      entityKind: CategoryEntityKind.VoiceActor,
+      voiceActorFilter: { languages: ['Japanese'] },
+    })
+    expect(categoryById('bestvoiceartistperformanceenglish01')).toMatchObject({
+      entityKind: CategoryEntityKind.VoiceActor,
+      voiceActorFilter: { languages: ['English'] },
     })
   })
 })

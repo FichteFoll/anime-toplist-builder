@@ -8,6 +8,10 @@ import { describe, expect, it, vi } from 'vitest'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createSongSelection } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, ThemeType, type AniListSearchResponse, type AniListSearchResult, type Category } from '@/types'
 
 const mocks = vi.hoisted(() => ({
@@ -102,11 +106,11 @@ vi.mock('@/components/categories/AnimePickerBrowser.vue', () => ({
   },
 }))
 
-vi.mock('@/components/categories/SongPickerStepper.vue', () => ({
+vi.mock('@/components/categories/PickerStepper.vue', () => ({
   default: {
-    props: ['activeView', 'canNavigateToSongView'],
-    emits: ['update:activeView'],
-    template: '<div class="stepper"><button type="button" class="step-anime" @click="$emit(\'update:activeView\', \'anime\')">Anime</button><button type="button" class="step-song" :disabled="!canNavigateToSongView" @click="$emit(\'update:activeView\', \'song\')">Song</button><span class="active-view">{{ activeView }}</span></div>',
+    props: ['activeKey', 'steps', 'disabledKeys'],
+    emits: ['update:activeKey'],
+    template: '<div class="stepper"><button type="button" class="step-anime" @click="$emit(\'update:activeKey\', \'anime\')">Anime</button><button type="button" class="step-song" :disabled="disabledKeys.includes(\'song\')" @click="$emit(\'update:activeKey\', \'song\')">Song</button><span class="active-view">{{ activeKey }}</span></div>',
   },
 }))
 
@@ -117,6 +121,8 @@ const category: Category = {
   filter: createEmptyFilterState(),
   entityKind: CategoryEntityKind.Song,
   songFilter: { types: [] },
+  characterFilter: createEmptyCharacterFilterState(),
+  voiceActorFilter: createEmptyVoiceActorFilterState(),
 }
 
 const selectedSong = createSongSelection({

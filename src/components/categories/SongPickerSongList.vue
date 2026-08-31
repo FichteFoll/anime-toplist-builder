@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import {
-  TooltipArrow,
-  TooltipContent,
-  TooltipPortal,
-  TooltipRoot,
-  TooltipTrigger,
-} from 'reka-ui'
-
 import type { AnimeThemesSong } from '@/api'
+import NameWithTooltip from '@/components/categories/NameWithTooltip.vue'
 import PlayIcon from '@/components/icons/PlayIcon.vue'
 import { formatSongEpisodesHint, getSongSelectionKey, resolveSongTitle } from '@/lib/song-selection'
 import { useSettingsStore } from '@/stores/settings'
@@ -69,28 +62,11 @@ const filteredSongs = computed(() => {
           @click="emit('selectSong', song)"
         >
           <span class="block min-w-0">
-            <TooltipRoot v-if="resolveSongTitle(song, settingsStore.titleLanguage).tooltip">
-              <TooltipTrigger as-child>
-                <span class="block break-words font-medium text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-                  {{ resolveSongTitle(song, settingsStore.titleLanguage).primary }}
-                </span>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent
-                  class="z-[60] rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                  :side-offset="8"
-                >
-                  {{ resolveSongTitle(song, settingsStore.titleLanguage).tooltip }}
-                  <TooltipArrow class="fill-app-surface" />
-                </TooltipContent>
-              </TooltipPortal>
-            </TooltipRoot>
-            <span
-              v-else
-              class="block break-words font-medium text-app-text"
-            >
-              {{ resolveSongTitle(song, settingsStore.titleLanguage).primary }}
-            </span>
+            <NameWithTooltip
+              :primary="resolveSongTitle(song, settingsStore.titleLanguage).primary"
+              :tooltip="resolveSongTitle(song, settingsStore.titleLanguage).tooltip"
+              text-class="font-medium text-app-text"
+            />
             <span
               v-if="song.artist.trim()"
               class="mt-1 block text-sm text-app-muted"

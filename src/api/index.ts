@@ -1,4 +1,5 @@
 export * from './anilist'
+export * from './anilist-characters'
 export * from './anilist-client'
 export * from './anilist-query-builder'
 export * from './animethemes'

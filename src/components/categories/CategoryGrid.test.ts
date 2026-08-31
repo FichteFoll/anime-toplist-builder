@@ -7,6 +7,10 @@ import { describe, expect, it, vi } from 'vitest'
 import CategoryGrid from '@/components/categories/CategoryGrid.vue'
 import { createEmptyFilterState } from '@/lib/filter-state'
 import { createAnimeSelection, createEmptySongFilterState } from '@/lib/song-selection'
+import {
+  createEmptyCharacterFilterState,
+  createEmptyVoiceActorFilterState,
+} from '@/lib/relation-selection'
 import { AnimeFormat, AnimeSeason, CategoryEntityKind, TemplateOrigin, type AnimeSelection, type Category } from '@/types'
 
 const { sortableCreate, sortableDestroy } = vi.hoisted(() => ({
@@ -110,6 +114,8 @@ const categories: Array<Category> = [
     filter: createEmptyFilterState(),
     entityKind: CategoryEntityKind.Anime,
     songFilter: createEmptySongFilterState(),
+    characterFilter: createEmptyCharacterFilterState(),
+    voiceActorFilter: createEmptyVoiceActorFilterState(),
   },
 ]
 
