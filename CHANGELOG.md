@@ -5,6 +5,12 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+- Native-title tooltips now appear next to the name they belong to
+  instead of floating in the middle of the row.
+  This affected song titles in the song picker
+  and the selected entry's title on a category card,
+  as well as the new character and voice-actor lists.
+
 - Character and voice-actor cards now give their inset images room of their
   own instead of laying them over the primary image.
   The character or voice actor is drawn slightly smaller,

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { TooltipArrow, TooltipContent, TooltipPortal, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
 import CategoryEditDialog from '@/components/categories/CategoryEditDialog.vue'
+import NameWithTooltip from '@/components/categories/NameWithTooltip.vue'
 import AnimePickerDialog from '@/components/categories/AnimePickerDialog.vue'
 import SongPickerDialog from '@/components/categories/SongPickerDialog.vue'
 import CharacterPickerDialog from '@/components/categories/CharacterPickerDialog.vue'
@@ -225,29 +226,11 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
         </div>
 
         <div class="min-w-0 space-y-2">
-          <TooltipRoot v-if="selectionAltTitle">
-            <TooltipTrigger as-child>
-              <p class="break-words text-base font-semibold text-app-text decoration-dashed underline decoration-app-border underline-offset-4">
-                {{ selectionTitle }}
-              </p>
-            </TooltipTrigger>
-
-            <TooltipPortal>
-              <TooltipContent
-                class="z-50 rounded-2xl border border-app-border/80 bg-app-surface px-3 py-2 text-xs leading-5 text-app-text shadow-shell"
-                :side-offset="8"
-              >
-                {{ selectionAltTitle }}
-                <TooltipArrow class="fill-app-surface" />
-              </TooltipContent>
-            </TooltipPortal>
-          </TooltipRoot>
-          <p
-            v-else
-            class="break-words text-base font-semibold text-app-text"
-          >
-            {{ selectionTitle }}
-          </p>
+          <NameWithTooltip
+            :primary="selectionTitle ?? ''"
+            :tooltip="selectionAltTitle"
+            text-class="text-base font-semibold text-app-text"
+          />
 
           <p
             v-if="selection.kind === 'anime'"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AniListCharacterCredit, AniListVoiceActorCredit } from '@/api'
-import RelationName from '@/components/categories/RelationName.vue'
+import NameWithTooltip from '@/components/categories/NameWithTooltip.vue'
 import { formatCharacterRoleLabel } from '@/lib/format-label'
 import { resolveRelationName } from '@/lib/relation-selection'
 import { useSettingsStore } from '@/stores/settings'
@@ -69,7 +69,7 @@ const resolveMetaLine = (row: VoiceActorCreditRow) => [
       </span>
 
       <span class="block min-w-0">
-        <RelationName
+        <NameWithTooltip
           :primary="resolveVoiceActorName(row).primary"
           :tooltip="resolveVoiceActorName(row).tooltip"
           text-class="font-medium text-app-text"
@@ -77,7 +77,7 @@ const resolveMetaLine = (row: VoiceActorCreditRow) => [
 
         <span class="mt-1 block break-words text-sm text-app-text/80">
           as
-          <RelationName
+          <NameWithTooltip
             :primary="resolveCharacterName(row).primary"
             :tooltip="resolveCharacterName(row).tooltip"
           />

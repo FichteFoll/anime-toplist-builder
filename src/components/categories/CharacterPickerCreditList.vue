@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AniListCharacterCredit } from '@/api'
-import RelationName from '@/components/categories/RelationName.vue'
+import NameWithTooltip from '@/components/categories/NameWithTooltip.vue'
 import { formatCharacterRoleLabel } from '@/lib/format-label'
 import { resolveRelationName } from '@/lib/relation-selection'
 import { useSettingsStore } from '@/stores/settings'
@@ -38,7 +38,7 @@ const resolveCreditName = (credit: AniListCharacterCredit) =>
       >
 
       <span class="block min-w-0">
-        <RelationName
+        <NameWithTooltip
           :primary="resolveCreditName(credit).primary"
           :tooltip="resolveCreditName(credit).tooltip"
           text-class="font-medium text-app-text"
