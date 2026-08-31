@@ -5,9 +5,7 @@ The app shows these entries in its changelog popup.
 
 ## 2026-08-31
 
-- Categories can now pick a character of an anime,
-  or a voice actor credited for a character,
-  in addition to anime and song categories.
+- Added character and voice-actor categories.
   Both are picked anime-first:
   choose an anime,
   then a character from it,
