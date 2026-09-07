@@ -1,14 +1,28 @@
 <script setup lang="ts">
-defineProps<{
-  totalResults: number
+import { computed } from 'vue'
+
+import type { PickerResultTotal } from '@/lib/picker-result-total'
+
+const props = defineProps<{
+  resultTotal: PickerResultTotal | null
   currentPage: number
-  lastPage: number
+  lastPage: number | null
+  perPage: number
   hasNextPage: boolean
   status: 'idle' | 'loading' | 'ready' | 'error'
   hasResults: boolean
   errorMessage?: string | null
   emptyMessage: string
 }>()
+
+const resultTotalLabel = computed(() => {
+  if (!props.resultTotal) {
+    return 'No total reported yet'
+  }
+
+  const { count, isExact } = props.resultTotal
+  return `${count}${isExact ? '' : '+'} matches`
+})
 
 const emit = defineEmits<{
   previous: []
@@ -20,16 +34,16 @@ const emit = defineEmits<{
 <template>
   <div class="mt-3 flex items-center justify-between gap-3 rounded-[1.25rem] bg-app-bg/50 px-4 py-3 text-sm text-app-muted">
     <p>
-      {{ totalResults > 0 ? `${totalResults} matches` : 'No total reported yet' }}
+      {{ resultTotalLabel }}
     </p>
     <p>
-      {{ status === 'loading' ? 'Loading...' : `Page ${currentPage} · 15 per page` }}
+      {{ status === 'loading' ? 'Loading...' : `Page ${currentPage} · ${perPage} per page` }}
     </p>
   </div>
 
   <div class="mt-4 flex items-center justify-between gap-3 text-sm text-app-muted">
     <p>
-      Page {{ currentPage }} of {{ lastPage }}
+      {{ lastPage === null ? `Page ${currentPage}` : `Page ${currentPage} of ${lastPage}` }}
     </p>
     <div class="flex flex-wrap gap-2">
       <button

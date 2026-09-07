@@ -11,6 +11,11 @@ The app shows these entries in its changelog popup.
   The header, the category section and the category cards
   no longer blur the page behind them,
   and cover images now load only once they come into view.
+- The anime picker now shows a lower bound like *45+ matches*
+  and hides the page count while searching
+  instead of relying on the AniList's fabricated match count
+  when using text search.
+  Filter-only queries keep their exact total.
 
 ## 2026-08-31
 

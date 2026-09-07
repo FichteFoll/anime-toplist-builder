@@ -30,6 +30,15 @@ Deliberate constraints and rough edges that are worth knowing before filing them
 - Genre and tag suggestions depend on the AniList metadata request at startup.
   If it fails,
   the suggestion lists stay empty until the page is reloaded.
+- AniList answers a query carrying a search term from its search index,
+  where `pageInfo.total` and `pageInfo.lastPage` report the index result window
+  of 5000 entries instead of the real match count,
+  until the last page of results collapses them to the truth.
+  The anime picker therefore shows a lower bound such as `45+ matches`
+  while searching,
+  and hides the page count,
+  since only `hasNextPage` and the returned page are dependable there.
+  Without a search term the reported total is exact.
 
 ## Image Export
 

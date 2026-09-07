@@ -9,6 +9,7 @@ import PickerSearchToolbar from '@/components/categories/PickerSearchToolbar.vue
 import { useDebouncedValue } from '@/composables/useDebouncedValue'
 import { mergeFilterStates } from '@/lib/filter-merge'
 import { buildActiveFilterSummary } from '@/lib/filter-summary'
+import { resolvePickerLastPage, resolvePickerResultTotal } from '@/lib/picker-result-total'
 import { useAniListAuthStore } from '@/stores/anilist-auth'
 import { usePickerFiltersStore } from '@/stores/picker-filters'
 import {
@@ -48,6 +49,7 @@ const currentPage = ref(1)
 const status = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 const errorMessage = ref<string | null>(null)
 const searchResponse = ref<AniListSearchResponse | null>(null)
+const activeSearchTerm = ref('')
 const localSortField = ref<FilterSortField | ''>('')
 const localSortDirection = ref<FilterSortDirection>(FilterSortDirection.Desc)
 const debouncedSearch = useDebouncedValue(searchDraft, 250)
@@ -90,7 +92,29 @@ const pickerSort = computed<FilterSort | undefined>(() => {
   }
 })
 
-const totalResults = computed(() => searchResponse.value?.pageInfo.total ?? 0)
+const resultTotal = computed(() => {
+  const response = searchResponse.value
+
+  if (!response) {
+    return null
+  }
+
+  return resolvePickerResultTotal({
+    pageInfo: response.pageInfo,
+    resultCount: response.results.length,
+    perPage: pageSize,
+    hasSearchTerm: activeSearchTerm.value.length > 0,
+  })
+})
+const lastPage = computed(() => {
+  const response = searchResponse.value
+
+  if (!response) {
+    return null
+  }
+
+  return resolvePickerLastPage(response.pageInfo, activeSearchTerm.value.length > 0)
+})
 const hasResults = computed(() => (searchResponse.value?.results.length ?? 0) > 0)
 const canUseListFilters = computed(() => aniListAuthStore.isAuthenticated)
 const showFilterSummary = computed(() => activeFilterSummary.value.length > 0 || canUseListFilters.value)
@@ -98,6 +122,7 @@ const showFilterSummary = computed(() => activeFilterSummary.value.length > 0 ||
 const resetSearchState = () => {
   isResettingState.value = true
   searchDraft.value = ''
+  activeSearchTerm.value = ''
   currentPage.value = 1
   errorMessage.value = null
   searchResponse.value = null
@@ -133,6 +158,7 @@ const loadResults = async (searchTerm: string, page: number) => {
     }
 
     searchResponse.value = response
+    activeSearchTerm.value = searchTerm.trim()
     status.value = 'ready'
   } catch (error) {
     if (requestId !== activeRequestId) {
@@ -224,9 +250,10 @@ watch(() => pickerFiltersStore.listVisibility, (value, previousValue) => {
     />
 
     <PickerResultsFrame
-      :total-results="totalResults"
+      :result-total="resultTotal"
       :current-page="searchResponse?.pageInfo.currentPage ?? currentPage"
-      :last-page="searchResponse?.pageInfo.lastPage ?? 1"
+      :last-page="lastPage"
+      :per-page="pageSize"
       :has-next-page="searchResponse?.pageInfo.hasNextPage ?? false"
       :status="status"
       :has-results="hasResults"

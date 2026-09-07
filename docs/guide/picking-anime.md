@@ -18,6 +18,11 @@ see [picking songs](./picking-songs.md).
   falling back to the template order.
 - Pagination uses a page size of 15,
   with next and previous controls.
+- The match count above the results is exact for a pure filter query.
+  With a search term AniList does not report an honest total,
+  so the picker shows what it has seen itself,
+  as a growing lower bound like `45+ matches`,
+  and drops the total page count until the last page is reached.
 
 ## Result Cards
 
