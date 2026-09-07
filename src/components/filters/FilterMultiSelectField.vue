@@ -14,6 +14,7 @@ const props = defineProps<{
   options: Array<FilterOption>
   emptyMessage?: string
   disabledReason?: string
+  active?: boolean
 }>()
 
 const model = defineModel<Array<string>>({ required: true })
@@ -47,6 +48,7 @@ const toggleValue = (value: string) => {
     :label="label"
     :description="description"
     :disabled-reason="disabledReason"
+    :active="active"
   >
     <div
       v-if="normalizedOptions.length > 0"

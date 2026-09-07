@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   TooltipArrow,
   TooltipContent,
@@ -7,18 +8,35 @@ import {
   TooltipTrigger,
 } from 'reka-ui'
 
-defineProps<{
+const props = defineProps<{
   label: string
   description?: string
   disabledReason?: string
+  active?: boolean
 }>()
+
+// An inherited field carries a value too, but the user cannot change it here,
+// so it stays visually distinct from a value set in this editor.
+const railClass = computed(() => {
+  if (props.disabledReason) {
+    return 'border-dashed border-app-border'
+  }
+
+  return props.active ? 'border-app-accent/70' : 'border-transparent'
+})
 </script>
 
 <template>
-  <section class="space-y-3">
+  <section
+    class="space-y-3 border-l-2 pl-3"
+    :class="railClass"
+  >
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h3 class="text-sm font-medium text-app-text">
+        <h3
+          class="text-sm font-medium"
+          :class="active && !disabledReason ? 'text-app-accent' : 'text-app-text'"
+        >
           {{ label }}
         </h3>
         <p

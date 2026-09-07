@@ -9,6 +9,7 @@ const props = defineProps<{
   metadataStatus: 'idle' | 'loading' | 'ready' | 'error'
   metadataError?: string | null
   disabledReason?: string
+  active?: boolean
 }>()
 
 const model = defineModel<Array<string>>({ required: true })
@@ -62,6 +63,7 @@ const emptyMessage = computed(() => {
       virtualized
       placeholder="Search or select tags"
       :disabled-reason="disabledReason"
+      :active="active"
     />
   </div>
 </template>

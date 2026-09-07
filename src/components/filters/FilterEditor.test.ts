@@ -37,6 +37,20 @@ const FilterMultiSelectFieldStub = defineComponent({
   template: '<div />',
 })
 
+const FilterFieldStub = defineComponent({
+  props: {
+    label: {
+      type: String,
+      default: '',
+    },
+    active: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  template: '<div><slot /></div>',
+})
+
 describe('FilterEditor', () => {
   it('preserves same-tick genre and excluded genre updates', async () => {
     const wrapper = mount(FilterEditor, {
@@ -117,5 +131,67 @@ describe('FilterEditor', () => {
     expect(updates!.at(-1)?.[0]).toMatchObject({
       countriesOfOrigin: ['CN', 'JP'],
     })
+  })
+  it('marks fields that carry a value as active', () => {
+    const wrapper = mount(FilterEditor, {
+      props: {
+        mode: 'global',
+        metadata: {
+          genres: [],
+          tags: [],
+        },
+        metadataStatus: 'ready',
+        modelValue: {
+          ...createEmptyFilterState(),
+          yearRange: { minimum: 2000 },
+        },
+      },
+      global: {
+        stubs: {
+          FilterMultiSelectField: true,
+          FilterMultiComboboxField: true,
+          FilterSingleComboboxField: true,
+          FilterSortEditor: true,
+          FilterTagEditor: true,
+          CaretIcon: true,
+          FilterField: FilterFieldStub,
+        },
+      },
+    })
+
+    const fields = wrapper.findAllComponents(FilterFieldStub)
+    const activeLabels = fields.filter((field) => field.props('active')).map((field) => field.props('label'))
+
+    expect(activeLabels).toEqual(['Release year'])
+  })
+
+  it('opens the advanced section when it holds a configured field', () => {
+    const wrapper = mount(FilterEditor, {
+      props: {
+        mode: 'global',
+        metadata: {
+          genres: [],
+          tags: [],
+        },
+        metadataStatus: 'ready',
+        modelValue: {
+          ...createEmptyFilterState(),
+          episodes: { maximum: 13 },
+        },
+      },
+      global: {
+        stubs: {
+          FilterField: true,
+          FilterMultiSelectField: true,
+          FilterMultiComboboxField: true,
+          FilterSingleComboboxField: true,
+          FilterSortEditor: true,
+          FilterTagEditor: true,
+          CaretIcon: true,
+        },
+      },
+    })
+
+    expect(wrapper.find('details').attributes('open')).toBeDefined()
   })
 })

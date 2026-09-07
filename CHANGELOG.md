@@ -16,6 +16,13 @@ The app shows these entries in its changelog popup.
   instead of relying on the AniList's fabricated match count
   when using text search.
   Filter-only queries keep their exact total.
+- Filter fields that carry a value
+  are now highlighted in the filter editors,
+  and the `Advanced filters` section opens on its own
+  when it contains one.
+  In a category filter,
+  fields fixed by the template-wide filter
+  are marked differently from the ones set on the category.
 
 ## 2026-08-31
 

@@ -14,6 +14,7 @@ defineProps<{
   label: string
   description?: string
   inheritLabel?: string
+  active?: boolean
 }>()
 
 const model = defineModel<FilterSort | undefined>()
@@ -53,6 +54,7 @@ const setDirection = (direction: FilterSortDirection) => {
   <FilterField
     :label="label"
     :description="description"
+    :active="active"
   >
     <div class="flex flex-nowrap items-end gap-2">
       <label class="min-w-0 flex-1 space-y-2">

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   countAdvancedFilterFields,
   countConfiguredFilterFields,
+  getActiveFilterFields,
   getCategoryFilterDisabledReasons,
 } from '@/lib/filter-editor'
 import { createEmptyFilterState } from '@/lib/filter-state'
@@ -73,6 +74,42 @@ describe('filter editor helpers', () => {
     }
 
     expect(countAdvancedFilterFields(filter)).toBe(0)
+  })
+
+  it('reports which fields carry a value', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      yearRange: { minimum: 2000 },
+      genres: ['Action'],
+      tags: ['Isekai'],
+    }
+
+    const activeFields = getActiveFilterFields(filter)
+
+    expect(activeFields.yearRange).toBe(true)
+    expect(activeFields.genres).toBe(true)
+    expect(activeFields.tags).toBe(true)
+    expect(activeFields.minimumTagRank).toBe(true)
+    expect(activeFields.seasons).toBe(false)
+    expect(activeFields.sort).toBe(false)
+  })
+
+  it('does not report the minimum tag rank without tags', () => {
+    const filter: FilterState = {
+      ...createEmptyFilterState(),
+      minimumTagRank: 40,
+    }
+
+    expect(getActiveFilterFields(filter).minimumTagRank).toBe(false)
+  })
+
+  it('lets a category set its own sort even when the template sorts', () => {
+    const globalFilter: FilterState = {
+      ...createEmptyFilterState(),
+      sort: { field: FilterSortField.Popularity, direction: FilterSortDirection.Desc },
+    }
+
+    expect(getCategoryFilterDisabledReasons(globalFilter).sort).toBeUndefined()
   })
 
   it('disables minimum tag rank when tags are inherited', () => {

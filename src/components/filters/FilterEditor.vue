@@ -8,7 +8,7 @@ import FilterSingleComboboxField from '@/components/filters/FilterSingleCombobox
 import FilterSortEditor from '@/components/filters/FilterSortEditor.vue'
 import FilterTagEditor from '@/components/filters/FilterTagEditor.vue'
 import CaretIcon from '@/components/icons/CaretIcon.vue'
-import { countAdvancedFilterFields } from '@/lib/filter-editor'
+import { countAdvancedFilterFields, getActiveFilterFields } from '@/lib/filter-editor'
 import { formatAnimeFormatLabel } from '@/lib/format-label'
 import type { FilterDisabledReasons } from '@/lib/filter-editor'
 import {
@@ -72,6 +72,10 @@ const countryOptions = computed(() =>
 
 const genreOptions = computed(() => mergedOptions(props.metadata?.genres ?? [], model.value.genres))
 const advancedFilterCount = computed(() => countAdvancedFilterFields(model.value))
+const activeFields = computed(() => getActiveFilterFields(model.value))
+
+// Active fields must not stay hidden behind a collapsed section.
+const isAdvancedSectionOpen = ref(advancedFilterCount.value > 0)
 
 const seasonValue = computed(() => model.value.seasons[0] ?? '')
 const countriesOfOriginModel = computed({
@@ -175,6 +179,7 @@ const updateMinimumTagRank = (rawValue: string) => {
       label="Release year"
       description="Limit results to a release year range."
       :disabled-reason="disabledFields?.yearRange"
+      :active="activeFields.yearRange"
     >
       <div class="grid gap-3 sm:grid-cols-2">
         <input
@@ -200,6 +205,7 @@ const updateMinimumTagRank = (rawValue: string) => {
       label="Season"
       description="Choose one season to focus on."
       :disabled-reason="disabledFields?.seasons"
+      :active="activeFields.seasons"
     >
       <div class="flex flex-wrap gap-2">
         <button
@@ -224,6 +230,7 @@ const updateMinimumTagRank = (rawValue: string) => {
       description="Choose the release formats you want included."
       :options="formatOptions"
       :disabled-reason="disabledFields?.formats"
+      :active="activeFields.formats"
     />
 
     <FilterSingleComboboxField
@@ -234,6 +241,7 @@ const updateMinimumTagRank = (rawValue: string) => {
       placeholder="Choose a source type"
       clear-label="Clear source material"
       :disabled-reason="disabledFields?.source"
+      :active="activeFields.source"
     />
 
     <FilterMultiComboboxField
@@ -247,6 +255,7 @@ const updateMinimumTagRank = (rawValue: string) => {
       clear-label="Clear genres"
       placeholder="Search or select genres"
       :disabled-reason="disabledFields?.genres"
+      :active="activeFields.genres"
     />
 
     <FilterTagEditor
@@ -257,9 +266,14 @@ const updateMinimumTagRank = (rawValue: string) => {
       :metadata-status="metadataStatus"
       :metadata-error="metadataError"
       :disabled-reason="disabledFields?.tags"
+      :active="activeFields.tags"
     />
 
-    <details class="group lg:col-span-2 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4">
+    <details
+      :open="isAdvancedSectionOpen"
+      class="group lg:col-span-2 rounded-[1.5rem] border border-app-border/70 bg-app-bg/50 p-4"
+      @toggle="isAdvancedSectionOpen = ($event.target as HTMLDetailsElement).open"
+    >
       <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-app-text">
         <CaretIcon class="h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-90" />
         <span>Advanced filters</span>
@@ -277,6 +291,7 @@ const updateMinimumTagRank = (rawValue: string) => {
           label="Sort"
           :description="mode === 'global' ? 'Choose how results should be ordered by default.' : 'Choose how this category should be ordered.'"
           :inherit-label="mode === 'category' ? 'Use template order' : 'No sort set'"
+          :active="activeFields.sort"
         />
 
         <FilterMultiSelectField
@@ -285,12 +300,14 @@ const updateMinimumTagRank = (rawValue: string) => {
           description="Pick the countries where the anime was made."
           :options="countryOptions"
           :disabled-reason="disabledFields?.countriesOfOrigin"
+          :active="activeFields.countriesOfOrigin"
         />
 
         <FilterField
           label="Popularity"
           description="Limit results to a popularity range."
           :disabled-reason="disabledFields?.popularity"
+          :active="activeFields.popularity"
         >
           <div class="grid gap-3 sm:grid-cols-2">
             <input
@@ -316,6 +333,7 @@ const updateMinimumTagRank = (rawValue: string) => {
           label="Minimum tag rank"
           description="Only match tags at or above this rank. Range: 1-100."
           :disabled-reason="disabledFields?.minimumTagRank"
+          :active="activeFields.minimumTagRank"
         >
           <input
             type="number"
@@ -333,6 +351,7 @@ const updateMinimumTagRank = (rawValue: string) => {
           label="Episode count"
           description="Limit results to a range of episode counts."
           :disabled-reason="disabledFields?.episodes"
+          :active="activeFields.episodes"
         >
           <div class="grid gap-3 sm:grid-cols-2">
             <input
@@ -358,6 +377,7 @@ const updateMinimumTagRank = (rawValue: string) => {
           label="Duration"
           description="Limit results to a range of durations in minutes."
           :disabled-reason="disabledFields?.duration"
+          :active="activeFields.duration"
         >
           <div class="grid gap-3 sm:grid-cols-2">
             <input

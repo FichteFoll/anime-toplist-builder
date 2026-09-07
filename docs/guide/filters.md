@@ -81,6 +81,18 @@ popularity,
 minimum tag rank,
 episode count,
 and duration sit behind `Advanced filters` in the editor.
+The section opens automatically when one of those fields carries a value.
+
+## Highlighting
+
+Fields that carry a value are marked with an accent bar and an accent label,
+in the template-wide editor as well as in the category editor,
+so a filter is visible without opening every section.
+In the category editor,
+a field that is fixed by the template-wide filter
+gets a muted dashed bar instead of the accent one,
+next to the `From template` badge,
+because its value does not come from the category.
 
 Genre and tag suggestions come from AniList metadata that is loaded once at startup.
 If that request fails a toast is shown and the suggestion lists stay empty,

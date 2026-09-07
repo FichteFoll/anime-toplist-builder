@@ -27,6 +27,7 @@ const props = defineProps<{
   placeholder?: string
   clearLabel: string
   disabledReason?: string
+  active?: boolean
   virtualized?: boolean
   enableExclusion?: boolean
 }>()
@@ -323,6 +324,7 @@ const toggleChipSelection = (value: string) => {
     :label="label"
     :description="description"
     :disabled-reason="disabledReason"
+    :active="active"
   >
     <ComboboxRoot
       :multiple="true"

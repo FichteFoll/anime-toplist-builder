@@ -25,6 +25,7 @@ const props = defineProps<{
   placeholder?: string
   disabledReason?: string
   clearLabel: string
+  active?: boolean
 }>()
 
 const model = defineModel<string | undefined>({ required: true })
@@ -55,6 +56,7 @@ const updateValue = (value: string | undefined) => {
     :label="label"
     :description="description"
     :disabled-reason="disabledReason"
+    :active="active"
   >
     <ComboboxRoot
       :model-value="model"
