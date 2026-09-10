@@ -3,6 +3,13 @@
 User-facing changes, newest first.
 The app shows these entries in its changelog popup.
 
+## Unreleased
+
+- Scrolling and zooming is much smoother on mobile.
+  The header, the category section and the category cards
+  no longer blur the page behind them,
+  and cover images now load only once they come into view.
+
 ## 2026-08-31
 
 - Added character and voice-actor categories.
