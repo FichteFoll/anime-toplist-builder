@@ -5,6 +5,8 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+- The Dark Reader browser extension now leaves the app alone,
+  so its own dark theme is used instead of a generated one.
 - Scrolling and zooming is much smoother on mobile.
   The header, the category section and the category cards
   no longer blur the page behind them,
