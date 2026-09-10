@@ -165,7 +165,7 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
 
 <template>
   <article
-    class="group flex flex-col rounded-[2rem] border bg-app-surface/90 p-5 shadow-shell backdrop-blur transition hover:border-app-accent/60"
+    class="group flex flex-col rounded-[2rem] border bg-app-surface p-5 shadow-shell transition hover:border-app-accent/60"
     :class="selection ? 'border-app-accent/70' : 'border-app-border/70'"
     :data-category-id="category.id"
   >

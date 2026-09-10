@@ -13,10 +13,12 @@ import { useToastStore } from '@/stores/toasts'
 
 const toastStore = useToastStore()
 
+// The tints stay opaque so the toast, which floats above scrolling content,
+// does not need a backdrop filter to stay readable.
 const toneClasses = {
-  success: 'border-emerald-400/50 bg-emerald-500/10',
-  error: 'border-rose-400/50 bg-rose-500/10',
-  info: 'border-app-border/80 bg-app-surface/95',
+  success: 'border-emerald-400/50 bg-emerald-50 dark:bg-emerald-950',
+  error: 'border-rose-400/50 bg-rose-50 dark:bg-rose-950',
+  info: 'border-app-border/80 bg-app-surface',
 } as const
 </script>
 
@@ -28,7 +30,7 @@ const toneClasses = {
       v-model:open="toast.open"
       :duration="toast.duration"
       :class="[
-        'pointer-events-auto rounded-[1.5rem] border p-4 shadow-shell backdrop-blur',
+        'pointer-events-auto rounded-[1.5rem] border p-4 shadow-shell',
         toneClasses[toast.tone],
       ]"
       @escape-key-down="toastStore.dismiss(toast.id)"

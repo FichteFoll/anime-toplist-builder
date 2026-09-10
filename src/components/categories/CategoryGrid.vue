@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="rounded-[2rem] border border-app-border/70 bg-app-surface/90 p-6 shadow-shell backdrop-blur sm:p-7">
+  <section class="rounded-[2rem] border border-app-border/70 bg-app-surface p-6 shadow-shell sm:p-7">
     <div class="flex flex-col gap-5 border-b border-app-border/70 pb-5 md:flex-row md:items-start md:justify-between">
       <div class="max-w-4xl">
         <p class="text-xs font-medium uppercase tracking-[0.3em] text-app-muted">

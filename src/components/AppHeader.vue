@@ -89,7 +89,7 @@ onMounted(() => {
   <header class="sticky top-0 z-30">
     <ToolbarRoot
       as="div"
-      class="rounded-b-[2rem] rounded-t-none border border-t-0 border-app-border/70 bg-app-surface/85 px-6 py-3 shadow-shell backdrop-blur-xl sm:px-7"
+      class="rounded-b-[2rem] rounded-t-none border border-t-0 border-app-border/70 bg-app-surface px-6 py-3 shadow-shell sm:px-7"
     >
       <div class="flex items-center gap-2 lg:hidden">
         <button
