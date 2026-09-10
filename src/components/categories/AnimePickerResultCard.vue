@@ -39,6 +39,8 @@ const emit = defineEmits<{
           :src="result.coverImage.large"
           :alt="resolveAnimeTitle(result.title, settingsStore.titleLanguage)"
           class="h-28 w-20 rounded-xl border border-app-border/70 object-cover"
+          loading="lazy"
+          decoding="async"
         >
 
         <div class="min-w-0 space-y-2">

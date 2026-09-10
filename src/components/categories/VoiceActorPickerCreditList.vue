@@ -59,12 +59,16 @@ const resolveMetaLine = (row: VoiceActorCreditRow) => [
           :src="row.voiceActor.image.large"
           :alt="resolveVoiceActorName(row).primary"
           class="voice-actor-image h-16 w-12 shrink-0 rounded-lg border border-app-border/70 object-cover"
+          loading="lazy"
+          decoding="async"
         >
 
         <img
           :src="row.credit.image.large"
           :alt="resolveCharacterName(row).primary"
           class="character-image h-16 w-12 shrink-0 rounded-lg border border-app-border/70 object-cover"
+          loading="lazy"
+          decoding="async"
         >
       </span>
 

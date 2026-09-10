@@ -63,6 +63,7 @@ const songFilterSummary = computed(() => props.songFilterTypes.length > 0
               :src="detailAnime.coverImage.large"
               :alt="resolveAnimeTitle(detailAnime.title, settingsStore.titleLanguage)"
               class="h-28 w-20 shrink-0 rounded-xl border border-app-border/70 object-cover"
+              decoding="async"
             >
 
             <div class="min-w-0 space-y-2">

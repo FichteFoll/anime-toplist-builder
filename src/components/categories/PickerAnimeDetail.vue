@@ -20,6 +20,7 @@ const settingsStore = useSettingsStore()
           :src="anime.coverImage.large"
           :alt="resolveAnimeTitle(anime.title, settingsStore.titleLanguage)"
           class="h-28 w-20 shrink-0 rounded-xl border border-app-border/70 object-cover"
+          decoding="async"
         >
 
         <div class="min-w-0 space-y-2">

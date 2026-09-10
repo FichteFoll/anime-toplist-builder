@@ -35,6 +35,8 @@ const resolveCreditName = (credit: AniListCharacterCredit) =>
         :src="credit.image.large"
         :alt="resolveCreditName(credit).primary"
         class="h-16 w-12 shrink-0 rounded-lg border border-app-border/70 object-cover"
+        loading="lazy"
+        decoding="async"
       >
 
       <span class="block min-w-0">

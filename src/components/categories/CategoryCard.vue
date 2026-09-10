@@ -213,6 +213,8 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             :alt="selectionTitle ?? 'Selected anime cover'"
             class="selection-primary-image rounded-xl border border-app-border/70 object-cover"
             :class="primaryImageClasses[selectionInsets.length] ?? 'h-[4.25rem] w-11'"
+            loading="lazy"
+            decoding="async"
           >
 
           <img
@@ -222,6 +224,8 @@ const deleteCategoryTooltip = computed(() => `Delete category ${props.category.n
             :alt="inset.alt"
             class="absolute bottom-px h-9 w-6 rounded-md object-cover ring-1 ring-app-surface"
             :class="inset.positionClass"
+            loading="lazy"
+            decoding="async"
           >
         </div>
 
