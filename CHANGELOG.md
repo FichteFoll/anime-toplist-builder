@@ -5,17 +5,22 @@ The app shows these entries in its changelog popup.
 
 ## Unreleased
 
+## 2026-11-08
+
 - The Dark Reader browser extension now leaves the app alone,
   so its own dark theme is used instead of a generated one.
+
 - Scrolling and zooming is much smoother on mobile.
   The header, the category section and the category cards
   no longer blur the page behind them,
   and cover images now load only once they come into view.
+
 - The anime picker now shows a lower bound like *45+ matches*
   and hides the page count while searching
-  instead of relying on the AniList's fabricated match count
+  instead of relying on AniList's fabricated match count
   when using text search.
   Filter-only queries keep their exact total.
+
 - Filter fields that carry a value
   are now highlighted in the filter editors,
   and the `Advanced filters` section opens on its own
