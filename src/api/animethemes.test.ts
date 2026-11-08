@@ -4,19 +4,19 @@ import { fetchAnimeSongs } from './animethemes'
 
 const themesPayload = {
   data: {
-    findAnimeByExternalSite: [
+    filterAnimeByExternalSite: [
       {
         title: {
           romaji: 'Kaubooi Bibappu',
           english: 'Cowboy Bebop',
           native: 'カウボーイビバップ',
         },
-        animethemes: [
+        themes: [
           {
             id: 1,
             type: 'OP',
             slug: 'OP1',
-            animethemeentries: [
+            entries: [
               {
                 episodes: '1-25',
                 videos: {
@@ -32,10 +32,16 @@ const themesPayload = {
             ],
             song: {
               title: { romaji: 'Tank!', native: 'Tank!（ネイティブ）' },
-              performances: [
+              staff: [
                 {
-                  artist: { name: { main: 'The Seatbelts' } },
+                  role: 'Performance',
                   as: 'Seatbelts',
+                  artist: { name: { main: 'The Seatbelts' } },
+                },
+                {
+                  role: 'Composer',
+                  as: null,
+                  artist: { name: { main: 'Yoko Kanno' } },
                 },
               ],
             },
@@ -71,7 +77,7 @@ describe('fetchAnimeSongs', () => {
     vi.unstubAllGlobals()
   })
 
-  it('normalizes the new AnimeThemes title and name shapes', async () => {
+  it('normalizes the AnimeThemes response and ignores non-performance staff', async () => {
     stubFetch(themesPayload)
 
     const result = await fetchAnimeSongs({
@@ -114,6 +120,14 @@ describe('fetchAnimeSongs', () => {
     // a stale selection set can be caught.
     expect(query).toMatch(/song\s*\{[\s\S]*?\btitle\s*\{/)
     expect(query).not.toMatch(/^\s*name\s*$/m)
+    expect(query).toContain('filterAnimeByExternalSite(site: ANILIST')
+    expect(query).toMatch(/\bthemes\s*\{/)
+    expect(query).toMatch(/\bentries\s*\{/)
+    expect(query).toMatch(/song\s*\{\s*staff\s*\{\s*role\b/)
+    expect(query).not.toContain('findAnimeByExternalSite')
+    expect(query).not.toContain('animethemes')
+    expect(query).not.toContain('animethemeentries')
+    expect(query).not.toContain('performances')
   })
 
   it('builds the fallback anime title from the response title object', async () => {

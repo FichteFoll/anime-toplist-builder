@@ -20,9 +20,9 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/animethemes-graphql': {
-          target: 'https://graphql.animethemes.moe/',
+          target: 'https://rs.animethemes.moe',
           changeOrigin: true,
-          rewrite: () => '/',
+          rewrite: () => '/graphql',
         },
       },
     },

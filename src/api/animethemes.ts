@@ -12,17 +12,17 @@ import type {
 
 const themesQuery = `
   query ThemesQuery($anilistIds: [Int!]) {
-    findAnimeByExternalSite(site: ANILIST, id: $anilistIds) {
+    filterAnimeByExternalSite(site: ANILIST, id: $anilistIds) {
       title {
         romaji
         english
         native
       }
-      animethemes {
+      themes {
         id
         type
         slug
-        animethemeentries {
+        entries {
           episodes
           videos {
             nodes {
@@ -35,13 +35,14 @@ const themesQuery = `
           }
         }
         song {
-          performances {
+          staff {
+            role
+            as
             artist {
               name {
                 main
               }
             }
-            as
           }
           title {
             romaji
@@ -117,8 +118,12 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
 
   const performances: Array<SongPerformance> = []
 
-  for (const performance of theme.song?.performances ?? []) {
-    const artist = normalizeText(performance.artist?.name?.main)
+  for (const staff of theme.song?.staff ?? []) {
+    if (staff.role !== 'Performance') {
+      continue
+    }
+
+    const artist = normalizeText(staff.artist?.name?.main)
 
     if (!artist) {
       continue
@@ -126,11 +131,11 @@ const normalizeTheme = (theme: AnimeThemeResponse): AnimeThemesSong | null => {
 
     performances.push({
       artist,
-      as: normalizeText(performance.as),
+      as: normalizeText(staff.as),
     })
   }
 
-  const entries = theme.animethemeentries ?? []
+  const entries = theme.entries ?? []
   const videos = entries.flatMap((entry) => entry.videos?.nodes ?? [])
   const previewVideo = pickPreviewVideo(videos)
   const firstEpisodeHint = entries.map((entry) => normalizeSongEpisodes(entry.episodes)).find(Boolean) ?? null
@@ -165,7 +170,7 @@ export const fetchAnimeSongs = async ({
       anilistIds: [animeId],
     })
 
-    const anime = data.findAnimeByExternalSite?.[0]
+    const anime = data.filterAnimeByExternalSite?.[0]
 
     return {
       animeId,
@@ -176,7 +181,7 @@ export const fetchAnimeSongs = async ({
         extraLarge: null,
         color: null,
       },
-      songs: (anime?.animethemes ?? [])
+      songs: (anime?.themes ?? [])
         .map(normalizeTheme)
         .filter((song): song is AnimeThemesSong => song !== null),
     }

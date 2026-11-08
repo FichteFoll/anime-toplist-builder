@@ -23,7 +23,7 @@ everything in the bundle is public.
   Defaults to `https://anilist.co`.
 - `VITE_ANIMETHEMES_URL`:
   AnimeThemes GraphQL endpoint.
-  Defaults to `https://graphql.animethemes.moe/` in production
+  Defaults to `https://rs.animethemes.moe/graphql` in production
   and to the dev proxy path `/animethemes-graphql` during development.
 - `VITE_ANILIST_CLIENT_ID`:
   AniList OAuth client id.
@@ -40,7 +40,7 @@ for example the AniList client id registered against `http://localhost:5173/`.
 
 ## Development Proxy
 
-The dev server proxies `/animethemes-graphql` to `https://graphql.animethemes.moe/`,
+The dev server proxies `/animethemes-graphql` to `https://rs.animethemes.moe/graphql`,
 so song lookups work locally without CORS trouble.
 Production builds talk to the AnimeThemes endpoint directly.
 
